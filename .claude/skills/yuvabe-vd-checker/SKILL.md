@@ -105,6 +105,40 @@ Count uses of `text-primary`, `bg-primary`, `border-primary`, `ring-primary`, `f
 - **WARN**: >8 uses on a single screen — terracotta is precious; budget overshoot dilutes the accent.
 - **WARN**: 0 uses on a screen with primary CTAs — the brand accent is missing where it would read as the action.
 
+### I. Behavior — affordances, microinteractions, motion
+
+The DS Behavior layer rules cover *how* interactive elements behave. Audit each interactive element (`<button>`, `<a>`, `<input>`, `<select>`, `<textarea>`, shadcn `Button`/`Input`/`Switch`/`Dialog`/`Sheet`/`DropdownMenu`/`AlertDialog`, plus any element with `onClick` / `role="button"`).
+
+**States** — every interactive element should define them. Look for:
+
+- **FAIL**: an interactive element with no `hover:` style and no `disabled:` style — usually means states were never thought through.
+- **FAIL**: `focus-visible:outline-none` (or `focus:outline-none`) without a replacement ring (`focus-visible:ring-*`). The terracotta ring is mandatory.
+- **FAIL**: disabled state shown by opacity alone — must combine `disabled:opacity-50` **with** `disabled:pointer-events-none` **with** `disabled:cursor-not-allowed` **and** a non-color cue (italic, label change, icon, `aria-disabled`).
+- **WARN**: state distinguishable by color shift only — pair with text, icon, border weight, or italic.
+
+**Affordances** — look for:
+
+- **FAIL**: `cursor-pointer` on an element that is also `disabled` or has `pointer-events-none`.
+- **WARN**: `cursor-pointer` on a non-interactive `<div>` / `<span>` that has no `onClick`, `role`, or keyboard handler (looks clickable, isn't).
+- **WARN**: a clickable `<div>` (with `onClick`) that is missing `cursor-pointer`, `role="button"`, `tabIndex={0}`, or keyboard handlers — pick a real `<button>` instead.
+- **WARN**: button styled to look like a link (no border, no bg) without `<Button variant="link">`, or a link styled to look like a filled button without the right variant.
+
+**Motion** — subtle, in service of clarity. Look for:
+
+- **FAIL**: `animate-bounce`, `animate-spin` outside an explicit loading spinner (`Loader2`), `animate-ping`, or any `animation-*` referencing shimmer / parallax / scroll-driven choreography.
+- **FAIL**: spring / bounce easing or any custom cubic-bezier overshooting 1.0 (`ease-[cubic-bezier(...)]` with values >1 or <0).
+- **FAIL**: translates outside the subtlety budget — `translate-x-2` and larger, `translate-y-2` and larger. Allowed: `translate-x-px`, `-translate-x-px`, `translate-y-px`, `-translate-y-px` (1–2px).
+- **FAIL**: scales outside `0.98`–`1.02`. Specifically flag `scale-95`, `scale-90`, `scale-105`, `scale-110`, `hover:scale-105`+.
+- **FAIL**: any `rotate-*` on `hover:` or `data-[state=*]` (loading spinner is the only allowed rotate).
+- **FAIL**: `duration-*` outside the canonical `duration-100` / `duration-150` / `duration-200` / `duration-300` / `duration-400` / `duration-[400ms]` set. Specifically flag `duration-500`, `duration-700`, `duration-1000`.
+- **WARN**: shadcn `DialogContent` / `SheetContent` / `DropdownMenuContent` / `PopoverContent` with default `data-[state=open]:zoom-in-95` left in (5% scale exceeds the 2% budget). Default to fade-only; a ≤2px translate is acceptable as a directional cue.
+- **WARN**: a skeleton loader using a shimmer/gradient `bg-gradient-to-r` with `animate-*` instead of plain `animate-pulse` on a hairline-bordered surface.
+- **WARN**: a "Loading…" string with no specific subject (should be "Saving candidate…", "Reading the description…", etc.).
+
+**Reduced motion** — look for:
+
+- **FYI**: `app/globals.css` lacks a `@media (prefers-reduced-motion: reduce)` block reducing `animation-duration` / `transition-duration` to 1ms. Should exist once, project-wide.
+
 ## Output format
 
 Emit findings grouped by severity. Cite `file:line` for each.

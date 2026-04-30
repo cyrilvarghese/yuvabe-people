@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { listJobs } from "@/lib/jobs-store";
 import { listApplicationsByJobCode, type Application, type ApplicationStatus } from "@/lib/applications-store";
 import { listCandidates, type Candidate } from "@/lib/candidates-store";
-import { ArrowLeft, ArrowUpRight } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, Pencil } from "lucide-react";
 import NavTabClient from "../_components/nav-tab";
 
 /* —————————————————————————— atoms (inlined per design system) —————————————————————————— */
@@ -157,6 +157,13 @@ export default async function JobDetailPage({
                 </Eyebrow>
                 <span className="text-border">·</span>
                 <Eyebrow>posted {relativeTime(job.createdAt)}</Eyebrow>
+                <Link
+                  href={`/jobs/${job.code}/edit`}
+                  className="ml-auto inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm"
+                >
+                  Edit
+                  <Pencil className="h-3 w-3" strokeWidth={1.75} />
+                </Link>
               </div>
 
               {applications.length > 0 && (
