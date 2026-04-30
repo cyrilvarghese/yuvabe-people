@@ -4,7 +4,14 @@ import {
   EXTRACT_CRITERIA_USER,
   EXTRACT_CRITERIA_SCHEMA,
   type ExtractCriteriaResult,
+  type Criterion,
 } from "./prompts/extractCriteria.v1";
+import {
+  SCORE_MATCH_SYSTEM,
+  SCORE_MATCH_USER,
+  SCORE_MATCH_SCHEMA,
+  type ScoreMatchLLMResult,
+} from "./prompts/scoreMatch.v1";
 
 const MODEL = "gpt-4o";
 
@@ -54,4 +61,34 @@ export async function extractCriteria(jd: string): Promise<ExtractCriteriaResult
   }
 
   return JSON.parse(content) as ExtractCriteriaResult;
+}
+
+export async function scoreMatch(
+  criteria: Criterion[],
+  resumeText: string,
+  coverLetter: string
+): Promise<ScoreMatchLLMResult> {
+  const openai = getClient();
+
+  const completion = await openai.chat.completions.create({
+    model: MODEL,
+    temperature: 0,
+    seed: 42,
+    messages: [
+      { role: "system", content: SCORE_MATCH_SYSTEM },
+      { role: "user", content: SCORE_MATCH_USER(criteria, resumeText, coverLetter) },
+    ],
+    response_format: {
+      type: "json_schema",
+      json_schema: {
+        name: "score_match_result",
+        schema: SCORE_MATCH_SCHEMA,
+        strict: true,
+      },
+    },
+  });
+
+  const content = completion.choices[0]?.message?.content;
+  if (!content) throw new Error("LLM returned empty response");
+  return JSON.parse(content) as ScoreMatchLLMResult;
 }

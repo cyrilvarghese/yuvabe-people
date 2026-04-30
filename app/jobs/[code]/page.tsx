@@ -3,8 +3,10 @@ import { notFound } from "next/navigation";
 import { listJobs } from "@/lib/jobs-store";
 import { listApplicationsByJobCode, type Application, type ApplicationStatus } from "@/lib/applications-store";
 import { listCandidates, type Candidate } from "@/lib/candidates-store";
+import { type Criterion, type Importance } from "@/lib/prompts/extractCriteria.v1";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import NavTabClient from "../_components/nav-tab";
+import ApplyForm from "./apply-form";
 
 /* —————————————————————————— atoms (inlined per design system) —————————————————————————— */
 
@@ -183,33 +185,55 @@ export default async function JobDetailPage({
             </div>
           </div>
 
+          {/* Intake form — collapses to a single trigger row when closed */}
+          <ApplyForm jobCode={code} criteriaCount={job.criteria.length} />
+
           {/* Scrolling list */}
           <div className="flex-1 overflow-y-auto px-10 pt-8 pb-12">
-            {applications.length === 0 ? (
-              <EmptyState code={job.code} />
-            ) : (
-              <ul className="max-w-5xl">
-                {applications.map((app, idx) => {
-                  const candidate = candidatesById.get(app.candidateId);
-                  if (!candidate) return null;
-                  return (
-                    <li
-                      key={app.id}
-                      className={`group border-b border-border/60 ${
-                        idx === 0 ? "border-t border-border/60" : ""
-                      }`}
-                    >
-                      <Link
-                        href={`/applications/${app.id}`}
-                        className="block py-5 -mx-4 px-4 rounded-sm hover:bg-secondary/40 transition-colors"
-                      >
-                        <ApplicationRow application={app} candidate={candidate} />
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
+            <div className="max-w-5xl space-y-10">
+
+              {/* Criteria section */}
+              <CriteriaSection criteria={job.criteria} />
+
+              {/* Applications section */}
+              <div>
+                <div className="flex items-baseline gap-3 mb-4">
+                  <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-foreground/55">
+                    Applications
+                  </span>
+                  <span className="font-mono text-[10px] tabular text-muted-foreground/70">
+                    {String(applications.length).padStart(2, "0")}
+                  </span>
+                  <div className="flex-1 border-b border-border/70" />
+                </div>
+                {applications.length === 0 ? (
+                  <EmptyState code={job.code} />
+                ) : (
+                  <ul>
+                    {applications.map((app, idx) => {
+                      const candidate = candidatesById.get(app.candidateId);
+                      if (!candidate) return null;
+                      return (
+                        <li
+                          key={app.id}
+                          className={`group border-b border-border/60 ${
+                            idx === 0 ? "border-t border-border/60" : ""
+                          }`}
+                        >
+                          <Link
+                            href={`/applications/${app.id}`}
+                            className="block py-5 -mx-4 px-4 rounded-sm hover:bg-secondary/40 transition-colors"
+                          >
+                            <ApplicationRow application={app} candidate={candidate} />
+                          </Link>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </div>
+
+            </div>
           </div>
         </section>
       </main>
@@ -305,6 +329,71 @@ function StatusFilterChip({
       <span>{String(count).padStart(2, "0")}</span>
       <span>{label}</span>
     </button>
+  );
+}
+
+/* —————————————————————————— criteria section —————————————————————————— */
+
+const IMPORTANCE_ORDER: Importance[] = ["must", "strong", "nice"];
+
+const IMPORTANCE_LABEL: Record<Importance, string> = {
+  must: "Must",
+  strong: "Strong",
+  nice: "Nice",
+};
+
+const CATEGORY_LABEL: Record<Criterion["category"], string> = {
+  skill: "Skill",
+  experience: "Experience",
+  education: "Education",
+  domain: "Domain",
+  other: "Other",
+};
+
+function CriteriaSection({ criteria }: { criteria: Criterion[] }) {
+  const grouped = IMPORTANCE_ORDER.reduce<Record<Importance, Criterion[]>>(
+    (acc, imp) => {
+      acc[imp] = criteria.filter((c) => c.importance === imp);
+      return acc;
+    },
+    { must: [], strong: [], nice: [] }
+  );
+
+  return (
+    <div className="space-y-6">
+      {IMPORTANCE_ORDER.filter((imp) => grouped[imp].length > 0).map((imp) => (
+        <div key={imp}>
+          {/* Section heading */}
+          <div className="flex items-baseline gap-3 mb-3">
+            <span
+              className={`font-mono text-[10px] uppercase tracking-[0.18em] ${
+                imp === "must" ? "text-primary" : "text-foreground/55"
+              }`}
+            >
+              {IMPORTANCE_LABEL[imp]}
+            </span>
+            <span className="font-mono text-[10px] tabular text-muted-foreground/70">
+              {String(grouped[imp].length).padStart(2, "0")}
+            </span>
+            <div className="flex-1 border-b border-border/70" />
+          </div>
+
+          {/* Criterion rows */}
+          <ul className="space-y-1.5">
+            {grouped[imp].map((c, i) => (
+              <li key={i} className="flex items-baseline justify-between gap-4 py-1">
+                <span className="text-[13px] text-foreground/80 leading-snug">
+                  {c.label}
+                </span>
+                <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground/60 flex-shrink-0">
+                  {CATEGORY_LABEL[c.category]}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
   );
 }
 

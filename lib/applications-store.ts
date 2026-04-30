@@ -90,3 +90,33 @@ export async function countApplicationsByJobCode(
   const store = await readStore();
   return store.applications.filter((a) => a.jobCode === jobCode).length;
 }
+
+export type CreateApplicationInput = {
+  jobId: string;
+  jobCode: string;
+  candidateId: string;
+  matchScore: number;
+  matchSummary: string;
+  matchBreakdown: CriterionMatch[];
+  coverLetter: string;
+};
+
+async function writeStore(store: Store): Promise<void> {
+  await fs.mkdir(DATA_DIR, { recursive: true });
+  await fs.writeFile(FILE, JSON.stringify(store, null, 2), "utf-8");
+}
+
+export async function createApplication(
+  input: CreateApplicationInput
+): Promise<Application> {
+  const store = await readStore();
+  const app: Application = {
+    id: crypto.randomUUID(),
+    ...input,
+    receivedAt: new Date().toISOString(),
+    status: "new",
+  };
+  store.applications.push(app);
+  await writeStore(store);
+  return app;
+}

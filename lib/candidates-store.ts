@@ -75,3 +75,56 @@ export async function getCandidateById(id: string): Promise<Candidate | null> {
   const store = await readStore();
   return store.candidates.find((c) => c.id === id) ?? null;
 }
+
+export type UpsertCandidateInput = {
+  name: string;
+  email: string;
+  location?: string;
+  summary?: string;
+  yearsOfExperience?: number;
+  skills?: string[];
+  resumeText: string;
+};
+
+async function writeStore(store: Store): Promise<void> {
+  await fs.mkdir(DATA_DIR, { recursive: true });
+  await fs.writeFile(FILE, JSON.stringify(store, null, 2), "utf-8");
+}
+
+/** Find candidate by email and update their profile, or create a new one. */
+export async function upsertCandidateByEmail(
+  input: UpsertCandidateInput
+): Promise<Candidate> {
+  const store = await readStore();
+  const existing = store.candidates.find(
+    (c) => c.email.toLowerCase() === input.email.toLowerCase()
+  );
+
+  if (existing) {
+    existing.resumeText = input.resumeText;
+    if (input.location) existing.location = input.location;
+    if (input.summary) existing.summary = input.summary;
+    if (input.yearsOfExperience !== undefined)
+      existing.yearsOfExperience = input.yearsOfExperience;
+    if (input.skills?.length) existing.skills = input.skills;
+    await writeStore(store);
+    return existing;
+  }
+
+  const candidate: Candidate = {
+    id: crypto.randomUUID(),
+    name: input.name,
+    email: input.email,
+    phone: "",
+    location: input.location ?? "",
+    summary: input.summary ?? "",
+    yearsOfExperience: input.yearsOfExperience ?? 0,
+    skills: input.skills ?? [],
+    experience: [],
+    education: [],
+    resumeText: input.resumeText,
+  };
+  store.candidates.push(candidate);
+  await writeStore(store);
+  return candidate;
+}
