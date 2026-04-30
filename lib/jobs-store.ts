@@ -36,26 +36,38 @@ type Store = {
 
 async function ensureFile(): Promise<Store> {
   await fs.mkdir(DATA_DIR, { recursive: true });
-  // Try the live file first.
-  try {
-    const raw = await fs.readFile(FILE, "utf-8");
-    const parsed = JSON.parse(raw) as Store;
-    if (parsed.jobs && parsed.jobs.length > 0) return parsed;
-    // Empty file → fall through to seed merge below
-  } catch (err) {
-    if ((err as NodeJS.ErrnoException).code !== "ENOENT") throw err;
-  }
-  // No live file (or empty) → seed from example if available.
+
+  // Read example seed (always — it's mock data we want visible alongside real).
+  let exampleJobs: Job[] = [];
   try {
     const raw = await fs.readFile(EXAMPLE, "utf-8");
-    const seed = JSON.parse(raw) as Store;
-    return seed;
+    exampleJobs = (JSON.parse(raw) as Store).jobs ?? [];
   } catch {
-    // No example either → start truly empty
-    const empty: Store = { jobs: [] };
-    await fs.writeFile(FILE, JSON.stringify(empty, null, 2), "utf-8");
-    return empty;
+    // No example file — that's fine, we'll just have live data.
   }
+
+  // Read live file (real saved jobs).
+  let liveJobs: Job[] = [];
+  try {
+    const raw = await fs.readFile(FILE, "utf-8");
+    liveJobs = (JSON.parse(raw) as Store).jobs ?? [];
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException).code === "ENOENT") {
+      // Initialize the live file as empty so subsequent createJob writes work.
+      await fs.writeFile(FILE, JSON.stringify({ jobs: [] }, null, 2), "utf-8");
+    } else {
+      throw err;
+    }
+  }
+
+  // Merge: live wins on id OR code collision; example fills the rest.
+  const liveIds = new Set(liveJobs.map((j) => j.id));
+  const liveCodes = new Set(liveJobs.map((j) => j.code));
+  const merged = [
+    ...liveJobs,
+    ...exampleJobs.filter((j) => !liveIds.has(j.id) && !liveCodes.has(j.code)),
+  ];
+  return { jobs: merged };
 }
 
 async function writeStore(store: Store): Promise<void> {
