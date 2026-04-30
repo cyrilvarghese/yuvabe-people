@@ -97,6 +97,20 @@ When in doubt, suggest `text-foreground/70` for "softer than primary, harder tha
 - **WARN**: a major page (h1, page-level title) with **zero** italic Newsreader (`font-serif italic`) usage. Every editorial spread should have one moment.
 - **WARN**: an empty state without a *thesis* — a stock "no data" message instead of a quote that explains what the screen embodies. Examples to *aim for*: *"No applications yet for this role."*, *"A score without reasoning is not a score."* Examples to *avoid*: *"Nothing here yet."*, *"No items found."*
 
+### I. Responsiveness
+
+Target: usable down to 360px viewport. Mobile = "doesn't break", not "is feature-optimized."
+
+- **FAIL**: outer page container uses `h-screen overflow-hidden` without an `md:` guard. Pattern: `min-h-screen md:h-screen md:overflow-hidden` instead. Without the guard, the viewport is locked on mobile and content gets clipped.
+- **FAIL**: a `grid grid-cols-2` or `grid grid-cols-[Xpx_1fr]` without `grid-cols-1 md:grid-cols-...` prefix. Two columns shouldn't survive into mobile.
+- **FAIL**: page padding written as just `px-10` / `px-12` (with no responsive prefix). Use `px-4 sm:px-6 md:px-10` or similar.
+- **FAIL**: a sticky aside (`md:grid-cols-[340px_1fr]`) where the aside doesn't have `border-b md:border-r md:border-b-0` — without this, the visual divider between aside and main is wrong on mobile.
+- **WARN**: display-size text (`text-3xl`, `text-4xl`, `text-5xl`, `text-[2.75rem]`, etc.) without a smaller responsive variant (`text-xl md:text-3xl`). Big italic Newsreader at 2.75rem on a 375px viewport eats most of the column.
+- **WARN**: a `nav` row with multiple items lacking `overflow-x-auto`. On narrow screens the tabs would wrap or compress.
+- **WARN**: secondary metadata in row layouts (timestamps, secondary counts) not hidden on small screens with `hidden sm:inline` / `hidden md:inline`. On mobile the row gets visually cluttered.
+- **WARN**: gap values that don't scale (`gap-6`, `gap-8`) without `gap-3 md:gap-6`. Tight rows on mobile, loose on desktop.
+- **FYI**: pages where ColumnMarker (i. ii.) doesn't apply `text-3xl md:text-5xl`. The numeral at full size on mobile dominates the screen.
+
 ### H. Terracotta budget
 
 Count uses of `text-primary`, `bg-primary`, `border-primary`, `ring-primary`, `from-primary`, `via-primary`, `to-primary`.

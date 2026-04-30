@@ -80,11 +80,11 @@ function ColumnMarker({
   title: string;
 }) {
   return (
-    <div className="flex items-baseline gap-4 mb-10">
-      <span className="font-serif italic text-5xl leading-none text-primary tabular">
+    <div className="flex items-baseline gap-3 md:gap-4 mb-6 md:mb-10">
+      <span className="font-serif italic text-3xl md:text-5xl leading-none text-primary tabular">
         {numeral}.
       </span>
-      <span className="font-serif italic text-2xl leading-none text-foreground/85">
+      <span className="font-serif italic text-xl md:text-2xl leading-none text-foreground/85">
         {title}
       </span>
     </div>
@@ -306,50 +306,53 @@ export default function NewJobPage() {
   const visibleCount = grouped.reduce((n, g) => n + g.items.length, 0);
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden bg-background">
+    <div className="min-h-screen md:h-screen flex flex-col md:overflow-hidden bg-background">
       {/* —————— Sticky header — brand + tabs —————— */}
       <header className="flex-shrink-0 border-b border-border bg-background z-10">
         {/* Brand row */}
-        <div className="px-10 pt-4 pb-3 flex items-center justify-between">
-          <div className="flex items-baseline gap-3">
+        <div className="px-4 md:px-10 pt-4 pb-3 flex items-center justify-between gap-3">
+          <div className="flex items-baseline gap-3 min-w-0">
             <span className="font-serif italic text-lg leading-none">
               Yuvabe
             </span>
             <span className="text-muted-foreground">/</span>
             <Eyebrow>ATS</Eyebrow>
           </div>
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-3 md:gap-6 flex-shrink-0">
             <Eyebrow>
-              <span className="tabular">01</span> &nbsp;/&nbsp; New job
+              <span className="tabular">01</span> &nbsp;/&nbsp;{" "}
+              <span className="hidden sm:inline">New job</span>
+              <span className="sm:hidden">New</span>
             </Eyebrow>
             {result && (
               <button
                 onClick={reset}
                 className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground hover:text-primary transition-colors"
               >
-                Start over →
+                <span className="hidden sm:inline">Start over →</span>
+                <span className="sm:hidden">Reset →</span>
               </button>
             )}
           </div>
         </div>
 
         {/* Tabs row */}
-        <nav className="px-10 flex items-center gap-8">
+        <nav className="px-4 md:px-10 flex items-center gap-6 md:gap-8 overflow-x-auto">
           <NavTab href="/jobs" label="Jobs" prefix="/jobs" />
           <NavTab
             href="/applications"
-            label="Applications"
+            label="Applicants"
             prefix="/applications"
           />
           <NavTab href="/review" label="Review" prefix="/review" />
         </nav>
       </header>
 
-      {/* —————— Two-column body —————— */}
-      <main className="flex-1 grid grid-cols-2 overflow-hidden">
+      {/* —————— Two-column body (stacks on mobile) —————— */}
+      <main className="md:flex-1 grid grid-cols-1 md:grid-cols-2 md:overflow-hidden">
         {/* ════════ LEFT — the source ════════ */}
-        <section className="border-r border-border flex flex-col overflow-hidden">
-          <div className="flex-1 flex flex-col px-12 pt-12 pb-8 overflow-y-auto">
+        <section className="border-b md:border-b-0 md:border-r border-border flex flex-col md:overflow-hidden">
+          <div className="md:flex-1 flex flex-col px-4 sm:px-6 md:px-12 pt-6 md:pt-12 pb-6 md:pb-8 md:overflow-y-auto">
             <ColumnMarker numeral="i" title="The job" />
 
             <input
@@ -516,7 +519,7 @@ export default function NewJobPage() {
         <section className="flex flex-col overflow-hidden">
           {/* —— Empty / Loading: single scrolling area —— */}
           {!result && (
-            <div className="flex-1 px-12 pt-12 pb-8 overflow-y-auto">
+            <div className="md:flex-1 px-4 sm:px-6 md:px-12 pt-6 md:pt-12 pb-8 md:overflow-y-auto">
               {/* Empty state */}
               {!loading && (
                 <div className="h-full flex flex-col">
@@ -617,7 +620,7 @@ export default function NewJobPage() {
           {result && (
             <>
               {/* Static top — does not scroll */}
-              <div className="flex-shrink-0 px-12 pt-10 pb-5 border-b border-border bg-background">
+              <div className="flex-shrink-0 px-4 sm:px-6 md:px-12 pt-6 md:pt-10 pb-5 border-b border-border bg-background">
                 <div className="max-w-2xl">
                   <Eyebrow>Extracted from {result.file.name}</Eyebrow>
                   <h2 className="font-serif italic text-4xl leading-[1.05] mt-3 mb-4 tracking-tight">
@@ -665,7 +668,7 @@ export default function NewJobPage() {
               </div>
 
               {/* Scrolling middle — criteria only */}
-              <div className="flex-1 px-12 pt-8 pb-8 overflow-y-auto">
+              <div className="md:flex-1 px-4 sm:px-6 md:px-12 pt-6 md:pt-8 pb-8 md:overflow-y-auto">
                 <div className="max-w-2xl">
                   {grouped.length === 0 && (
                     <div className="py-12 text-center border border-dashed border-border rounded-sm">
@@ -761,7 +764,7 @@ export default function NewJobPage() {
 
           {/* —— Sticky action bar — outside scroll container, only when result is shown —— */}
           {result && !loading && (
-            <div className="border-t border-border bg-background px-12 py-4 flex items-center justify-between gap-4 flex-shrink-0">
+            <div className="border-t border-border bg-background px-4 sm:px-6 md:px-12 py-4 flex items-center justify-between gap-4 flex-shrink-0">
               <div className="flex-1 min-w-0">
                 {saveState === "error" && saveError ? (
                   <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-primary">
@@ -800,11 +803,11 @@ export default function NewJobPage() {
       </main>
 
       {/* —————— Bottom rule —————— */}
-      <footer className="border-t border-border px-10 py-3 flex-shrink-0 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-        <span>
+      <footer className="border-t border-border px-4 sm:px-6 md:px-10 py-3 flex-shrink-0 flex items-center justify-between gap-3 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+        <span className="truncate">
           Yuvabe ATS &nbsp; · &nbsp; v0.1
         </span>
-        <span className="italic font-serif normal-case tracking-normal text-muted-foreground/80">
+        <span className="italic font-serif normal-case tracking-normal text-muted-foreground/80 hidden md:inline">
           Hiring is a human act.
         </span>
         <span>2026</span>

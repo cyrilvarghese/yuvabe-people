@@ -17,11 +17,11 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
 
 function ColumnMarker({ numeral, title }: { numeral: string; title: string }) {
   return (
-    <div className="flex items-baseline gap-4">
-      <span className="font-serif italic text-5xl leading-none text-primary tabular">
+    <div className="flex items-baseline gap-3 md:gap-4">
+      <span className="font-serif italic text-3xl md:text-5xl leading-none text-primary tabular">
         {numeral}.
       </span>
-      <span className="font-serif italic text-2xl leading-none text-foreground/85">
+      <span className="font-serif italic text-xl md:text-2xl leading-none text-foreground/85">
         {title}
       </span>
     </div>
@@ -37,7 +37,7 @@ function ScoreChip({ score }: { score: number }) {
       : "text-primary border-primary/40 bg-primary/[0.06]";
   return (
     <div
-      className={`inline-flex items-baseline justify-center min-w-[52px] px-2 py-1 border rounded-sm font-mono text-[16px] tabular leading-none ${colorClass}`}
+      className={`inline-flex items-baseline justify-center min-w-[44px] md:min-w-[52px] px-2 py-1 border rounded-sm font-mono text-[14px] md:text-[16px] tabular leading-none ${colorClass}`}
     >
       {String(score).padStart(2, "0")}
     </div>
@@ -74,8 +74,26 @@ function relativeTime(iso: string): string {
 
 /* —————————————————————————— page —————————————————————————— */
 
-export default async function ApplicationsListPage() {
-  const applications = await listApplications();
+const VALID_STATUSES: ApplicationStatus[] = [
+  "new",
+  "reviewing",
+  "shortlisted",
+  "rejected",
+  "offered",
+];
+
+export default async function ApplicationsListPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ status?: string }>;
+}) {
+  const params = await searchParams;
+  const filter =
+    params.status && VALID_STATUSES.includes(params.status as ApplicationStatus)
+      ? (params.status as ApplicationStatus)
+      : null;
+
+  const allApplications = await listApplications();
   const candidates = await listCandidates();
   const jobs = await listJobs();
 
@@ -84,8 +102,9 @@ export default async function ApplicationsListPage() {
   );
   const jobsByCode = new Map<string, Job>(jobs.map((j) => [j.code, j]));
 
-  const total = applications.length;
-  const statusCounts = applications.reduce<Record<ApplicationStatus, number>>(
+  // All counts come from the unfiltered set — chips are navigators, not status.
+  const total = allApplications.length;
+  const statusCounts = allApplications.reduce<Record<ApplicationStatus, number>>(
     (acc, a) => {
       acc[a.status] = (acc[a.status] ?? 0) + 1;
       return acc;
@@ -93,56 +112,68 @@ export default async function ApplicationsListPage() {
     { new: 0, reviewing: 0, shortlisted: 0, rejected: 0, offered: 0 }
   );
 
+  // The list rendered is the filtered set.
+  const applications = filter
+    ? allApplications.filter((a) => a.status === filter)
+    : allApplications;
+
   return (
-    <div className="h-screen flex flex-col overflow-hidden bg-background">
+    <div className="min-h-screen md:h-screen flex flex-col md:overflow-hidden bg-background">
       <header className="flex-shrink-0 border-b border-border bg-background z-10">
-        <div className="px-10 pt-4 pb-3 flex items-center justify-between">
-          <div className="flex items-baseline gap-3">
+        <div className="px-4 md:px-10 pt-4 pb-3 flex items-center justify-between gap-3">
+          <div className="flex items-baseline gap-3 min-w-0">
             <span className="font-serif italic text-lg leading-none">Yuvabe</span>
             <span className="text-muted-foreground">/</span>
             <Eyebrow>ATS</Eyebrow>
           </div>
           <Eyebrow>
             <span className="tabular">{String(total).padStart(2, "0")}</span>
-            &nbsp;{total === 1 ? "application" : "applications"} across {jobs.length}{" "}
-            {jobs.length === 1 ? "role" : "roles"}
+            &nbsp;
+            <span className="hidden sm:inline">
+              {total === 1 ? "application" : "applications"} across {jobs.length}{" "}
+              {jobs.length === 1 ? "role" : "roles"}
+            </span>
+            <span className="sm:hidden">{total === 1 ? "app" : "apps"}</span>
           </Eyebrow>
         </div>
-        <nav className="px-10 flex items-center gap-8">
+        <nav className="px-4 md:px-10 flex items-center gap-6 md:gap-8 overflow-x-auto">
           <NavTabClient href="/jobs" label="Jobs" prefix="/jobs" />
-          <NavTabClient href="/applications" label="Applications" prefix="/applications" />
+          <NavTabClient href="/applications" label="Applicants" prefix="/applications" />
           <NavTabClient href="/review" label="Review" prefix="/review" />
         </nav>
       </header>
 
-      <main className="flex-1 overflow-hidden">
-        <section className="h-full flex flex-col overflow-hidden">
+      <main className="md:flex-1 md:overflow-hidden">
+        <section className="md:h-full flex flex-col md:overflow-hidden">
           {/* Static top */}
-          <div className="flex-shrink-0 px-10 pt-10 pb-5 border-b border-border bg-background">
+          <div className="flex-shrink-0 px-4 sm:px-6 md:px-10 pt-6 md:pt-10 pb-5 border-b border-border bg-background">
             <ColumnMarker numeral="i" title="Applications" />
             <p className="mt-4 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground tabular">
-              {String(total).padStart(2, "0")} total &nbsp;·&nbsp; sorted by recency
+              {String(applications.length).padStart(2, "0")} of {String(total).padStart(2, "0")}
+              &nbsp;·&nbsp; sorted by recency
+              {filter && <> &nbsp;·&nbsp; filtered by {filter}</>}
             </p>
             <div className="mt-5 flex items-center gap-1 flex-wrap -ml-2.5">
-              <FilterPill label="All" count={total} tone="neutral" active />
+              <FilterPill href="/applications" label="All" count={total} tone="neutral" active={!filter} />
               {(["shortlisted", "reviewing", "new", "offered", "rejected"] as ApplicationStatus[])
                 .filter((s) => statusCounts[s] > 0)
                 .map((s) => (
                   <FilterPill
                     key={s}
+                    href={`/applications?status=${s}`}
                     label={STATUS_LABEL[s]}
                     count={statusCounts[s]}
                     tone={s === "shortlisted" ? "shortlist" : s === "offered" ? "offered" : "neutral"}
-                    active={false}
+                    active={filter === s}
                   />
                 ))}
             </div>
           </div>
 
           {/* Scrolling list */}
-          <div className="flex-1 overflow-y-auto px-10 pt-8 pb-12">
+          <div className="md:flex-1 md:overflow-y-auto px-4 sm:px-6 md:px-10 pt-6 md:pt-8 pb-12">
             {applications.length === 0 ? (
-              <EmptyState />
+              <EmptyState filter={filter} totalAll={total} />
             ) : (
               <ul className="max-w-5xl">
                 {applications.map((app, idx) => {
@@ -160,35 +191,35 @@ export default async function ApplicationsListPage() {
                         href={`/applications/${app.id}`}
                         className="block py-5 -mx-4 px-4 rounded-sm hover:bg-secondary/40 transition-colors"
                       >
-                        <div className="flex items-center justify-between gap-6">
-                          <div className="flex items-center gap-5 min-w-0 flex-1">
+                        <div className="flex items-center justify-between gap-3 md:gap-6">
+                          <div className="flex items-center gap-3 md:gap-5 min-w-0 flex-1">
                             <ScoreChip score={app.matchScore} />
                             <div className="min-w-0 flex-1">
-                              <h3 className="font-serif italic text-xl leading-tight tracking-tight truncate">
+                              <h3 className="font-serif italic text-lg md:text-xl leading-tight tracking-tight truncate">
                                 {candidate.name}
                               </h3>
-                              <div className="mt-1 flex items-center gap-2 text-[12px] text-muted-foreground flex-wrap">
+                              <div className="mt-1 flex items-center gap-2 text-[12px] text-muted-foreground">
                                 <span className="truncate">{job.title}</span>
-                                <span className="text-border">·</span>
-                                <span className="font-mono text-primary">
+                                <span className="text-border hidden sm:inline">·</span>
+                                <span className="font-mono text-primary hidden sm:inline">
                                   [JOB-{job.code}]
                                 </span>
-                                <span className="text-border">·</span>
-                                <span className="truncate">{candidate.location}</span>
+                                <span className="text-border hidden md:inline">·</span>
+                                <span className="truncate hidden md:inline">{candidate.location}</span>
                               </div>
                             </div>
                           </div>
-                          <div className="flex items-center gap-5 flex-shrink-0">
+                          <div className="flex items-center gap-3 md:gap-5 flex-shrink-0">
                             <span
-                              className={`font-mono text-[10px] uppercase tracking-[0.18em] ${STATUS_COLOR[app.status]}`}
+                              className={`font-mono text-[10px] uppercase tracking-[0.16em] md:tracking-[0.18em] ${STATUS_COLOR[app.status]}`}
                             >
                               {STATUS_LABEL[app.status]}
                             </span>
-                            <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground tabular hidden sm:inline">
+                            <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground tabular hidden md:inline">
                               {relativeTime(app.receivedAt)}
                             </span>
                             <ArrowUpRight
-                              className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-px group-hover:-translate-y-px transition-all"
+                              className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-px group-hover:-translate-y-px transition-all flex-shrink-0"
                               strokeWidth={1.75}
                             />
                           </div>
@@ -203,9 +234,9 @@ export default async function ApplicationsListPage() {
         </section>
       </main>
 
-      <footer className="border-t border-border px-10 py-3 flex-shrink-0 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-        <span>Yuvabe ATS &nbsp; · &nbsp; v0.1</span>
-        <span className="italic font-serif normal-case tracking-normal text-muted-foreground/80">
+      <footer className="border-t border-border px-4 sm:px-6 md:px-10 py-3 flex-shrink-0 flex items-center justify-between gap-3 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+        <span className="truncate">Yuvabe ATS &nbsp; · &nbsp; v0.1</span>
+        <span className="italic font-serif normal-case tracking-normal text-muted-foreground/80 hidden md:inline">
           Hiring is a human act.
         </span>
         <span>2026</span>
@@ -217,11 +248,13 @@ export default async function ApplicationsListPage() {
 /* —————————————————————————— filter pill —————————————————————————— */
 
 function FilterPill({
+  href,
   label,
   count,
   tone,
   active,
 }: {
+  href: string;
   label: string;
   count: number;
   tone: "neutral" | "shortlist" | "offered";
@@ -234,8 +267,9 @@ function FilterPill({
       ? "text-[#3F6B3F]"
       : "text-muted-foreground";
   return (
-    <button
-      type="button"
+    <Link
+      href={href}
+      scroll={false}
       className={`
         font-mono text-[11px] uppercase tracking-[0.14em] tabular
         flex items-center gap-1.5 px-2.5 py-1 rounded-sm
@@ -246,13 +280,35 @@ function FilterPill({
     >
       <span>{String(count).padStart(2, "0")}</span>
       <span>{label}</span>
-    </button>
+    </Link>
   );
 }
 
 /* —————————————————————————— empty state —————————————————————————— */
 
-function EmptyState() {
+function EmptyState({
+  filter,
+  totalAll,
+}: {
+  filter: ApplicationStatus | null;
+  totalAll: number;
+}) {
+  if (filter && totalAll > 0) {
+    // Filter excluded everything
+    return (
+      <div className="h-full flex flex-col items-center justify-center text-center pb-24">
+        <p className="font-serif italic text-3xl text-foreground/55 leading-tight">
+          No {STATUS_LABEL[filter].toLowerCase()} applications.
+        </p>
+        <Link
+          href="/applications"
+          className="mt-4 font-mono text-[10px] uppercase tracking-[0.18em] text-primary hover:text-primary/70 transition-colors"
+        >
+          Show all ←
+        </Link>
+      </div>
+    );
+  }
   return (
     <div className="h-full flex flex-col items-center justify-center text-center pb-24">
       <p className="font-serif italic text-3xl text-foreground/55 leading-tight">

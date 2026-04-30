@@ -17,7 +17,7 @@ A candidate's submission for one Job, originating from an inbound email. Carries
 _Avoid_: Submission, candidacy, applicant record.
 
 **Applicant**:
-The person who sent the email. Identified by their email address. May produce multiple Applications across different Jobs.
+The person who sent the email. Identified by their email address. May produce multiple Applications across different Jobs. **In the UI, "Applicants" is the user-facing label** — recruiters think about people, not application records. The data model retains `Application` as a distinct entity (the submission event); the UI just labels them as Applicants because that's how recruiters reason about them.
 _Avoid_: Candidate (we use Applicant during intake; future slices may distinguish "applicant who's been progressed" as Candidate).
 
 **Match Score**:

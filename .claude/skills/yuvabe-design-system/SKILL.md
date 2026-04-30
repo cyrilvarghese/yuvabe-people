@@ -129,6 +129,104 @@ Use `font-serif italic` for: candidate names, page H1 on editorial pages, empty-
 - Caption-style labels are `font-mono text-[10px] uppercase tracking-[0.18em]` — letter-spacing is what makes them feel editorial, not the font alone.
 - **Never use color alone to convey state** — always pair with text. Status badges use background tint + text; score chips use border color + number.
 
+## Responsiveness
+
+**Target**: usable down to **360px** viewport width. Desktop (≥1024px) is primary — a recruiter's workbench at full screen. Mobile/tablet must degrade *gracefully*, not be feature-optimized.
+
+**Principle: stack, don't squeeze.** When two columns don't fit, collapse to one full-width column. Never try to keep two columns by shrinking type or tightening padding past the locked spacing scale.
+
+### Breakpoints (Tailwind defaults)
+
+| Prefix | Min width | Layout phase |
+|---|---|---|
+| (none) | < 640px | Mobile — single column, stacked, smaller display |
+| `sm:` | 640px | Phablet — secondary metadata starts re-appearing |
+| `md:` | 768px | Tablet — multi-column layouts engage here |
+| `lg:` | 1024px | Desktop — full editorial refinement |
+
+### Required responsive patterns
+
+Every new page must apply these where applicable:
+
+**Page gutter**:
+```tsx
+className="px-4 md:px-10"            // single-col page
+className="px-4 sm:px-6 md:px-12"    // two-col inner column
+```
+
+**Two-column spread → stack at <md**:
+```tsx
+// Was: <main className="grid grid-cols-2 overflow-hidden">
+className="grid grid-cols-1 md:grid-cols-2 overflow-hidden"
+
+// Sticky aside layout (e.g. /applications/[id]):
+className="grid grid-cols-1 md:grid-cols-[340px_1fr] overflow-hidden"
+```
+
+**Sticky aside → top section on mobile**:
+```tsx
+<aside className="border-b border-border md:border-r md:border-b-0 ...">
+```
+
+**Display sizes**: every Newsreader display moment scales down on mobile.
+```tsx
+text-3xl md:text-5xl           // ColumnMarker numeral (i. ii.)
+text-xl  md:text-3xl           // Page title (italic)
+text-[2rem] md:text-[2.75rem]  // Candidate name (display-xl)
+text-[2rem] md:text-[3rem]     // Score number (display)
+```
+
+**Vertical padding tighter on mobile**:
+```tsx
+className="pt-6 pb-6 md:pt-10 md:pb-5"  // static-top section
+className="py-8 md:py-10"               // scrolling content area
+```
+
+**Secondary metadata hides on small screens**:
+```tsx
+className="hidden sm:inline"   // received time on a row when name + status are enough
+className="hidden md:flex"     // an entire metadata column when stacked
+```
+
+**Score chip scales**:
+```tsx
+className="min-w-[44px] md:min-w-[58px] text-[16px] md:text-[20px]"
+```
+
+**Header utility links**: collapse text-with-icon to icon-only on mobile.
+```tsx
+<ArrowLeft className="h-3 w-3" />
+<span className="hidden sm:inline">All jobs</span>
+```
+
+**Tabs row**: allow horizontal overflow rather than wrapping or shrinking.
+```tsx
+<nav className="px-4 md:px-10 flex items-center gap-6 md:gap-8 overflow-x-auto">
+```
+
+### Anti-patterns
+
+- ❌ Using `text-xs` / `text-[10px]` for body text on mobile to "make it fit". If text is too small at desktop scale, the page needs less content per row, not smaller letters.
+- ❌ Horizontal scroll on the body. The page itself should never scroll horizontally; only specific containers (tab strips, code blocks) may.
+- ❌ Hiding *primary* information on mobile. If a status badge matters at desktop, it matters on mobile — find a place for it. Hide *secondary* metadata (timestamps, secondary counts) only.
+- ❌ Sticky elements that take >40% of the mobile viewport. A 340px sticky aside at 360px viewport is 95% — not sticky, just *blocking*. Convert to a non-sticky top section on mobile.
+
+### What stays the same
+
+- The palette doesn't change at any breakpoint
+- Typography faces don't change (Newsreader / Geist / Mono are everywhere)
+- The 4px spacing scale doesn't relax — mobile still uses values from {4,8,12,16,24,32,48,64,96}, just smaller ones (px-4 instead of px-12)
+
+### Mobile screen review checklist
+
+Before declaring a screen done, view at 375px (iPhone SE) and verify:
+- [ ] Page title is fully readable (no truncation that hides meaning)
+- [ ] Primary CTAs are reachable and tappable (≥44px tap target)
+- [ ] No horizontal page-level scroll
+- [ ] Sticky elements take <40% of viewport
+- [ ] List rows are scannable — name and primary metric still visible
+- [ ] Secondary metadata can be omitted without losing the row's meaning
+
 ## Spatial language
 
 - **4px base unit.** Scale: `4, 8, 12, 16, 24, 32, 48, 64, 96`. Don't use 6, 10, 14, 18 etc.

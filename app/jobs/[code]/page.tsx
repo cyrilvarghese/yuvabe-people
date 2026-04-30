@@ -18,11 +18,11 @@ function Eyebrow({ children }: { children: React.ReactNode }) {
 
 function ColumnMarker({ numeral, title }: { numeral: string; title: string }) {
   return (
-    <div className="flex items-baseline gap-4">
-      <span className="font-serif italic text-5xl leading-none text-primary tabular">
+    <div className="flex items-baseline gap-3 md:gap-4">
+      <span className="font-serif italic text-3xl md:text-5xl leading-none text-primary tabular">
         {numeral}.
       </span>
-      <h1 className="font-serif italic text-3xl leading-none text-foreground tracking-tight max-w-[36ch] truncate">
+      <h1 className="font-serif italic text-xl md:text-3xl leading-tight md:leading-none text-foreground tracking-tight max-w-[36ch]">
         {title}
       </h1>
     </div>
@@ -41,7 +41,7 @@ function ScoreChip({ score }: { score: number }) {
       : "text-primary border-primary/40 bg-primary/[0.06]";
   return (
     <div
-      className={`inline-flex items-baseline justify-center min-w-[58px] px-2.5 py-1.5 border rounded-sm font-mono text-[20px] tabular leading-none ${colorClass}`}
+      className={`inline-flex items-baseline justify-center min-w-[44px] md:min-w-[58px] px-2 md:px-2.5 py-1.5 border rounded-sm font-mono text-[15px] md:text-[20px] tabular leading-none ${colorClass}`}
       aria-label={`Match score ${score}`}
     >
       {String(score).padStart(2, "0")}
@@ -81,24 +81,40 @@ function relativeTime(iso: string): string {
 
 /* —————————————————————————— page —————————————————————————— */
 
+const VALID_STATUSES: ApplicationStatus[] = [
+  "new",
+  "reviewing",
+  "shortlisted",
+  "rejected",
+  "offered",
+];
+
 export default async function JobDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ code: string }>;
+  searchParams: Promise<{ status?: string }>;
 }) {
   const { code } = await params;
+  const sp = await searchParams;
+  const filter =
+    sp.status && VALID_STATUSES.includes(sp.status as ApplicationStatus)
+      ? (sp.status as ApplicationStatus)
+      : null;
+
   const jobs = await listJobs();
   const job = jobs.find((j) => j.code === code);
   if (!job) notFound();
 
-  const applications = await listApplicationsByJobCode(code);
+  const allApplications = await listApplicationsByJobCode(code);
   const allCandidates = await listCandidates();
   const candidatesById = new Map<string, Candidate>(
     allCandidates.map((c) => [c.id, c])
   );
 
-  // Status counts for the chips
-  const statusCounts = applications.reduce<Record<ApplicationStatus, number>>(
+  // Counts always come from the unfiltered set — chips are navigators.
+  const statusCounts = allApplications.reduce<Record<ApplicationStatus, number>>(
     (acc, a) => {
       acc[a.status] = (acc[a.status] ?? 0) + 1;
       return acc;
@@ -106,36 +122,55 @@ export default async function JobDetailPage({
     { new: 0, reviewing: 0, shortlisted: 0, rejected: 0, offered: 0 }
   );
 
+  // The list rendered is the filtered set.
+  const applications = filter
+    ? allApplications.filter((a) => a.status === filter)
+    : allApplications;
+
   return (
-    <div className="h-screen flex flex-col overflow-hidden bg-background">
+    <div className="min-h-screen md:h-screen flex flex-col md:overflow-hidden bg-background">
       {/* —————— Sticky header —————— */}
       <header className="flex-shrink-0 border-b border-border bg-background z-10">
-        <div className="px-10 pt-4 pb-3 flex items-center justify-between">
-          <div className="flex items-baseline gap-3">
+        <div className="px-4 md:px-10 pt-4 pb-3 flex items-center justify-between gap-4">
+          <div className="flex items-baseline gap-3 min-w-0">
             <span className="font-serif italic text-lg leading-none">Yuvabe</span>
             <span className="text-muted-foreground">/</span>
             <Eyebrow>ATS</Eyebrow>
           </div>
           <Link
             href="/jobs"
-            className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground hover:text-foreground transition-colors"
+            className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
           >
             <ArrowLeft className="h-3 w-3" />
-            All jobs
+            <span className="hidden sm:inline">All jobs</span>
           </Link>
         </div>
-        <nav className="px-10 flex items-center gap-8">
+        <nav className="px-4 md:px-10 flex items-center gap-6 md:gap-8 overflow-x-auto">
           <NavTabClient href="/jobs" label="Jobs" prefix="/jobs" />
-          <NavTabClient href="/applications" label="Applications" prefix="/applications" />
+          <NavTabClient href="/applications" label="Applicants" prefix="/applications" />
           <NavTabClient href="/review" label="Review" prefix="/review" />
         </nav>
       </header>
 
-      <main className="flex-1 overflow-hidden">
-        <section className="h-full flex flex-col overflow-hidden">
+      <main className="md:flex-1 md:overflow-hidden">
+        <section className="md:h-full flex flex-col md:overflow-hidden">
           {/* Static top — job title + filter chips */}
-          <div className="flex-shrink-0 px-10 pt-10 pb-5 border-b border-border bg-background">
+          <div className="flex-shrink-0 px-4 sm:px-6 md:px-10 pt-6 md:pt-10 pb-5 border-b border-border bg-background">
             <div className="max-w-5xl">
+              <nav className="mb-4 font-mono text-[10px] uppercase tracking-[0.18em] flex items-center gap-2.5">
+                <Link
+                  href="/jobs"
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Jobs
+                </Link>
+                <span className="text-base leading-none text-muted-foreground/65">
+                  ›
+                </span>
+                <span className="text-foreground/80 truncate max-w-[40ch]">
+                  {job.title}
+                </span>
+              </nav>
               <ColumnMarker numeral="i" title={job.title} />
               <div className="mt-4 flex items-center gap-4 flex-wrap">
                 <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-primary tabular">
@@ -166,23 +201,25 @@ export default async function JobDetailPage({
                 </Link>
               </div>
 
-              {applications.length > 0 && (
+              {allApplications.length > 0 && (
                 <div className="mt-6 flex items-center gap-1 flex-wrap -ml-2.5">
                   <StatusFilterChip
+                    href={`/jobs/${code}`}
                     label="All"
-                    count={applications.length}
+                    count={allApplications.length}
                     tone="neutral"
-                    active
+                    active={!filter}
                   />
                   {(["shortlisted", "reviewing", "new", "offered", "rejected"] as ApplicationStatus[])
                     .filter((s) => statusCounts[s] > 0)
                     .map((s) => (
                       <StatusFilterChip
                         key={s}
+                        href={`/jobs/${code}?status=${s}`}
                         label={STATUS_LABEL[s]}
                         count={statusCounts[s]}
                         tone={s === "shortlisted" ? "shortlist" : s === "offered" ? "offered" : "neutral"}
-                        active={false}
+                        active={filter === s}
                       />
                     ))}
                 </div>
@@ -191,9 +228,13 @@ export default async function JobDetailPage({
           </div>
 
           {/* Scrolling list */}
-          <div className="flex-1 overflow-y-auto px-10 pt-8 pb-12">
+          <div className="md:flex-1 md:overflow-y-auto px-4 sm:px-6 md:px-10 pt-6 md:pt-8 pb-12">
             {applications.length === 0 ? (
-              <EmptyState code={job.code} />
+              <EmptyState
+                code={job.code}
+                filter={filter}
+                hasAny={allApplications.length > 0}
+              />
             ) : (
               <ul className="max-w-5xl">
                 {applications.map((app, idx) => {
@@ -222,9 +263,9 @@ export default async function JobDetailPage({
       </main>
 
       {/* —————— Footer —————— */}
-      <footer className="border-t border-border px-10 py-3 flex-shrink-0 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-        <span>Yuvabe ATS &nbsp; · &nbsp; v0.1</span>
-        <span className="italic font-serif normal-case tracking-normal text-muted-foreground/80">
+      <footer className="border-t border-border px-4 sm:px-6 md:px-10 py-3 flex-shrink-0 flex items-center justify-between gap-3 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+        <span className="truncate">Yuvabe ATS &nbsp; · &nbsp; v0.1</span>
+        <span className="italic font-serif normal-case tracking-normal text-muted-foreground/80 hidden md:inline">
           Hiring is a human act.
         </span>
         <span>2026</span>
@@ -243,35 +284,35 @@ function ApplicationRow({
   candidate: Candidate;
 }) {
   return (
-    <div className="flex items-center justify-between gap-6">
-      <div className="flex items-center gap-5 min-w-0 flex-1">
+    <div className="flex items-center justify-between gap-3 md:gap-6">
+      <div className="flex items-center gap-3 md:gap-5 min-w-0 flex-1">
         <ScoreChip score={application.matchScore} />
         <div className="min-w-0 flex-1">
-          <h3 className="font-serif italic text-xl leading-tight tracking-tight truncate">
+          <h3 className="font-serif italic text-lg md:text-xl leading-tight tracking-tight truncate">
             {candidate.name}
           </h3>
-          <div className="mt-1 flex items-center gap-2 text-[12px] text-muted-foreground flex-wrap">
-            <span className="truncate">{candidate.email}</span>
-            <span className="text-border">·</span>
-            <span>{candidate.location}</span>
-            <span className="text-border">·</span>
-            <span className="tabular">
+          <div className="mt-1 flex items-center gap-2 text-[12px] text-muted-foreground">
+            <span className="truncate">{candidate.location}</span>
+            <span className="text-border hidden sm:inline">·</span>
+            <span className="hidden sm:inline truncate">{candidate.email}</span>
+            <span className="text-border hidden md:inline">·</span>
+            <span className="tabular hidden md:inline">
               {candidate.yearsOfExperience}y experience
             </span>
           </div>
         </div>
       </div>
-      <div className="flex items-center gap-5 flex-shrink-0">
+      <div className="flex items-center gap-3 md:gap-5 flex-shrink-0">
         <span
-          className={`font-mono text-[10px] uppercase tracking-[0.18em] ${STATUS_COLOR[application.status]}`}
+          className={`font-mono text-[10px] uppercase tracking-[0.16em] md:tracking-[0.18em] ${STATUS_COLOR[application.status]}`}
         >
           {STATUS_LABEL[application.status]}
         </span>
-        <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground tabular hidden sm:inline">
+        <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground tabular hidden md:inline">
           {relativeTime(application.receivedAt)}
         </span>
         <ArrowUpRight
-          className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-px group-hover:-translate-y-px transition-all"
+          className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-px group-hover:-translate-y-px transition-all flex-shrink-0"
           strokeWidth={1.75}
         />
       </div>
@@ -279,14 +320,16 @@ function ApplicationRow({
   );
 }
 
-/* —————————————————————————— status filter chip (display-only for now) —————————————————————————— */
+/* —————————————————————————— status filter chip (URL-driven) —————————————————————————— */
 
 function StatusFilterChip({
+  href,
   label,
   count,
   tone,
   active,
 }: {
+  href: string;
   label: string;
   count: number;
   tone: "neutral" | "shortlist" | "offered";
@@ -299,8 +342,9 @@ function StatusFilterChip({
       ? "text-[#3F6B3F]"
       : "text-muted-foreground";
   return (
-    <button
-      type="button"
+    <Link
+      href={href}
+      scroll={false}
       className={`
         font-mono text-[11px] uppercase tracking-[0.14em] tabular
         flex items-center gap-1.5 px-2.5 py-1 rounded-sm
@@ -311,13 +355,37 @@ function StatusFilterChip({
     >
       <span>{String(count).padStart(2, "0")}</span>
       <span>{label}</span>
-    </button>
+    </Link>
   );
 }
 
 /* —————————————————————————— empty state —————————————————————————— */
 
-function EmptyState({ code }: { code: string }) {
+function EmptyState({
+  code,
+  filter,
+  hasAny,
+}: {
+  code: string;
+  filter: ApplicationStatus | null;
+  hasAny: boolean;
+}) {
+  // The role HAS applicants but the current filter excluded them all.
+  if (filter && hasAny) {
+    return (
+      <div className="h-full flex flex-col items-center justify-center text-center pb-24">
+        <p className="font-serif italic text-3xl text-foreground/55 leading-tight">
+          No {STATUS_LABEL[filter].toLowerCase()} candidates for this role.
+        </p>
+        <Link
+          href={`/jobs/${code}`}
+          className="mt-4 font-mono text-[10px] uppercase tracking-[0.18em] text-primary hover:text-primary/70 transition-colors"
+        >
+          Show all ←
+        </Link>
+      </div>
+    );
+  }
   return (
     <div className="h-full flex flex-col items-center justify-center text-center pb-24">
       <p className="font-serif italic text-3xl text-foreground/55 leading-tight">

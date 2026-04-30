@@ -117,35 +117,53 @@ export default async function ApplicationDetailPage({
   })).filter((g) => g.items.length > 0);
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden bg-background">
+    <div className="min-h-screen md:h-screen flex flex-col md:overflow-hidden bg-background">
       {/* —————— Sticky header —————— */}
       <header className="flex-shrink-0 border-b border-border bg-background z-10">
-        <div className="px-10 pt-4 pb-3 flex items-center justify-between">
-          <div className="flex items-baseline gap-3">
+        <div className="px-4 md:px-10 pt-4 pb-3 flex items-center justify-between gap-3">
+          <div className="flex items-baseline gap-3 min-w-0">
             <span className="font-serif italic text-lg leading-none">Yuvabe</span>
             <span className="text-muted-foreground">/</span>
             <Eyebrow>ATS</Eyebrow>
           </div>
           <Link
             href={`/jobs/${job.code}`}
-            className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground hover:text-foreground transition-colors max-w-[40ch] truncate"
+            className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground hover:text-foreground transition-colors min-w-0 max-w-[40ch]"
           >
             <ArrowLeft className="h-3 w-3 flex-shrink-0" />
-            <span className="truncate">{job.title}</span>
+            <span className="truncate hidden sm:inline">{job.title}</span>
           </Link>
         </div>
-        <nav className="px-10 flex items-center gap-8">
+        <nav className="px-4 md:px-10 flex items-center gap-6 md:gap-8 overflow-x-auto">
           <NavTabClient href="/jobs" label="Jobs" prefix="/jobs" />
-          <NavTabClient href="/applications" label="Applications" prefix="/applications" />
+          <NavTabClient href="/applications" label="Applicants" prefix="/applications" />
           <NavTabClient href="/review" label="Review" prefix="/review" />
         </nav>
       </header>
 
-      <main className="flex-1 grid grid-cols-[360px_1fr] overflow-hidden">
+      <main className="md:flex-1 grid grid-cols-1 md:grid-cols-[340px_1fr] md:overflow-hidden">
         {/* ════════ LEFT — candidate profile ════════ */}
-        <aside className="border-r border-border overflow-y-auto px-10 py-10 flex flex-col">
-          <Eyebrow>Applicant</Eyebrow>
-          <h1 className="font-serif italic text-[2.75rem] leading-[1.05] mt-3 mb-1 tracking-tight">
+        <aside className="border-b border-border md:border-r md:border-b-0 md:overflow-y-auto px-4 sm:px-6 md:px-10 py-6 md:py-10 flex flex-col">
+          <nav className="mb-3 font-mono text-[10px] uppercase tracking-[0.18em] flex items-center gap-2.5 flex-wrap">
+            <Link
+              href="/jobs"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Jobs
+            </Link>
+            <span className="text-base leading-none text-muted-foreground/65">›</span>
+            <Link
+              href={`/jobs/${job.code}`}
+              className="text-muted-foreground hover:text-foreground transition-colors truncate max-w-[20ch]"
+            >
+              {job.title}
+            </Link>
+            <span className="text-base leading-none text-muted-foreground/65">›</span>
+            <span className="text-foreground/80 truncate max-w-[20ch]">
+              {candidate.name}
+            </span>
+          </nav>
+          <h1 className="font-serif italic text-[2rem] md:text-[2.75rem] leading-[1.05] mt-1 mb-1 tracking-tight">
             {candidate.name}
           </h1>
 
@@ -170,7 +188,7 @@ export default async function ApplicationDetailPage({
             <Eyebrow>Match score</Eyebrow>
             <div className="mt-2 flex items-baseline gap-3">
               <span
-                className={`font-mono text-[3rem] leading-none tabular ${bandTextClass(application.matchScore)}`}
+                className={`font-mono text-[2.5rem] md:text-[3rem] leading-none tabular ${bandTextClass(application.matchScore)}`}
               >
                 {String(application.matchScore).padStart(2, "0")}
               </span>
@@ -285,7 +303,7 @@ export default async function ApplicationDetailPage({
         </aside>
 
         {/* ════════ RIGHT — match analysis ════════ */}
-        <section className="overflow-y-auto px-12 py-10">
+        <section className="md:overflow-y-auto px-4 sm:px-6 md:px-12 py-6 md:py-10">
           <div className="max-w-3xl">
             {/* Match summary — editorial moment */}
             <Eyebrow>Match summary</Eyebrow>
@@ -404,9 +422,9 @@ export default async function ApplicationDetailPage({
       </main>
 
       {/* —————— Footer —————— */}
-      <footer className="border-t border-border px-10 py-3 flex-shrink-0 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-        <span>Yuvabe ATS &nbsp; · &nbsp; v0.1</span>
-        <span className="italic font-serif normal-case tracking-normal text-muted-foreground/80">
+      <footer className="border-t border-border px-4 sm:px-6 md:px-10 py-3 flex-shrink-0 flex items-center justify-between gap-3 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+        <span className="truncate">Yuvabe ATS &nbsp; · &nbsp; v0.1</span>
+        <span className="italic font-serif normal-case tracking-normal text-muted-foreground/80 hidden md:inline">
           Hiring is a human act.
         </span>
         <span>2026</span>

@@ -22,11 +22,11 @@ function ColumnMarker({
   title: string;
 }) {
   return (
-    <div className="flex items-baseline gap-4">
-      <span className="font-serif italic text-5xl leading-none text-primary tabular">
+    <div className="flex items-baseline gap-3 md:gap-4">
+      <span className="font-serif italic text-3xl md:text-5xl leading-none text-primary tabular">
         {numeral}.
       </span>
-      <span className="font-serif italic text-2xl leading-none text-foreground/85">
+      <span className="font-serif italic text-xl md:text-2xl leading-none text-foreground/85">
         {title}
       </span>
     </div>
@@ -83,11 +83,11 @@ export default async function JobsPage({
   }
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden bg-background">
+    <div className="min-h-screen md:h-screen flex flex-col md:overflow-hidden bg-background">
       {/* —————— Sticky header — brand + tabs —————— */}
       <header className="flex-shrink-0 border-b border-border bg-background z-10">
-        <div className="px-10 pt-4 pb-3 flex items-center justify-between">
-          <div className="flex items-baseline gap-3">
+        <div className="px-4 md:px-10 pt-4 pb-3 flex items-center justify-between gap-3">
+          <div className="flex items-baseline gap-3 min-w-0">
             <span className="font-serif italic text-lg leading-none">
               Yuvabe
             </span>
@@ -99,21 +99,21 @@ export default async function JobsPage({
             &nbsp;{count === 1 ? "job" : "jobs"}
           </Eyebrow>
         </div>
-        <nav className="px-10 flex items-center gap-8">
+        <nav className="px-4 md:px-10 flex items-center gap-6 md:gap-8 overflow-x-auto">
           <NavTabClient href="/jobs" label="Jobs" prefix="/jobs" />
           <NavTabClient
             href="/applications"
-            label="Applications"
+            label="Applicants"
             prefix="/applications"
           />
           <NavTabClient href="/review" label="Review" prefix="/review" />
         </nav>
       </header>
 
-      <main className="flex-1 overflow-hidden">
-        <section className="h-full flex flex-col overflow-hidden">
+      <main className="md:flex-1 md:overflow-hidden">
+        <section className="md:h-full flex flex-col md:overflow-hidden">
           {/* Static top */}
-          <div className="flex-shrink-0 px-10 pt-10 pb-6 border-b border-border bg-background">
+          <div className="flex-shrink-0 px-4 sm:px-6 md:px-10 pt-6 md:pt-10 pb-6 border-b border-border bg-background">
             <div className="flex items-end justify-between gap-6">
               <ColumnMarker numeral="i" title="Jobs" />
               <Link
@@ -132,7 +132,7 @@ export default async function JobsPage({
           </div>
 
           {/* Scrolling list */}
-          <div className="flex-1 overflow-y-auto px-10 pt-8 pb-12">
+          <div className="md:flex-1 md:overflow-y-auto px-4 sm:px-6 md:px-10 pt-6 md:pt-8 pb-12">
             {count === 0 ? (
               <EmptyState />
             ) : (
@@ -150,33 +150,40 @@ export default async function JobsPage({
                         ${isNew ? "highlight-new" : ""}
                       `}
                     >
-                      <Link
-                        href={`/jobs/${job.code}`}
-                        className="block py-6 -mx-4 px-4 rounded-sm hover:bg-secondary/40 transition-colors"
-                      >
-                        <div className="flex items-baseline justify-between gap-6">
+                      <div className="py-5 md:py-6 -mx-4 px-4 rounded-sm">
+                        <div className="flex items-start justify-between gap-3 md:gap-6">
                           <div className="min-w-0 flex-1">
                             <div className="flex items-baseline gap-3 mb-2">
-                              <h3 className="font-serif italic text-2xl leading-tight tracking-tight truncate">
+                              <h3 className="font-serif italic text-xl md:text-2xl leading-tight tracking-tight truncate">
                                 {job.title}
                               </h3>
                               {isNew && (
-                                <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-primary flex-shrink-0">
+                                <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-primary flex-shrink-0 hidden sm:inline">
                                   ← just saved
                                 </span>
                               )}
                             </div>
-                            <div className="flex items-center gap-4 flex-wrap">
+                            <div className="flex items-center gap-2 md:gap-3 flex-wrap">
                               <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-primary tabular">
                                 [JOB-{job.code}]
                               </span>
                               <span className="text-border">·</span>
                               <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground tabular">
-                                {String(job.criteria.length).padStart(2, "0")}{" "}
-                                criteria
+                                {String(job.criteria.length).padStart(2, "0")} criteria
                               </span>
-                              <span className="text-muted-foreground/60">·</span>
-                              <span className="font-mono text-[10px] uppercase tracking-[0.14em] tabular">
+                              <span className="text-border hidden sm:inline">·</span>
+                              <span className="font-mono text-[10px] uppercase tracking-[0.14em] tabular hidden sm:inline">
+                                <span
+                                  className={appCount > 0 ? "text-foreground font-medium" : "text-muted-foreground/70"}
+                                >
+                                  {String(appCount).padStart(2, "0")}
+                                </span>{" "}
+                                <span className="text-muted-foreground">
+                                  {appCount === 1 ? "applicant" : "applicants"}
+                                </span>
+                              </span>
+                              <span className="text-border hidden md:inline">·</span>
+                              <span className="font-mono text-[10px] uppercase tracking-[0.14em] tabular hidden md:inline">
                                 <span className="text-primary">
                                   {String(counts.must).padStart(2, "0")} must
                                 </span>
@@ -189,34 +196,34 @@ export default async function JobsPage({
                                   {String(counts.nice).padStart(2, "0")} nice
                                 </span>
                               </span>
+                              <span className="text-border hidden lg:inline">·</span>
+                              <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground hidden lg:inline">
+                                {relativeTime(job.createdAt)}
+                              </span>
                             </div>
                           </div>
-                          <div className="flex items-center gap-5 flex-shrink-0">
-                            <div className="text-right leading-none">
-                              <span
-                                className={`font-mono text-[15px] tabular block ${
-                                  appCount > 0 ? "text-foreground" : "text-muted-foreground/70"
-                                }`}
-                              >
-                                {String(appCount).padStart(2, "0")}
-                              </span>
-                              <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-muted-foreground mt-1.5 block">
-                                {appCount === 1 ? "applicant" : "applicants"}
-                              </span>
-                            </div>
-                            <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
-                              {relativeTime(job.createdAt)}
-                            </span>
-                            <span className="inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground group-hover:text-primary transition-colors">
-                              View
+                          <div className="flex flex-col items-stretch gap-1 flex-shrink-0 min-w-[140px]">
+                            <Link
+                              href={`/jobs/${job.code}`}
+                              className="font-mono text-[10px] uppercase tracking-[0.16em] px-3 py-2 rounded-sm text-foreground hover:bg-secondary border border-border hover:border-foreground/20 transition-colors inline-flex items-center justify-center gap-1.5"
+                            >
+                              View applicants
                               <ArrowUpRight
-                                className="h-3 w-3 group-hover:translate-x-px group-hover:-translate-y-px transition-transform"
+                                className="h-3 w-3"
                                 strokeWidth={2}
                               />
-                            </span>
+                            </Link>
+                            <button
+                              type="button"
+                              disabled
+                              title="Edit coming next"
+                              className="font-mono text-[10px] uppercase tracking-[0.16em] px-3 py-2 rounded-sm text-muted-foreground/65 italic cursor-not-allowed inline-flex items-center justify-center"
+                            >
+                              Edit
+                            </button>
                           </div>
                         </div>
-                      </Link>
+                      </div>
                     </li>
                   );
                 })}
@@ -227,9 +234,9 @@ export default async function JobsPage({
       </main>
 
       {/* —————— Footer —————— */}
-      <footer className="border-t border-border px-10 py-3 flex-shrink-0 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-        <span>Yuvabe ATS &nbsp; · &nbsp; v0.1</span>
-        <span className="italic font-serif normal-case tracking-normal text-muted-foreground/80">
+      <footer className="border-t border-border px-4 sm:px-6 md:px-10 py-3 flex-shrink-0 flex items-center justify-between gap-3 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+        <span className="truncate">Yuvabe ATS &nbsp; · &nbsp; v0.1</span>
+        <span className="italic font-serif normal-case tracking-normal text-muted-foreground/80 hidden md:inline">
           Hiring is a human act.
         </span>
         <span>2026</span>
