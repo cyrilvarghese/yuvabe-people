@@ -23,7 +23,7 @@ export default function NavTab({
         ${
           active
             ? "text-foreground border-primary"
-            : "text-muted-foreground/60 border-transparent hover:text-foreground"
+            : "text-foreground/55 border-transparent hover:text-foreground"
         }
       `}
     >

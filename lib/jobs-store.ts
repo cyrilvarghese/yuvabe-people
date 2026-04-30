@@ -19,6 +19,7 @@ const generateCode = customAlphabet(codeAlphabet, 6);
 
 const DATA_DIR = path.join(process.cwd(), "data");
 const FILE = path.join(DATA_DIR, "jobs.json");
+const EXAMPLE = path.join(DATA_DIR, "jobs.example.json");
 
 export type Job = {
   id: string;
@@ -34,18 +35,26 @@ type Store = {
 };
 
 async function ensureFile(): Promise<Store> {
+  await fs.mkdir(DATA_DIR, { recursive: true });
+  // Try the live file first.
   try {
-    await fs.mkdir(DATA_DIR, { recursive: true });
     const raw = await fs.readFile(FILE, "utf-8");
-    return JSON.parse(raw) as Store;
+    const parsed = JSON.parse(raw) as Store;
+    if (parsed.jobs && parsed.jobs.length > 0) return parsed;
+    // Empty file → fall through to seed merge below
   } catch (err) {
-    // ENOENT: file doesn't exist yet — create with empty list
-    if ((err as NodeJS.ErrnoException).code === "ENOENT") {
-      const empty: Store = { jobs: [] };
-      await fs.writeFile(FILE, JSON.stringify(empty, null, 2), "utf-8");
-      return empty;
-    }
-    throw err;
+    if ((err as NodeJS.ErrnoException).code !== "ENOENT") throw err;
+  }
+  // No live file (or empty) → seed from example if available.
+  try {
+    const raw = await fs.readFile(EXAMPLE, "utf-8");
+    const seed = JSON.parse(raw) as Store;
+    return seed;
+  } catch {
+    // No example either → start truly empty
+    const empty: Store = { jobs: [] };
+    await fs.writeFile(FILE, JSON.stringify(empty, null, 2), "utf-8");
+    return empty;
   }
 }
 

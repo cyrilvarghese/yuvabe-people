@@ -1,0 +1,455 @@
+{
+  "applications": [
+    {
+      "id": "app_AIEN9X_aisha",
+      "jobId": "job_aieng_001",
+      "jobCode": "AIEN9X",
+      "candidateId": "c_aisha_khan",
+      "matchScore": 89,
+      "matchSummary": "Aisha brings six years of production ML experience that maps closely to this role's requirements — currently leading inference for a 4M-query/month RAG product. The MLOps coverage (MLflow, Kubeflow, Argo) is unusually deep. Light on academic publications, but the Ray Serve open-source contributions are a strong signal.",
+      "matchBreakdown": [
+        { "criterionLabel": "5+ years Python", "importance": "must", "matched": "yes", "evidence": "6 years at Helio AI and Truly Labs, all Python-primary roles.", "score": 10 },
+        { "criterionLabel": "PyTorch or TensorFlow", "importance": "must", "matched": "yes", "evidence": "Listed PyTorch in skills; Truly Labs role used PyTorch for fine-tuning.", "score": 9 },
+        { "criterionLabel": "LLM application experience", "importance": "must", "matched": "yes", "evidence": "Currently lead engineer on a RAG product (4M queries/month).", "score": 10 },
+        { "criterionLabel": "Production ML deployment", "importance": "must", "matched": "yes", "evidence": "Reduced p95 from 2.4s to 680ms via Ray Serve orchestration.", "score": 10 },
+        { "criterionLabel": "MLOps tooling", "importance": "must", "matched": "yes", "evidence": "Owns MLflow registry; familiar with Kubeflow and ArgoCD.", "score": 9 },
+        { "criterionLabel": "Strong ML fundamentals", "importance": "must", "matched": "yes", "evidence": "BITS Pilani CS degree + 6 years applied; depth assumed from RAG architecture work.", "score": 8 },
+        { "criterionLabel": "SQL fluency", "importance": "must", "matched": "yes", "evidence": "PostgreSQL listed as core skill; data pipelines at Truly Labs.", "score": 8 },
+        { "criterionLabel": "Cloud platforms (AWS/GCP)", "importance": "strong", "matched": "yes", "evidence": "AWS Sagemaker pipelines at Truly Labs; AWS in current stack.", "score": 9 },
+        { "criterionLabel": "Distributed systems", "importance": "strong", "matched": "yes", "evidence": "Ray Serve at scale (4M queries/month) implies distributed inference experience.", "score": 8 },
+        { "criterionLabel": "BS/MS Computer Science", "importance": "strong", "matched": "yes", "evidence": "BITS Pilani, B.E. Computer Science (2019).", "score": 10 },
+        { "criterionLabel": "Open-source ML contributions", "importance": "nice", "matched": "yes", "evidence": "Two contributions to Ray Serve mentioned in resume.", "score": 9 },
+        { "criterionLabel": "Publications or talks", "importance": "nice", "matched": "no", "evidence": "No publications or talks listed.", "score": 0 }
+      ],
+      "coverLetter": "I've followed Yuvabe's work for a while and the focus on practical, outcome-driven AI is exactly the kind of place I want to spend the next chapter. My current role at Helio is rewarding but the team has stabilized and I'm looking for a smaller, higher-ownership environment. I'd be happy to walk through the inference architecture I built — it's the kind of decision-making I'd want to bring here.",
+      "receivedAt": "2026-04-29T08:14:22.000Z",
+      "status": "shortlisted"
+    },
+    {
+      "id": "app_AIEN9X_marcus",
+      "jobId": "job_aieng_001",
+      "jobCode": "AIEN9X",
+      "candidateId": "c_marcus_chen",
+      "matchScore": 76,
+      "matchSummary": "Marcus is a strong full-stack engineer with applied ML exposure but not a production-ML specialist. The feature store + TF Serving work shows real systems instincts; less depth in modern LLM tooling. Worth a conversation if the team values production reliability over cutting-edge model work.",
+      "matchBreakdown": [
+        { "criterionLabel": "5+ years Python", "importance": "must", "matched": "yes", "evidence": "8 years engineering, Python in current and prior roles.", "score": 10 },
+        { "criterionLabel": "PyTorch or TensorFlow", "importance": "must", "matched": "yes", "evidence": "TF Serving integration at Skyfire; PyTorch listed.", "score": 8 },
+        { "criterionLabel": "LLM application experience", "importance": "must", "matched": "partial", "evidence": "No direct LLM product experience; recommendation models predate LLM era.", "score": 4 },
+        { "criterionLabel": "Production ML deployment", "importance": "must", "matched": "yes", "evidence": "TF Serving at 2K req/sec for recommendations.", "score": 8 },
+        { "criterionLabel": "MLOps tooling", "importance": "must", "matched": "partial", "evidence": "Built feature store from scratch but didn't mention MLflow/Kubeflow specifically.", "score": 6 },
+        { "criterionLabel": "Strong ML fundamentals", "importance": "must", "matched": "partial", "evidence": "EECS degree + applied ML; describes himself as 'applied not research'.", "score": 6 },
+        { "criterionLabel": "SQL fluency", "importance": "must", "matched": "yes", "evidence": "PostgreSQL + Kafka core to Outcrop and Skyfire roles.", "score": 9 },
+        { "criterionLabel": "Cloud platforms (AWS/GCP)", "importance": "strong", "matched": "yes", "evidence": "GCP listed; Skyfire stack is GCP-based.", "score": 9 },
+        { "criterionLabel": "Distributed systems", "importance": "strong", "matched": "yes", "evidence": "Owned billing service migration to microservices; Kafka experience.", "score": 9 },
+        { "criterionLabel": "BS/MS Computer Science", "importance": "strong", "matched": "yes", "evidence": "UC Berkeley B.S. EECS (2017).", "score": 10 }
+      ],
+      "coverLetter": "Hi — found the posting via a friend at Yuvabe. My background is more 'engineer who builds ML infrastructure' than 'ML scientist', so I want to be upfront: I haven't shipped LLM products yet, but I've built feature stores and inference pipelines from scratch and would close the LLM-specific gap quickly. Happy to talk if that profile is interesting.",
+      "receivedAt": "2026-04-28T14:22:11.000Z",
+      "status": "reviewing"
+    },
+    {
+      "id": "app_AIEN9X_theo",
+      "jobId": "job_aieng_001",
+      "jobCode": "AIEN9X",
+      "candidateId": "c_theo_andersson",
+      "matchScore": 73,
+      "matchSummary": "Theo is research-strong (KTH M.Sc., one NeurIPS workshop paper, CUDA kernel work) but lighter on years and on production MLOps tooling. The LLM coding-assistant experience is highly relevant. Trade-off: depth on transformers vs. breadth on production maturity.",
+      "matchBreakdown": [
+        { "criterionLabel": "5+ years Python", "importance": "must", "matched": "partial", "evidence": "3 years professional + research years at KTH; below 5y bar.", "score": 6 },
+        { "criterionLabel": "PyTorch or TensorFlow", "importance": "must", "matched": "yes", "evidence": "PyTorch + JAX in current role; CUDA-level depth.", "score": 10 },
+        { "criterionLabel": "LLM application experience", "importance": "must", "matched": "yes", "evidence": "Inference team at Liquid Compute (coding-assistant product).", "score": 9 },
+        { "criterionLabel": "Production ML deployment", "importance": "must", "matched": "yes", "evidence": "Optimized CUDA kernels for production inference; 30% cost reduction.", "score": 8 },
+        { "criterionLabel": "MLOps tooling", "importance": "must", "matched": "partial", "evidence": "Mentioned Argo + basic K8s; no MLflow/Kubeflow exposure.", "score": 5 },
+        { "criterionLabel": "Strong ML fundamentals", "importance": "must", "matched": "yes", "evidence": "KTH M.Sc. ML + NeurIPS '24 workshop co-authorship.", "score": 10 },
+        { "criterionLabel": "SQL fluency", "importance": "must", "matched": "no", "evidence": "No SQL or database tooling listed in skills.", "score": 2 },
+        { "criterionLabel": "Cloud platforms (AWS/GCP)", "importance": "strong", "matched": "yes", "evidence": "GCP listed.", "score": 7 },
+        { "criterionLabel": "BS/MS Computer Science", "importance": "strong", "matched": "yes", "evidence": "M.Sc. ML from KTH (2022).", "score": 10 },
+        { "criterionLabel": "Publications or talks", "importance": "nice", "matched": "yes", "evidence": "NeurIPS '24 workshop paper co-author.", "score": 9 }
+      ],
+      "coverLetter": "I came across Yuvabe through the open-source ML community in Stockholm. I've been wanting to move to a smaller team where I can own more of the stack — at Liquid I optimize kernels in a slice of someone else's pipeline. I'm aware my professional years are below the listed bar; happy to discuss whether the transformer / inference depth offsets that.",
+      "receivedAt": "2026-04-28T09:01:08.000Z",
+      "status": "reviewing"
+    },
+    {
+      "id": "app_AIEN9X_daniel",
+      "jobId": "job_aieng_001",
+      "jobCode": "AIEN9X",
+      "candidateId": "c_daniel_okafor",
+      "matchScore": 61,
+      "matchSummary": "Daniel has strong Python + FastAPI fundamentals and applied ML at his fintech (scikit-learn fraud detection) but no PyTorch/TensorFlow or LLM experience. Solid backend-with-ML profile — would be a stretch for this role; better fit for a backend-leaning ML role.",
+      "matchBreakdown": [
+        { "criterionLabel": "5+ years Python", "importance": "must", "matched": "partial", "evidence": "4 years professional Python; just below the 5y bar.", "score": 7 },
+        { "criterionLabel": "PyTorch or TensorFlow", "importance": "must", "matched": "no", "evidence": "scikit-learn only; no DL framework experience listed.", "score": 1 },
+        { "criterionLabel": "LLM application experience", "importance": "must", "matched": "no", "evidence": "No LLM or generative AI experience listed.", "score": 0 },
+        { "criterionLabel": "Production ML deployment", "importance": "must", "matched": "yes", "evidence": "Fraud-detection pipeline processing 50K transactions/day.", "score": 7 },
+        { "criterionLabel": "MLOps tooling", "importance": "must", "matched": "partial", "evidence": "Airflow for ETL; no model-registry tooling mentioned.", "score": 4 },
+        { "criterionLabel": "Strong ML fundamentals", "importance": "must", "matched": "partial", "evidence": "Applied classification only; depth unclear.", "score": 5 },
+        { "criterionLabel": "SQL fluency", "importance": "must", "matched": "yes", "evidence": "PostgreSQL core to current role.", "score": 9 },
+        { "criterionLabel": "Cloud platforms (AWS/GCP)", "importance": "strong", "matched": "yes", "evidence": "AWS Lambda in current stack.", "score": 7 },
+        { "criterionLabel": "BS/MS Computer Science", "importance": "strong", "matched": "yes", "evidence": "University of Lagos, B.Sc. CS (2021).", "score": 8 }
+      ],
+      "coverLetter": "I'm interested in transitioning into AI engineering and Yuvabe seems like the kind of place where that move is possible. My ML experience is currently shallow — production scikit-learn at a fintech. I'd appreciate the chance to discuss whether you'd consider someone strong on backend who's growing into ML.",
+      "receivedAt": "2026-04-27T18:47:55.000Z",
+      "status": "reviewing"
+    },
+    {
+      "id": "app_AIEN9X_jia",
+      "jobId": "job_aieng_001",
+      "jobCode": "AIEN9X",
+      "candidateId": "c_jia_wen_liu",
+      "matchScore": 38,
+      "matchSummary": "Jia is an SRE with strong ops fundamentals but no production ML experience. Coursera ML courses noted but no professional application of ML. Significant skills gap for the must-haves.",
+      "matchBreakdown": [
+        { "criterionLabel": "5+ years Python", "importance": "must", "matched": "partial", "evidence": "2 years professional Python.", "score": 4 },
+        { "criterionLabel": "PyTorch or TensorFlow", "importance": "must", "matched": "no", "evidence": "Not listed in skills or experience.", "score": 0 },
+        { "criterionLabel": "LLM application experience", "importance": "must", "matched": "no", "evidence": "None.", "score": 0 },
+        { "criterionLabel": "Production ML deployment", "importance": "must", "matched": "no", "evidence": "Strong infrastructure experience but no ML in production.", "score": 1 },
+        { "criterionLabel": "MLOps tooling", "importance": "must", "matched": "partial", "evidence": "Terraform + K8s could transfer; no ML-specific tooling.", "score": 3 },
+        { "criterionLabel": "Strong ML fundamentals", "importance": "must", "matched": "no", "evidence": "Two Coursera courses; not professionally applied.", "score": 1 },
+        { "criterionLabel": "SQL fluency", "importance": "must", "matched": "yes", "evidence": "PostgreSQL listed.", "score": 8 },
+        { "criterionLabel": "Cloud platforms (AWS/GCP)", "importance": "strong", "matched": "yes", "evidence": "AWS + Terraform in current role.", "score": 8 },
+        { "criterionLabel": "BS/MS Computer Science", "importance": "strong", "matched": "yes", "evidence": "NUS B.Sc. CS (2023).", "score": 9 }
+      ],
+      "coverLetter": "I want to transition from SRE into ML engineering and would value Yuvabe's mentorship-focused culture. I'm aware my ML experience is academic only — I'm hoping the strong infrastructure and Python foundation makes the conversation worth having.",
+      "receivedAt": "2026-04-27T07:30:00.000Z",
+      "status": "new"
+    },
+    {
+      "id": "app_AIEN9X_lakshmi",
+      "jobId": "job_aieng_001",
+      "jobCode": "AIEN9X",
+      "candidateId": "c_lakshmi_reddy",
+      "matchScore": 24,
+      "matchSummary": "Lakshmi is a junior product designer; no programming or ML background. This appears to be an off-target application — she may have meant to apply to the Product Designer role.",
+      "matchBreakdown": [
+        { "criterionLabel": "5+ years Python", "importance": "must", "matched": "no", "evidence": "No engineering experience.", "score": 0 },
+        { "criterionLabel": "PyTorch or TensorFlow", "importance": "must", "matched": "no", "evidence": "Not in skills.", "score": 0 },
+        { "criterionLabel": "LLM application experience", "importance": "must", "matched": "no", "evidence": "Not in skills.", "score": 0 },
+        { "criterionLabel": "Production ML deployment", "importance": "must", "matched": "no", "evidence": "Not in scope of design work.", "score": 0 },
+        { "criterionLabel": "Strong ML fundamentals", "importance": "must", "matched": "no", "evidence": "Design background only.", "score": 0 },
+        { "criterionLabel": "BS/MS Computer Science", "importance": "strong", "matched": "no", "evidence": "B.Des. UX Design.", "score": 1 }
+      ],
+      "coverLetter": "I'm excited about Yuvabe's work. Applying with my design background — I'd love to learn AI engineering and would bring a unique perspective.",
+      "receivedAt": "2026-04-26T11:42:33.000Z",
+      "status": "rejected"
+    },
+    {
+      "id": "app_AIEN9X_felix",
+      "jobId": "job_aieng_001",
+      "jobCode": "AIEN9X",
+      "candidateId": "c_felix_muller",
+      "matchScore": 26,
+      "matchSummary": "Felix is a marketing analyst with strong SQL but no engineering or ML background. Likely a wrong-role application — would be a strong candidate for the Marketing Specialist posting instead.",
+      "matchBreakdown": [
+        { "criterionLabel": "5+ years Python", "importance": "must", "matched": "no", "evidence": "No Python experience.", "score": 0 },
+        { "criterionLabel": "PyTorch or TensorFlow", "importance": "must", "matched": "no", "evidence": "Not in skills.", "score": 0 },
+        { "criterionLabel": "LLM application experience", "importance": "must", "matched": "no", "evidence": "None.", "score": 0 },
+        { "criterionLabel": "SQL fluency", "importance": "must", "matched": "yes", "evidence": "SQL is core to his analyst role.", "score": 9 },
+        { "criterionLabel": "BS/MS Computer Science", "importance": "strong", "matched": "no", "evidence": "M.Sc. Marketing Analytics.", "score": 2 }
+      ],
+      "coverLetter": "I'm pivoting from marketing analytics into ML. I'm aware this is a stretch.",
+      "receivedAt": "2026-04-25T19:11:09.000Z",
+      "status": "new"
+    },
+
+    {
+      "id": "app_MKTG7P_kabir",
+      "jobId": "job_mktg_002",
+      "jobCode": "MKTG7P",
+      "candidateId": "c_kabir_hassan",
+      "matchScore": 91,
+      "matchSummary": "Kabir is a near-perfect match. Five years of B2B SaaS lead-gen experience with deep LinkedIn Ads expertise (rare). The cost-per-MQL improvement at Roundnet is a concrete, evidenced result. Comfortable with the full stack of platforms and analytics tooling.",
+      "matchBreakdown": [
+        { "criterionLabel": "2-3 years digital marketing", "importance": "must", "matched": "yes", "evidence": "5 years B2B SaaS — exceeds the bar.", "score": 10 },
+        { "criterionLabel": "Hands-on Meta Ads experience", "importance": "must", "matched": "yes", "evidence": "Meta Ads in current and prior roles.", "score": 8 },
+        { "criterionLabel": "Hands-on Google Ads experience", "importance": "must", "matched": "yes", "evidence": "Google Ads is a primary channel at Roundnet.", "score": 10 },
+        { "criterionLabel": "Hands-on LinkedIn Ads experience", "importance": "must", "matched": "yes", "evidence": "LinkedIn is his deepest channel; ABM experience.", "score": 10 },
+        { "criterionLabel": "GA4 and Looker Studio", "importance": "must", "matched": "yes", "evidence": "Both listed in skills.", "score": 9 },
+        { "criterionLabel": "Lead generation results", "importance": "must", "matched": "yes", "evidence": "Drove cost-per-MQL from $94 to $52 at Roundnet.", "score": 10 },
+        { "criterionLabel": "CPC, CPA, CTR, ROAS understanding", "importance": "must", "matched": "yes", "evidence": "Built lead-scoring models; clear performance vocabulary in resume.", "score": 10 },
+        { "criterionLabel": "A/B testing and optimization", "importance": "must", "matched": "yes", "evidence": "Multiple iteration cycles to drop CPL.", "score": 9 },
+        { "criterionLabel": "Basic design skills for creatives", "importance": "must", "matched": "partial", "evidence": "No design tool listed in skills (Canva, Figma).", "score": 5 },
+        { "criterionLabel": "Familiarity with AI marketing tools", "importance": "must", "matched": "partial", "evidence": "Not explicitly mentioned.", "score": 5 },
+        { "criterionLabel": "Client-facing communication", "importance": "must", "matched": "yes", "evidence": "Agency tenure (Pin Agency) implies client-facing role.", "score": 8 },
+        { "criterionLabel": "Marketing automation / CRM", "importance": "nice", "matched": "yes", "evidence": "HubSpot + Salesforce both listed.", "score": 10 },
+        { "criterionLabel": "SEO and content marketing", "importance": "nice", "matched": "no", "evidence": "Not in primary skills.", "score": 2 },
+        { "criterionLabel": "Startup or agency experience", "importance": "nice", "matched": "yes", "evidence": "3 years at Pin Agency on B2B SaaS clients.", "score": 10 }
+      ],
+      "coverLetter": "I'm leaving Roundnet because I want to apply what I've learned at a smaller, faster-moving organization where the loop between campaign and learning is shorter. Yuvabe's outcome-focused framing on the JD is exactly the language I use internally about my own work. I'd be happy to walk through the lead-scoring models I've built and how they'd transfer.",
+      "receivedAt": "2026-04-29T13:55:42.000Z",
+      "status": "shortlisted"
+    },
+    {
+      "id": "app_MKTG7P_james",
+      "jobId": "job_mktg_002",
+      "jobCode": "MKTG7P",
+      "candidateId": "c_james_patel",
+      "matchScore": 84,
+      "matchSummary": "James is strong on DTC e-commerce with $2M/quarter spend management and a documented ROAS lift. Slightly under-indexed on LinkedIn Ads (less of a DTC channel) and on B2B-style lead generation. Excellent client communication signal from agency tenure.",
+      "matchBreakdown": [
+        { "criterionLabel": "2-3 years digital marketing", "importance": "must", "matched": "yes", "evidence": "7 years — comfortably above bar.", "score": 10 },
+        { "criterionLabel": "Hands-on Meta Ads experience", "importance": "must", "matched": "yes", "evidence": "Primary channel for DTC work; at scale.", "score": 10 },
+        { "criterionLabel": "Hands-on Google Ads experience", "importance": "must", "matched": "yes", "evidence": "Listed in skills; managed at $2M/quarter.", "score": 10 },
+        { "criterionLabel": "Hands-on LinkedIn Ads experience", "importance": "must", "matched": "partial", "evidence": "Self-described 'less LinkedIn Ads exposure than other platforms'.", "score": 5 },
+        { "criterionLabel": "GA4 and Looker Studio", "importance": "must", "matched": "yes", "evidence": "Both listed.", "score": 9 },
+        { "criterionLabel": "Lead generation results", "importance": "must", "matched": "partial", "evidence": "DTC = sales not lead gen; ROAS metric is purchase-based.", "score": 6 },
+        { "criterionLabel": "CPC, CPA, CTR, ROAS understanding", "importance": "must", "matched": "yes", "evidence": "Lifted ROAS 2.1 → 3.4; clear command of metrics.", "score": 10 },
+        { "criterionLabel": "A/B testing and optimization", "importance": "must", "matched": "yes", "evidence": "Creative testing as primary lever.", "score": 9 },
+        { "criterionLabel": "Basic design skills for creatives", "importance": "must", "matched": "partial", "evidence": "Owns creative testing; design tools not in skills list.", "score": 6 },
+        { "criterionLabel": "Familiarity with AI marketing tools", "importance": "must", "matched": "partial", "evidence": "Not explicitly mentioned.", "score": 5 },
+        { "criterionLabel": "Client-facing communication", "importance": "must", "matched": "yes", "evidence": "4 years at Beam Agency; led monthly business reviews.", "score": 10 },
+        { "criterionLabel": "Marketing automation / CRM", "importance": "nice", "matched": "yes", "evidence": "Klaviyo + HubSpot listed.", "score": 9 },
+        { "criterionLabel": "Startup or agency experience", "importance": "nice", "matched": "yes", "evidence": "4 years at Beam Agency.", "score": 10 }
+      ],
+      "coverLetter": "After seven years in DTC, I'm looking to apply what I've learned about creative-led performance to a B2B context. Yuvabe's range across initiatives + clients is appealing — agency-like variety inside a single team. I'm aware LinkedIn isn't my deepest channel; I closed that gap on my last LinkedIn-led campaign.",
+      "receivedAt": "2026-04-29T10:18:20.000Z",
+      "status": "reviewing"
+    },
+    {
+      "id": "app_MKTG7P_saanvi",
+      "jobId": "job_mktg_002",
+      "jobCode": "MKTG7P",
+      "candidateId": "c_saanvi_reddy",
+      "matchScore": 74,
+      "matchSummary": "Saanvi is a true 2-3 year fit (the lower bound of the JD's experience requirement). Hands-on across Meta + Google with measurable lead-gen results. Less LinkedIn exposure but B2B SaaS instincts already developed at Elsewhere.",
+      "matchBreakdown": [
+        { "criterionLabel": "2-3 years digital marketing", "importance": "must", "matched": "yes", "evidence": "4 years — comfortably above the lower bar.", "score": 9 },
+        { "criterionLabel": "Hands-on Meta Ads experience", "importance": "must", "matched": "yes", "evidence": "Listed; primary channel at Curio Media.", "score": 8 },
+        { "criterionLabel": "Hands-on Google Ads experience", "importance": "must", "matched": "yes", "evidence": "Listed; used at both roles.", "score": 8 },
+        { "criterionLabel": "Hands-on LinkedIn Ads experience", "importance": "must", "matched": "no", "evidence": "Not in skills; B2B at Elsewhere is mostly content + email.", "score": 2 },
+        { "criterionLabel": "GA4 and Looker Studio", "importance": "must", "matched": "partial", "evidence": "GA4 yes; Looker Studio not mentioned.", "score": 6 },
+        { "criterionLabel": "Lead generation results", "importance": "must", "matched": "yes", "evidence": "300+ qualified leads in last quarter at Elsewhere.", "score": 9 },
+        { "criterionLabel": "CPC, CPA, CTR, ROAS understanding", "importance": "must", "matched": "yes", "evidence": "Implied from Curio role + lead-gen accountability.", "score": 7 },
+        { "criterionLabel": "A/B testing and optimization", "importance": "must", "matched": "yes", "evidence": "'A/B testing discipline' explicitly mentioned at Curio.", "score": 8 },
+        { "criterionLabel": "Basic design skills for creatives", "importance": "must", "matched": "yes", "evidence": "Canva listed; creative iteration in B2B SaaS context.", "score": 8 },
+        { "criterionLabel": "Familiarity with AI marketing tools", "importance": "must", "matched": "yes", "evidence": "ChatGPT for ad copy explicitly mentioned.", "score": 8 },
+        { "criterionLabel": "Client-facing communication", "importance": "must", "matched": "partial", "evidence": "Internal-facing roles; no agency-style client work.", "score": 5 },
+        { "criterionLabel": "Startup or agency experience", "importance": "nice", "matched": "yes", "evidence": "Elsewhere is a B2B SaaS startup.", "score": 9 }
+      ],
+      "coverLetter": "I'm at the right point in my career to take on more end-to-end ownership of a paid program — at Elsewhere I do that informally but the title doesn't match. Yuvabe's role description maps well to what I'm already doing. I'd want to grow into LinkedIn Ads which is a clear gap in my profile.",
+      "receivedAt": "2026-04-28T17:40:11.000Z",
+      "status": "reviewing"
+    },
+    {
+      "id": "app_MKTG7P_amina",
+      "jobId": "job_mktg_002",
+      "jobCode": "MKTG7P",
+      "candidateId": "c_amina_diallo",
+      "matchScore": 66,
+      "matchSummary": "Amina is content-strong with editorial depth but lighter on the paid-acquisition side that this role centers on. Strong AI tools familiarity. Would be a brilliant content hire; this role's heavy paid-channel requirement makes the fit imperfect.",
+      "matchBreakdown": [
+        { "criterionLabel": "2-3 years digital marketing", "importance": "must", "matched": "partial", "evidence": "6 years content-side; less direct campaign management.", "score": 6 },
+        { "criterionLabel": "Hands-on Meta Ads experience", "importance": "must", "matched": "no", "evidence": "Only boosted-post experience; no campaign manager work.", "score": 2 },
+        { "criterionLabel": "Hands-on Google Ads experience", "importance": "must", "matched": "no", "evidence": "Not in skills.", "score": 1 },
+        { "criterionLabel": "Hands-on LinkedIn Ads experience", "importance": "must", "matched": "no", "evidence": "Not in skills.", "score": 1 },
+        { "criterionLabel": "GA4 and Looker Studio", "importance": "must", "matched": "partial", "evidence": "Used GA in editorial reporting; Looker Studio unclear.", "score": 5 },
+        { "criterionLabel": "Lead generation results", "importance": "must", "matched": "partial", "evidence": "Content-driven leads at Lattice; not direct response paid.", "score": 5 },
+        { "criterionLabel": "Familiarity with AI marketing tools", "importance": "must", "matched": "yes", "evidence": "Implied from content workflow at Lattice (3-5 long-form pieces/month).", "score": 8 },
+        { "criterionLabel": "Client-facing communication", "importance": "must", "matched": "yes", "evidence": "3 B2B SaaS clients at Lattice.", "score": 9 },
+        { "criterionLabel": "SEO and content marketing", "importance": "nice", "matched": "yes", "evidence": "Core competency; SEO in skills.", "score": 10 },
+        { "criterionLabel": "Startup or agency experience", "importance": "nice", "matched": "yes", "evidence": "Lattice is an agency.", "score": 9 }
+      ],
+      "coverLetter": "I'm a content strategist applying because I've been adjacent to performance for three years and want to own more of the funnel. I know the JD reads paid-heavy; my pitch is that good content is a missing piece in most performance programs and I'd grow into the paid channels.",
+      "receivedAt": "2026-04-28T08:22:45.000Z",
+      "status": "reviewing"
+    },
+    {
+      "id": "app_MKTG7P_felix",
+      "jobId": "job_mktg_002",
+      "jobCode": "MKTG7P",
+      "candidateId": "c_felix_muller",
+      "matchScore": 58,
+      "matchSummary": "Felix is junior — 2 years of marketing analytics, light on hands-on campaign execution. Strong on the reporting layer (GA4, Looker Studio, SQL) but hasn't owned a paid budget. Could grow into the role if hired junior.",
+      "matchBreakdown": [
+        { "criterionLabel": "2-3 years digital marketing", "importance": "must", "matched": "yes", "evidence": "2 years — at the lower bar.", "score": 7 },
+        { "criterionLabel": "Hands-on Meta Ads experience", "importance": "must", "matched": "no", "evidence": "Reporting role; not campaign manager.", "score": 2 },
+        { "criterionLabel": "Hands-on Google Ads experience", "importance": "must", "matched": "partial", "evidence": "Basic exposure listed; not primary responsibility.", "score": 4 },
+        { "criterionLabel": "Hands-on LinkedIn Ads experience", "importance": "must", "matched": "no", "evidence": "Not listed.", "score": 1 },
+        { "criterionLabel": "GA4 and Looker Studio", "importance": "must", "matched": "yes", "evidence": "Built the org's GA4 + Looker Studio dashboard.", "score": 10 },
+        { "criterionLabel": "Lead generation results", "importance": "must", "matched": "no", "evidence": "Reports on leads but does not generate them directly.", "score": 3 },
+        { "criterionLabel": "CPC, CPA, CTR, ROAS understanding", "importance": "must", "matched": "yes", "evidence": "Strong analyst-level command from reporting role.", "score": 8 },
+        { "criterionLabel": "A/B testing and optimization", "importance": "must", "matched": "partial", "evidence": "Reads results; doesn't run them himself.", "score": 4 }
+      ],
+      "coverLetter": "I'd like to move from analyst into a hands-on marketing role and Yuvabe's smaller-team setup looks like the right place to make the jump. I bring strong reporting + SQL chops; I'd need ramp time on hands-on paid execution.",
+      "receivedAt": "2026-04-27T16:09:33.000Z",
+      "status": "new"
+    },
+    {
+      "id": "app_MKTG7P_marcus",
+      "jobId": "job_mktg_002",
+      "jobCode": "MKTG7P",
+      "candidateId": "c_marcus_chen",
+      "matchScore": 32,
+      "matchSummary": "Marcus is an engineer with no marketing background. Off-target application — likely speculative.",
+      "matchBreakdown": [
+        { "criterionLabel": "2-3 years digital marketing", "importance": "must", "matched": "no", "evidence": "8 years engineering, zero marketing.", "score": 0 },
+        { "criterionLabel": "Hands-on Meta Ads experience", "importance": "must", "matched": "no", "evidence": "None.", "score": 0 },
+        { "criterionLabel": "Hands-on Google Ads experience", "importance": "must", "matched": "no", "evidence": "None.", "score": 0 },
+        { "criterionLabel": "Familiarity with AI marketing tools", "importance": "must", "matched": "partial", "evidence": "Engineering background gives general AI-tools fluency.", "score": 4 }
+      ],
+      "coverLetter": "I'm interested in a career change. Strong engineering background; willing to learn marketing.",
+      "receivedAt": "2026-04-26T22:11:00.000Z",
+      "status": "new"
+    },
+    {
+      "id": "app_MKTG7P_priya",
+      "jobId": "job_mktg_002",
+      "jobCode": "MKTG7P",
+      "candidateId": "c_priya_sharma",
+      "matchScore": 28,
+      "matchSummary": "Priya is a product designer; no marketing experience. Likely meant to apply to the Product Designer role.",
+      "matchBreakdown": [
+        { "criterionLabel": "2-3 years digital marketing", "importance": "must", "matched": "no", "evidence": "Design background only.", "score": 0 },
+        { "criterionLabel": "Hands-on Meta Ads experience", "importance": "must", "matched": "no", "evidence": "Not in scope of design work.", "score": 0 },
+        { "criterionLabel": "Basic design skills for creatives", "importance": "must", "matched": "yes", "evidence": "Strong Figma/Sketch fundamentals — only criterion she meets.", "score": 8 }
+      ],
+      "coverLetter": "Applying with a design background.",
+      "receivedAt": "2026-04-26T14:00:18.000Z",
+      "status": "rejected"
+    },
+
+    {
+      "id": "app_PDDS4M_noah",
+      "jobId": "job_pdds_003",
+      "jobCode": "PDDS4M",
+      "candidateId": "c_noah_levy",
+      "matchScore": 92,
+      "matchSummary": "Noah is the strongest candidate of the cohort. Eight years across consumer and B2B, founding designer who built an 80-component design system from scratch, and deeply code-aware (writes the Figma → Tailwind token pipeline himself). Time-zone overlap from NY is workable.",
+      "matchBreakdown": [
+        { "criterionLabel": "4+ years UX/UI design", "importance": "must", "matched": "yes", "evidence": "8 years across Vox Media and current role.", "score": 10 },
+        { "criterionLabel": "Figma proficiency", "importance": "must", "matched": "yes", "evidence": "Built 80+ component library; uses variables.", "score": 10 },
+        { "criterionLabel": "Design systems experience", "importance": "must", "matched": "yes", "evidence": "Built current design system from zero; serves 30+ engineers.", "score": 10 },
+        { "criterionLabel": "User research & testing", "importance": "must", "matched": "yes", "evidence": "Implied from senior-IC tenure; Vox Media work was research-heavy.", "score": 8 },
+        { "criterionLabel": "Prototyping for flows", "importance": "must", "matched": "yes", "evidence": "Framer + Figma prototyping listed.", "score": 9 },
+        { "criterionLabel": "Visual design fundamentals", "importance": "must", "matched": "yes", "evidence": "Cooper Union B.F.A.; portfolio strong.", "score": 10 },
+        { "criterionLabel": "Cross-functional collaboration", "importance": "strong", "matched": "yes", "evidence": "Owns the design-engineering bridge at current role.", "score": 10 },
+        { "criterionLabel": "Front-end awareness (HTML/CSS)", "importance": "strong", "matched": "yes", "evidence": "Tailwind in skills; ships token pipeline himself.", "score": 10 },
+        { "criterionLabel": "Bachelor's in Design / HCI", "importance": "strong", "matched": "yes", "evidence": "Cooper Union B.F.A. Communication Design (2017).", "score": 10 },
+        { "criterionLabel": "Motion design", "importance": "nice", "matched": "yes", "evidence": "Lottie listed.", "score": 8 },
+        { "criterionLabel": "Accessibility (WCAG)", "importance": "nice", "matched": "partial", "evidence": "Not explicitly mentioned.", "score": 4 }
+      ],
+      "coverLetter": "I've watched Yuvabe from afar for a year. The culture line about 'measurable outcomes, not vanity metrics' reads accurate — most design teams I've worked with say it and few mean it. I'm at a point where I want to design for products with longer time horizons. Time-zone overlap with India is workable from NY; I've done 4 years remote with India teams.",
+      "receivedAt": "2026-04-29T20:33:04.000Z",
+      "status": "shortlisted"
+    },
+    {
+      "id": "app_PDDS4M_yara",
+      "jobId": "job_pdds_003",
+      "jobCode": "PDDS4M",
+      "candidateId": "c_yara_costa",
+      "matchScore": 86,
+      "matchSummary": "Yara is the textbook 'sole designer at a small startup who built the system from scratch' profile — exactly the muscle Yuvabe is hiring for. Strong on systems thinking and embedded research practice. Less front-end experience than Noah but more lived experience as a sole designer.",
+      "matchBreakdown": [
+        { "criterionLabel": "4+ years UX/UI design", "importance": "must", "matched": "yes", "evidence": "4 years — at the bar.", "score": 8 },
+        { "criterionLabel": "Figma proficiency", "importance": "must", "matched": "yes", "evidence": "Strong with Figma variables.", "score": 9 },
+        { "criterionLabel": "Design systems experience", "importance": "must", "matched": "yes", "evidence": "Built Mosaic Edu's system from scratch (variables + tokens).", "score": 10 },
+        { "criterionLabel": "User research & testing", "importance": "must", "matched": "yes", "evidence": "Monthly research interviews with teachers — embedded practice.", "score": 9 },
+        { "criterionLabel": "Prototyping for flows", "importance": "must", "matched": "yes", "evidence": "Listed; implied from sole-designer role.", "score": 8 },
+        { "criterionLabel": "Visual design fundamentals", "importance": "must", "matched": "yes", "evidence": "FAAP Bachelor of Design.", "score": 9 },
+        { "criterionLabel": "Cross-functional collaboration", "importance": "strong", "matched": "yes", "evidence": "Sole designer in 30-person org by definition.", "score": 9 },
+        { "criterionLabel": "Front-end awareness (HTML/CSS)", "importance": "strong", "matched": "no", "evidence": "Not in skills; would be a development area.", "score": 3 },
+        { "criterionLabel": "Bachelor's in Design / HCI", "importance": "strong", "matched": "yes", "evidence": "FAAP Bachelor of Design (2021).", "score": 10 },
+        { "criterionLabel": "Motion design", "importance": "nice", "matched": "yes", "evidence": "Lottie listed in skills.", "score": 8 }
+      ],
+      "coverLetter": "Working alone on Mosaic Edu has taught me what I want next: a small team where I'm not the only designer, where the standards are already high, and where I can specialize a bit. Yuvabe sounded right when I read the JD twice. The Auroville-or-remote setup works for me from São Paulo.",
+      "receivedAt": "2026-04-29T11:12:50.000Z",
+      "status": "shortlisted"
+    },
+    {
+      "id": "app_PDDS4M_priya",
+      "jobId": "job_pdds_003",
+      "jobCode": "PDDS4M",
+      "candidateId": "c_priya_sharma",
+      "matchScore": 78,
+      "matchSummary": "Priya is a strong fit on the core craft — 5 years, design system at Plumb, weekly research practice. Less code-fluent than Noah but already in HTML/CSS territory. Mumbai-based which simplifies coordination.",
+      "matchBreakdown": [
+        { "criterionLabel": "4+ years UX/UI design", "importance": "must", "matched": "yes", "evidence": "5 years across Plumb and Wedge.", "score": 9 },
+        { "criterionLabel": "Figma proficiency", "importance": "must", "matched": "yes", "evidence": "Owns 40-component design system at Plumb.", "score": 9 },
+        { "criterionLabel": "Design systems experience", "importance": "must", "matched": "yes", "evidence": "40+ component system; ongoing maintenance.", "score": 9 },
+        { "criterionLabel": "User research & testing", "importance": "must", "matched": "yes", "evidence": "Weekly usability testing — strong practice.", "score": 10 },
+        { "criterionLabel": "Prototyping for flows", "importance": "must", "matched": "yes", "evidence": "Listed; uses Framer.", "score": 9 },
+        { "criterionLabel": "Visual design fundamentals", "importance": "must", "matched": "yes", "evidence": "NID Ahmedabad B.Des.", "score": 9 },
+        { "criterionLabel": "Cross-functional collaboration", "importance": "strong", "matched": "yes", "evidence": "B2B onboarding flows imply heavy PM + eng collaboration.", "score": 9 },
+        { "criterionLabel": "Front-end awareness (HTML/CSS)", "importance": "strong", "matched": "yes", "evidence": "HTML/CSS + Tailwind in skills; reads React.", "score": 8 },
+        { "criterionLabel": "Bachelor's in Design / HCI", "importance": "strong", "matched": "yes", "evidence": "NID Ahmedabad B.Des. Communication Design.", "score": 10 }
+      ],
+      "coverLetter": "I'm a designer at Plumb ready for a smaller team where I can shape the design culture more directly. The Yuvabe writing on the JD is unusually thoughtful — I want to work somewhere that bothers to write a JD like that. Open to Auroville with periodic Mumbai trips.",
+      "receivedAt": "2026-04-28T19:40:21.000Z",
+      "status": "reviewing"
+    },
+    {
+      "id": "app_PDDS4M_lakshmi",
+      "jobId": "job_pdds_003",
+      "jobCode": "PDDS4M",
+      "candidateId": "c_lakshmi_reddy",
+      "matchScore": 56,
+      "matchSummary": "Lakshmi is junior — 2 years agency. Solid Figma fundamentals but no design-system or research experience yet. Would be a stretch for the senior bar; better hire for a junior role.",
+      "matchBreakdown": [
+        { "criterionLabel": "4+ years UX/UI design", "importance": "must", "matched": "partial", "evidence": "2 years; below the 4y bar.", "score": 4 },
+        { "criterionLabel": "Figma proficiency", "importance": "must", "matched": "yes", "evidence": "Listed; agency work implies daily use.", "score": 8 },
+        { "criterionLabel": "Design systems experience", "importance": "must", "matched": "no", "evidence": "Not mentioned in resume.", "score": 2 },
+        { "criterionLabel": "User research & testing", "importance": "must", "matched": "partial", "evidence": "Listed 'basics' only.", "score": 4 },
+        { "criterionLabel": "Prototyping for flows", "importance": "must", "matched": "yes", "evidence": "Listed.", "score": 7 },
+        { "criterionLabel": "Visual design fundamentals", "importance": "must", "matched": "yes", "evidence": "Srishti B.Des.", "score": 8 },
+        { "criterionLabel": "Cross-functional collaboration", "importance": "strong", "matched": "partial", "evidence": "Agency setting limits exposure to in-house collaboration patterns.", "score": 5 },
+        { "criterionLabel": "Bachelor's in Design / HCI", "importance": "strong", "matched": "yes", "evidence": "Srishti B.Des. UX Design (2023).", "score": 10 }
+      ],
+      "coverLetter": "I'd love to work at Yuvabe. I know I'm under the experience bar — I'm applying anyway because the brief reads like a place worth growing inside.",
+      "receivedAt": "2026-04-27T13:55:30.000Z",
+      "status": "reviewing"
+    },
+    {
+      "id": "app_PDDS4M_riya",
+      "jobId": "job_pdds_003",
+      "jobCode": "PDDS4M",
+      "candidateId": "c_riya_joshi",
+      "matchScore": 41,
+      "matchSummary": "Riya is a recent grad with 1 year of internship + freelance. Strong portfolio but no production design-system or research practice. Significant gap to the 4-year bar; better hire for a junior or design-intern role.",
+      "matchBreakdown": [
+        { "criterionLabel": "4+ years UX/UI design", "importance": "must", "matched": "no", "evidence": "1 year — well below the bar.", "score": 2 },
+        { "criterionLabel": "Figma proficiency", "importance": "must", "matched": "yes", "evidence": "Listed; portfolio work in Figma.", "score": 7 },
+        { "criterionLabel": "Design systems experience", "importance": "must", "matched": "no", "evidence": "Not mentioned.", "score": 1 },
+        { "criterionLabel": "User research & testing", "importance": "must", "matched": "no", "evidence": "Not mentioned.", "score": 1 },
+        { "criterionLabel": "Prototyping for flows", "importance": "must", "matched": "partial", "evidence": "Wireframing listed; production prototyping unclear.", "score": 4 },
+        { "criterionLabel": "Visual design fundamentals", "importance": "must", "matched": "yes", "evidence": "Srishti B.Des.; portfolio strong.", "score": 8 },
+        { "criterionLabel": "Bachelor's in Design / HCI", "importance": "strong", "matched": "yes", "evidence": "Srishti B.Des. Visual Communication (2025).", "score": 9 }
+      ],
+      "coverLetter": "I just graduated from Srishti and I'm applying because the work looks meaningful. I know I'm a stretch — I'd be open to a junior or apprenticeship role too.",
+      "receivedAt": "2026-04-26T09:30:12.000Z",
+      "status": "new"
+    },
+    {
+      "id": "app_PDDS4M_james",
+      "jobId": "job_pdds_003",
+      "jobCode": "PDDS4M",
+      "candidateId": "c_james_patel",
+      "matchScore": 22,
+      "matchSummary": "James is a marketer; no design background. Off-target application.",
+      "matchBreakdown": [
+        { "criterionLabel": "4+ years UX/UI design", "importance": "must", "matched": "no", "evidence": "Marketing background.", "score": 0 },
+        { "criterionLabel": "Figma proficiency", "importance": "must", "matched": "no", "evidence": "Not in skills.", "score": 0 },
+        { "criterionLabel": "Visual design fundamentals", "importance": "must", "matched": "partial", "evidence": "Creative-direction exposure from DTC ads work.", "score": 4 }
+      ],
+      "coverLetter": "Applying because I'm interested in design-led marketing.",
+      "receivedAt": "2026-04-25T14:18:00.000Z",
+      "status": "rejected"
+    },
+    {
+      "id": "app_PDDS4M_daniel",
+      "jobId": "job_pdds_003",
+      "jobCode": "PDDS4M",
+      "candidateId": "c_daniel_okafor",
+      "matchScore": 19,
+      "matchSummary": "Daniel is an engineer; no design background. Off-target application.",
+      "matchBreakdown": [
+        { "criterionLabel": "4+ years UX/UI design", "importance": "must", "matched": "no", "evidence": "Backend engineer.", "score": 0 },
+        { "criterionLabel": "Figma proficiency", "importance": "must", "matched": "no", "evidence": "Not in skills.", "score": 0 },
+        { "criterionLabel": "Front-end awareness (HTML/CSS)", "importance": "strong", "matched": "yes", "evidence": "FastAPI implies basic HTML knowledge.", "score": 3 }
+      ],
+      "coverLetter": "I'd like to learn design.",
+      "receivedAt": "2026-04-25T11:00:00.000Z",
+      "status": "rejected"
+    }
+  ]
+}

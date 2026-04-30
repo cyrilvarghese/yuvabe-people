@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { listJobs, type Job } from "@/lib/jobs-store";
+import { listApplications } from "@/lib/applications-store";
 import { ArrowUpRight, Plus } from "lucide-react";
 import NavTabClient from "./_components/nav-tab";
 
@@ -74,6 +75,13 @@ export default async function JobsPage({
   const jobs = await listJobs();
   const count = jobs.length;
 
+  // Cross-reference applications so each row shows its application count.
+  const allApplications = await listApplications();
+  const appsByJobCode = new Map<string, number>();
+  for (const a of allApplications) {
+    appsByJobCode.set(a.jobCode, (appsByJobCode.get(a.jobCode) ?? 0) + 1);
+  }
+
   return (
     <div className="h-screen flex flex-col overflow-hidden bg-background">
       {/* —————— Sticky header — brand + tabs —————— */}
@@ -83,7 +91,7 @@ export default async function JobsPage({
             <span className="font-serif italic text-lg leading-none">
               Yuvabe
             </span>
-            <span className="text-muted-foreground/60">/</span>
+            <span className="text-muted-foreground">/</span>
             <Eyebrow>ATS</Eyebrow>
           </div>
           <Eyebrow>
@@ -117,7 +125,7 @@ export default async function JobsPage({
               </Link>
             </div>
             {count > 0 && (
-              <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground/70 tabular">
+              <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground tabular">
                 {String(count).padStart(2, "0")} {count === 1 ? "role" : "roles"} posted &nbsp;·&nbsp; sorted by newest
               </p>
             )}
@@ -132,69 +140,83 @@ export default async function JobsPage({
                 {jobs.map((job, idx) => {
                   const counts = importanceCounts(job.criteria);
                   const isNew = job.code === newCode;
+                  const appCount = appsByJobCode.get(job.code) ?? 0;
                   return (
                     <li
                       key={job.id}
                       className={`
-                        group border-b border-border/60 last:border-b-0 py-6
+                        group border-b border-border/60 last:border-b-0
                         ${idx === 0 ? "border-t border-border/60" : ""}
-                        ${isNew ? "highlight-new -mx-4 px-4 rounded-sm" : ""}
+                        ${isNew ? "highlight-new" : ""}
                       `}
                     >
-                      <div className="flex items-baseline justify-between gap-6">
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-baseline gap-3 mb-2">
-                            <h3 className="font-serif italic text-2xl leading-tight tracking-tight truncate">
-                              {job.title}
-                            </h3>
-                            {isNew && (
-                              <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-primary flex-shrink-0">
-                                ← just saved
+                      <Link
+                        href={`/jobs/${job.code}`}
+                        className="block py-6 -mx-4 px-4 rounded-sm hover:bg-secondary/40 transition-colors"
+                      >
+                        <div className="flex items-baseline justify-between gap-6">
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-baseline gap-3 mb-2">
+                              <h3 className="font-serif italic text-2xl leading-tight tracking-tight truncate">
+                                {job.title}
+                              </h3>
+                              {isNew && (
+                                <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-primary flex-shrink-0">
+                                  ← just saved
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-4 flex-wrap">
+                              <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-primary tabular">
+                                [JOB-{job.code}]
                               </span>
-                            )}
+                              <span className="text-border">·</span>
+                              <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground tabular">
+                                {String(job.criteria.length).padStart(2, "0")}{" "}
+                                criteria
+                              </span>
+                              <span className="text-muted-foreground/60">·</span>
+                              <span className="font-mono text-[10px] uppercase tracking-[0.14em] tabular">
+                                <span className="text-primary">
+                                  {String(counts.must).padStart(2, "0")} must
+                                </span>
+                                <span className="text-muted-foreground/60 mx-1.5">·</span>
+                                <span className="text-foreground">
+                                  {String(counts.strong).padStart(2, "0")} strong
+                                </span>
+                                <span className="text-muted-foreground/60 mx-1.5">·</span>
+                                <span className="text-muted-foreground">
+                                  {String(counts.nice).padStart(2, "0")} nice
+                                </span>
+                              </span>
+                            </div>
                           </div>
-                          <div className="flex items-center gap-4 flex-wrap">
-                            <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-primary tabular">
-                              [JOB-{job.code}]
+                          <div className="flex items-center gap-5 flex-shrink-0">
+                            <div className="text-right leading-none">
+                              <span
+                                className={`font-mono text-[15px] tabular block ${
+                                  appCount > 0 ? "text-foreground" : "text-muted-foreground/70"
+                                }`}
+                              >
+                                {String(appCount).padStart(2, "0")}
+                              </span>
+                              <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-muted-foreground mt-1.5 block">
+                                {appCount === 1 ? "applicant" : "applicants"}
+                              </span>
+                            </div>
+                            <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                              {relativeTime(job.createdAt)}
                             </span>
-                            <span className="text-border">·</span>
-                            <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground tabular">
-                              {String(job.criteria.length).padStart(2, "0")}{" "}
-                              criteria
-                            </span>
-                            <span className="text-muted-foreground/40">·</span>
-                            <span className="font-mono text-[10px] uppercase tracking-[0.14em] tabular">
-                              <span className="text-primary">
-                                {String(counts.must).padStart(2, "0")} must
-                              </span>
-                              <span className="text-muted-foreground/40 mx-1.5">·</span>
-                              <span className="text-foreground">
-                                {String(counts.strong).padStart(2, "0")} strong
-                              </span>
-                              <span className="text-muted-foreground/40 mx-1.5">·</span>
-                              <span className="text-muted-foreground">
-                                {String(counts.nice).padStart(2, "0")} nice
-                              </span>
+                            <span className="inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground group-hover:text-primary transition-colors">
+                              View
+                              <ArrowUpRight
+                                className="h-3 w-3 group-hover:translate-x-px group-hover:-translate-y-px transition-transform"
+                                strokeWidth={2}
+                              />
                             </span>
                           </div>
                         </div>
-                        <div className="flex items-center gap-3 flex-shrink-0">
-                          <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground/70">
-                            {relativeTime(job.createdAt)}
-                          </span>
-                          <span
-                            aria-disabled
-                            title="Job detail view coming next"
-                            className="inline-flex items-center gap-1 font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground/40"
-                          >
-                            View
-                            <ArrowUpRight
-                              className="h-3 w-3"
-                              strokeWidth={2}
-                            />
-                          </span>
-                        </div>
-                      </div>
+                      </Link>
                     </li>
                   );
                 })}
@@ -205,9 +227,9 @@ export default async function JobsPage({
       </main>
 
       {/* —————— Footer —————— */}
-      <footer className="border-t border-border px-10 py-3 flex-shrink-0 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground/70">
+      <footer className="border-t border-border px-10 py-3 flex-shrink-0 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
         <span>Yuvabe ATS &nbsp; · &nbsp; v0.1</span>
-        <span className="italic font-serif normal-case tracking-normal text-muted-foreground/50">
+        <span className="italic font-serif normal-case tracking-normal text-muted-foreground/80">
           Hiring is a human act.
         </span>
         <span>2026</span>
@@ -221,7 +243,7 @@ export default async function JobsPage({
 function EmptyState() {
   return (
     <div className="h-full flex flex-col items-center justify-center text-center pb-24">
-      <p className="font-serif italic text-3xl text-foreground/40 leading-tight">
+      <p className="font-serif italic text-3xl text-foreground/55 leading-tight">
         No jobs yet.
       </p>
       <p className="mt-4 max-w-sm text-sm text-muted-foreground leading-relaxed">

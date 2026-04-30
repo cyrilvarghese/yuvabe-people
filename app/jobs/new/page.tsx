@@ -115,7 +115,7 @@ function NavTab({
         ${
           active
             ? "text-foreground border-primary"
-            : "text-muted-foreground/60 border-transparent hover:text-foreground"
+            : "text-foreground/55 border-transparent hover:text-foreground"
         }
       `}
     >
@@ -315,7 +315,7 @@ export default function NewJobPage() {
             <span className="font-serif italic text-lg leading-none">
               Yuvabe
             </span>
-            <span className="text-muted-foreground/60">/</span>
+            <span className="text-muted-foreground">/</span>
             <Eyebrow>ATS</Eyebrow>
           </div>
           <div className="flex items-center gap-6">
@@ -383,10 +383,10 @@ export default function NewJobPage() {
                 `}
               >
                 {/* corner ornament — barely there */}
-                <div className="absolute top-3 left-3 font-mono text-[9px] uppercase tracking-[0.18em] text-muted-foreground/50">
+                <div className="absolute top-3 left-3 font-mono text-[9px] uppercase tracking-[0.18em] text-muted-foreground/75">
                   ◦ source
                 </div>
-                <div className="absolute top-3 right-3 font-mono text-[9px] uppercase tracking-[0.18em] text-muted-foreground/50">
+                <div className="absolute top-3 right-3 font-mono text-[9px] uppercase tracking-[0.18em] text-muted-foreground/75">
                   drop here
                 </div>
 
@@ -403,7 +403,7 @@ export default function NewJobPage() {
                   We&apos;ll read the file and pull out the criteria a recruiter
                   would screen on.
                 </p>
-                <div className="mt-10 flex items-center gap-4 text-[10px] uppercase tracking-[0.18em] text-muted-foreground/70 font-mono">
+                <div className="mt-10 flex items-center gap-4 text-[10px] uppercase tracking-[0.18em] text-muted-foreground font-mono">
                   <span>pdf</span>
                   <span className="text-border">·</span>
                   <span>docx</span>
@@ -523,10 +523,10 @@ export default function NewJobPage() {
                   <ColumnMarker numeral="ii" title="The criteria" />
                   <div className="flex-1 flex flex-col items-center justify-center text-center">
                     <div className="max-w-sm">
-                      <p className="font-serif italic text-2xl text-foreground/35 leading-tight">
+                      <p className="font-serif italic text-2xl text-foreground/55 leading-tight">
                         &ldquo;A score without reasoning is not a score.&rdquo;
                       </p>
-                      <p className="mt-6 text-[10px] uppercase tracking-[0.18em] text-muted-foreground/60 font-mono">
+                      <p className="mt-6 text-[10px] uppercase tracking-[0.18em] text-muted-foreground font-mono">
                         Awaiting source ←
                       </p>
                     </div>
@@ -653,10 +653,10 @@ export default function NewJobPage() {
                       tone="neutral"
                     />
                   </div>
-                  <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground/70 tabular">
+                  <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground tabular">
                     Showing {String(visibleCount).padStart(2, "0")} of {String(criteria.length).padStart(2, "0")}
                     {filter !== "all" && (
-                      <span className="ml-2 text-muted-foreground/50">
+                      <span className="ml-2 text-muted-foreground/75">
                         · filtered by {filter}
                       </span>
                     )}
@@ -669,7 +669,7 @@ export default function NewJobPage() {
                 <div className="max-w-2xl">
                   {grouped.length === 0 && (
                     <div className="py-12 text-center border border-dashed border-border rounded-sm">
-                      <p className="font-serif italic text-xl text-muted-foreground/60">
+                      <p className="font-serif italic text-xl text-foreground/55">
                         No {filter} criteria for this role.
                       </p>
                       <button
@@ -685,10 +685,10 @@ export default function NewJobPage() {
                     {grouped.map((group) => (
                     <div key={group.category}>
                       <div className="flex items-baseline gap-3 mb-4">
-                        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-foreground/55">
+                        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-foreground/70">
                           {CATEGORY_LABEL[group.category]}
                         </span>
-                        <span className="font-mono text-[10px] tabular text-muted-foreground/70">
+                        <span className="font-mono text-[10px] tabular text-muted-foreground">
                           {String(group.items.length).padStart(2, "0")}
                         </span>
                         <div className="flex-1 border-b border-border/70" />
@@ -770,7 +770,7 @@ export default function NewJobPage() {
                 ) : (
                   <p className="text-xs text-muted-foreground italic font-serif truncate">
                     {criteria.length} criteria locked in.
-                    <span className="font-sans not-italic ml-2 text-muted-foreground/70">
+                    <span className="font-sans not-italic ml-2 text-muted-foreground">
                       Saving stores the job locally in <span className="font-mono">data/jobs.json</span>.
                     </span>
                   </p>
@@ -800,11 +800,11 @@ export default function NewJobPage() {
       </main>
 
       {/* —————— Bottom rule —————— */}
-      <footer className="border-t border-border px-10 py-3 flex-shrink-0 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground/70">
+      <footer className="border-t border-border px-10 py-3 flex-shrink-0 flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
         <span>
           Yuvabe ATS &nbsp; · &nbsp; v0.1
         </span>
-        <span className="italic font-serif normal-case tracking-normal text-muted-foreground/50">
+        <span className="italic font-serif normal-case tracking-normal text-muted-foreground/80">
           Hiring is a human act.
         </span>
         <span>2026</span>

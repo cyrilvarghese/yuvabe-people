@@ -44,6 +44,28 @@ Values in `app/globals.css :root`. **Do not redefine these per-component.**
 
 Terracotta is a precious resource — it should appear in 3–6 places per screen, not more. If a screen looks too cool/gray, it doesn't need more terracotta — it needs more Newsreader italic.
 
+## Contrast & readability
+
+WCAG AA target: **4.5:1 for normal text** (<18pt), **3:1 for large text** (≥18pt or ≥14pt bold). The warm palette is forgiving for primary ink but fragile when dimmed — pure `--muted-foreground` (`#8A857B`) is only ~4.6:1 on `--background`, so any opacity modifier on it falls below AA.
+
+**Rule of thumb: dim ink, don't dim muted.** Use `text-foreground/X` to soften text — that gives you primary ink at reduced opacity, which is darker than `--muted-foreground` and readable down to ~`/55`. Reserve `text-muted-foreground` (full strength) for tertiary metadata that must stay AA. Never use `text-muted-foreground/X` on informational text — only on decorative glyphs.
+
+| Pattern | Approx ratio on `#FAF8F4` | When to use |
+|---|---|---|
+| `text-foreground` | ~14.8 : 1 | Primary text (titles, body) |
+| `text-foreground/70` | ~6 : 1 | Secondary metadata, caption labels, section headings |
+| `text-foreground/55` | ~5 : 1 | Tertiary, watermarky-but-readable (empty-state quotes) |
+| `text-muted-foreground` | ~4.6 : 1 (just AA) | Tertiary informational metadata, file sizes, timestamps |
+| `text-muted-foreground/80` | ~3.7 : 1 | **Below AA.** Decorative only — italic ethos line at footer center |
+| `text-muted-foreground/65–75` | ~3.1–3.3 : 1 | **Below AA.** Decorative glyphs only (·, /, leading dots, corner ornaments) |
+| `text-muted-foreground/<60` | <3 : 1 | Avoid. Even decorative glyphs become invisible. |
+
+**Disabled states**: dim alone is not enough — pair the dim with a second visual cue (italic, strikethrough, `aria-disabled`, tooltip explaining why). E.g. the disabled "View →" link uses `text-muted-foreground/65 italic` plus `aria-disabled` and a tooltip. AA spec considers state communicated by color *alone* a failure even when contrast passes.
+
+**Editorial fade exception**: an empty-state quote in italic Newsreader at `text-foreground/55` is fine — large display text, decorative tone, paired with a fully-readable mono caption beneath. Don't extend this exception to functional text (buttons, captions, labels).
+
+**Verification**: run the [`yuvabe-vd-checker`](../yuvabe-vd-checker/SKILL.md) skill after building any new screen. It computes contrast for every text-color combination and flags AA failures.
+
 ### Status (when needed in later slices)
 
 | State | Color | Token name |

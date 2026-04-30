@@ -1,0 +1,68 @@
+{
+  "jobs": [
+    {
+      "id": "job_aieng_001",
+      "code": "AIEN9X",
+      "title": "Senior AI Engineer",
+      "description": "Yuvabe is hiring a Senior AI Engineer to build production-grade AI systems across our internal tooling and client work. You'll own end-to-end pipelines: data, training, deployment, and monitoring. We're looking for someone who's shipped real ML systems and can make pragmatic trade-offs between research-grade accuracy and production reliability.\n\nRequirements:\n- 5+ years professional Python experience\n- Hands-on with PyTorch or TensorFlow in production\n- Experience deploying LLM-based applications (RAG, agentic, fine-tuning)\n- Production ML deployment experience (MLOps tooling: MLflow, Kubeflow, Sagemaker)\n- Strong ML fundamentals\n- SQL fluency\n\nPreferred:\n- Experience with cloud platforms (AWS or GCP)\n- Distributed systems / large-scale data processing\n- BS / MS in Computer Science or related\n\nNice to have:\n- Open-source contributions to ML tooling\n- Publications or technical talks",
+      "criteria": [
+        { "category": "experience", "label": "5+ years Python", "importance": "must" },
+        { "category": "skill", "label": "PyTorch or TensorFlow", "importance": "must" },
+        { "category": "skill", "label": "LLM application experience", "importance": "must" },
+        { "category": "experience", "label": "Production ML deployment", "importance": "must" },
+        { "category": "skill", "label": "MLOps tooling", "importance": "must" },
+        { "category": "skill", "label": "Strong ML fundamentals", "importance": "must" },
+        { "category": "skill", "label": "SQL fluency", "importance": "must" },
+        { "category": "skill", "label": "Cloud platforms (AWS/GCP)", "importance": "strong" },
+        { "category": "experience", "label": "Distributed systems", "importance": "strong" },
+        { "category": "education", "label": "BS/MS Computer Science", "importance": "strong" },
+        { "category": "other", "label": "Open-source ML contributions", "importance": "nice" },
+        { "category": "other", "label": "Publications or talks", "importance": "nice" }
+      ],
+      "createdAt": "2026-04-22T09:14:00.000Z"
+    },
+    {
+      "id": "job_mktg_002",
+      "code": "MKTG7P",
+      "title": "Digital Marketing & Performance Specialist",
+      "description": "Yuvabe Studios is looking for a Digital Marketing & Performance Specialist to plan, execute, and optimize digital campaigns across multiple channels. Flexible role — remote or from Auroville. Marketing here is practical and outcome-driven; you'll work on real campaigns with a strong focus on lead generation, performance metrics, and continuous optimization.\n\nRequirements:\n- 2-3 years of digital marketing and campaign management\n- Hands-on with Meta Ads (Facebook & Instagram)\n- Hands-on with Google Ads (Search, Display, YouTube)\n- Hands-on with LinkedIn Ads\n- GA4 and Looker Studio\n- Proven lead generation results\n- Strong understanding of CPC, CPA, CTR, ROAS, conversion funnels\n- A/B testing and campaign optimization\n- Basic design skills for ad creatives (Canva, Figma)\n- Familiarity with AI tools in marketing workflows\n- Client-facing communication\n\nNice to have:\n- Marketing automation / CRM platforms\n- SEO and content marketing\n- Landing page optimization\n- Startup or agency experience",
+      "criteria": [
+        { "category": "experience", "label": "2-3 years digital marketing", "importance": "must" },
+        { "category": "skill", "label": "Hands-on Meta Ads experience", "importance": "must" },
+        { "category": "skill", "label": "Hands-on Google Ads experience", "importance": "must" },
+        { "category": "skill", "label": "Hands-on LinkedIn Ads experience", "importance": "must" },
+        { "category": "skill", "label": "GA4 and Looker Studio", "importance": "must" },
+        { "category": "experience", "label": "Lead generation results", "importance": "must" },
+        { "category": "skill", "label": "CPC, CPA, CTR, ROAS understanding", "importance": "must" },
+        { "category": "skill", "label": "A/B testing and optimization", "importance": "must" },
+        { "category": "skill", "label": "Basic design skills for creatives", "importance": "must" },
+        { "category": "skill", "label": "Familiarity with AI marketing tools", "importance": "must" },
+        { "category": "skill", "label": "Client-facing communication", "importance": "must" },
+        { "category": "skill", "label": "Marketing automation / CRM", "importance": "nice" },
+        { "category": "skill", "label": "SEO and content marketing", "importance": "nice" },
+        { "category": "domain", "label": "Startup or agency experience", "importance": "nice" }
+      ],
+      "createdAt": "2026-04-25T11:32:00.000Z"
+    },
+    {
+      "id": "job_pdds_003",
+      "code": "PDDS4M",
+      "title": "Product Designer (UI/UX)",
+      "description": "Yuvabe Studios is hiring a Product Designer to lead UX and visual design across our internal tools and client products. You'll partner with engineering, marketing, and program leads to ship interfaces that respect users' time and attention. Based in Auroville with hybrid options.\n\nRequirements:\n- 4+ years professional UX/UI design experience\n- Figma proficiency including auto-layout, components, variants\n- Hands-on experience building or maintaining design systems\n- User research experience (interviews, usability testing)\n- Prototyping for testing flows\n- Strong visual design fundamentals (typography, hierarchy, color)\n\nPreferred:\n- Cross-functional collaboration with engineering and PMs\n- Front-end awareness (HTML/CSS, ideally Tailwind)\n- Bachelor's in Design, HCI, or related\n\nNice to have:\n- Motion design / Lottie\n- Accessibility expertise (WCAG)",
+      "criteria": [
+        { "category": "experience", "label": "4+ years UX/UI design", "importance": "must" },
+        { "category": "skill", "label": "Figma proficiency", "importance": "must" },
+        { "category": "skill", "label": "Design systems experience", "importance": "must" },
+        { "category": "experience", "label": "User research & testing", "importance": "must" },
+        { "category": "skill", "label": "Prototyping for flows", "importance": "must" },
+        { "category": "skill", "label": "Visual design fundamentals", "importance": "must" },
+        { "category": "skill", "label": "Cross-functional collaboration", "importance": "strong" },
+        { "category": "skill", "label": "Front-end awareness (HTML/CSS)", "importance": "strong" },
+        { "category": "education", "label": "Bachelor's in Design / HCI", "importance": "strong" },
+        { "category": "skill", "label": "Motion design", "importance": "nice" },
+        { "category": "skill", "label": "Accessibility (WCAG)", "importance": "nice" }
+      ],
+      "createdAt": "2026-04-26T15:48:00.000Z"
+    }
+  ]
+}
