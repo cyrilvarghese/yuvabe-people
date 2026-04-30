@@ -323,14 +323,114 @@ For pages where left = source/input, right = analysis/output (job intake, applic
 </div>
 ```
 
-## Motion — restrained
+## Behavior layer — clarity, affordances, microinteractions
 
-This is a tool, not a toy.
+This is a tool, not a toy. Behavior rules serve **clarity** first; affordance and microinteraction serve clarity; motion serves all three. If any rule below ever conflicts with clarity on a real screen, clarity wins.
 
-- Default transition: `transition-colors duration-150`
-- Status badge color changes: `duration-200`
-- Score number changes after rematch: count up over 400ms via `requestAnimationFrame`
-- **No spring physics. No bouncy reveals. No scroll-triggered choreography.** First impression should be "fast and clean," not "designer's portfolio."
+Priority order, top to bottom: **clarity → affordance → microinteraction → motion**. Motion is the smallest tool, never the headline.
+
+### The states every interactive element must define
+
+Every `<button>`, `<a>`, `<input>`, `<select>`, `<textarea>`, and shadcn primitive must define five states explicitly — plus *loading* / *busy* where async. Each state must be **distinguishable without color alone** (border weight, opacity shift, label change, icon swap, italic — not just a hue change).
+
+| State | Recipe | Notes |
+|---|---|---|
+| Default | base classes | The canonical resting look |
+| Hover | `hover:bg-secondary` or `hover:text-foreground` | Color/opacity only — no movement |
+| Focus-visible | `focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background` | Required on every interactive element |
+| Active / pressed | `active:bg-secondary/80` or color shift | Subtle color shift; scale ≤1.02 only if used |
+| Disabled | `disabled:opacity-50 disabled:pointer-events-none disabled:cursor-not-allowed` + a non-color cue | Opacity alone is **not** enough |
+| Loading / busy | inline spinner + label that names *what* + `aria-busy="true"` | "Saving candidate…" not "Loading…" |
+
+### Affordances — what the element tells you it can do
+
+- `cursor-pointer` on every clickable non-link, non-button element (cards used as click targets, custom toggles). Native `<button>` and `<a href>` already get pointer; do not override.
+- `cursor-not-allowed` on every disabled interactive element.
+- `cursor-text` on text-input wrappers, `cursor-grab` / `cursor-grabbing` on draggable handles.
+- **Focus ring is non-negotiable.** `focus-visible:outline-none` without a replacement ring is a clarity failure. The ring uses `--ring` (`#B8553A`, the terracotta) — it doubles as accent and as the "you are here" signal.
+- **Minimum hit target**: 40×40px for primary actions. 32×32 acceptable in dense list rows when spaced ≥8px from the next target (matches the dense-table aesthetic without violating WCAG 2.5.8's spacing exception).
+- **Disabled = opacity + `pointer-events-none` + cursor change + a non-color cue.** All four. Opacity alone reads as "loading," not "disabled."
+- **Link vs button.** Links navigate, buttons act. Underline links on hover (`hover:underline`). Never style a `<button>` to look like a link unless using `<Button variant="link">`. Never style an `<a>` to look like a filled button unless it is a primary navigation CTA — and then the underline-on-hover still applies via the variant.
+- **No nested interactive elements.** A `<Link>` wrapping a `<button>` is broken — screen readers handle nesting inconsistently (WCAG 4.1.2). For row-as-target patterns where the row needs both a primary navigation and a secondary action, use the **stretched-link pattern**: the primary `<Link>` covers the row via CSS `::after`, the secondary action sits as a DOM sibling at higher z-index. References: [Adrian Roselli — Block Links, Cards, Clickable Regions, Rows](https://adrianroselli.com/2020/02/block-links-cards-clickable-regions-etc.html), [Piccalilli — Faux-nested interactive controls](https://piccalil.li/blog/accessible-faux-nested-interactive-controls/).
+
+### Microinteractions — Saffer's loop applied to our primitives
+
+Every microinteraction has four parts: **Trigger → Rules → Feedback → Loops/Modes**. Built on shadcn primitives — never a custom UI primitive.
+
+**Universal rule**: every microinteraction must produce **at least one visible response within 100ms of the trigger**, even if the real work is still pending. The pending state itself is the response. A click that does nothing visible for 300ms is a clarity failure.
+
+| Interaction | Primitive | Feedback (within 100ms) | Completion |
+|---|---|---|---|
+| Button press | shadcn `Button` | `active:` color shift | nothing if sync; spinner + disabled if async |
+| Toggle (switch) | shadcn `Switch` | thumb position changes | `aria-checked` flips |
+| Copy to clipboard | `Button` | label swaps to "Copied" mono caps | revert label after 1500ms |
+| Optimistic save | `Button` | row updates immediately | toast on success; rollback + error toast on failure |
+| Destructive confirm | shadcn `AlertDialog` | dialog fades in | only the confirm button is terracotta; cancel is `variant="ghost"` |
+| Inline edit | `Input` (focused via click) | focus ring appears | Enter commits, Esc cancels, blur commits |
+| Async submit | `Button` + form | button disables and shows `Loader2 animate-spin` + label "Saving…" | toast or inline error block |
+| Sortable column | `<button>` in `<th>` | arrow icon appears next to label | URL updates with `?sort=…` |
+| Filter chip toggle | `Button variant="outline"` | filled state when on | list re-renders |
+| Bulk-action selection | `Checkbox` per row + sticky bar | row highlights + bar fades in | bar shows count and actions |
+| Row delete | `Button` + `AlertDialog` | row fades out 150ms | toast with undo for 5s |
+
+### Motion — subtle, in service of clarity
+
+The master principle is **subtlety**. Motion is allowed when it adds clarity (a fade in, an arrow leaning toward where it leads, a panel arriving) — never when it's decorative or attention-grabbing. If a motion would feel at home on a designer's portfolio site, it doesn't belong here.
+
+**Permitted primitives** (use sparingly, one motion per element):
+
+- **Opacity fades** — `transition-opacity`, `animate-pulse`, `data-[state=open]:fade-in-0`, `data-[state=closed]:fade-out-0`.
+- **Color transitions** — `transition-colors` for hover/focus state changes.
+- **Tiny translates** — `translate-x-px`, `-translate-y-px` (1–2px max). The canonical use is an arrow icon leaning toward its destination on `group-hover`. Never more than 2px in any direction.
+- **Tiny scales** — between `scale-[0.98]` and `scale-[1.02]` only, used sparingly for press feedback. Default to no scale.
+- **Number count-up** — 400ms `requestAnimationFrame` for score updates.
+
+**Forbidden** — these are the "designer-portfolio" tells, always:
+
+- Spring physics, bounce easing, elastic.
+- Rotate (any degree, any duration) — except a `Loader2 animate-spin` icon.
+- Shimmer gradients (`bg-gradient-to-r` with `animate-*`) — `animate-pulse` is the only loading shimmer.
+- Parallax, scroll-triggered choreography, magnetic cursors.
+- Translates > 2px, scales outside 0.98–1.02.
+- Durations > 400ms or < 100ms.
+
+**Duration scale** — use one of these, never an in-between:
+
+| Duration | Use |
+|---|---|
+| 100ms | Hover color/opacity, instant feedback |
+| 150ms | Default state changes (`transition-colors duration-150`) |
+| 200ms | Status badge color changes |
+| 300ms | Panel / Sheet / Dialog / DropdownMenu fade in & out |
+| 400ms | Score number count-up via `requestAnimationFrame` |
+
+**Easing**:
+
+- `ease-out` for entrances (fade-in, panel arriving, hover translate)
+- `ease-in` for exits (fade-out, panel leaving)
+- `ease-in-out` for color-only state transitions
+- Never `linear` for UI motion. Never spring. Never bounce.
+
+**Reduced motion** — drop all non-essential motion to 1ms. Add to `app/globals.css`:
+
+```css
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+  }
+}
+```
+
+**Override shadcn defaults toward subtlety.** shadcn's Dialog, Sheet, and DropdownMenu ship with full slide+zoom animations (`data-[state=open]:slide-in-from-…`, `data-[state=open]:zoom-in-95`). Strip the zoom (it scales 5%, exceeds our 2% budget) and replace the long slide with `fade-in-0` plus an optional ≤2px translate via inline style if a directional cue is genuinely needed. Default: fade only.
+
+### Loading & skeletons — clarity over decoration
+
+- **Skeletons mirror final shape.** Rect for image, text-line for text, hairline-bordered block for card. Reuse `border border-border rounded-sm` (the existing card recipe), not a soft gray rounded box.
+- **Pulse is fine** (`animate-pulse` is opacity-only — fits the rule). **Shimmer-gradient skeletons are forbidden** — that is "designer-portfolio" energy.
+- **Spinner only when shape is genuinely unpredictable** (e.g. a free-form LLM response). Always paired with what is loading: *"Reading the description…"*, *"Saving candidate…"*. Never a bare *"Loading…"*.
+- **Skeleton → content swap is a fade**, not a slide. Wrap the content in a `transition-opacity duration-300` and toggle `opacity-0` ↔ `opacity-100` on the data-ready boundary.
 
 ## Anti-patterns — never do
 
@@ -353,6 +453,18 @@ This is a tool, not a toy.
 - ❌ Tabs to hide sections — recruiters Cmd+F; everything on one scrollable page
 - ❌ Modal dialogs for actions — use inline buttons or the bulk-action bar
 - ❌ Filter chips that look like tabs — chips imply filters on one view; tabs imply separate views
+- ❌ `focus-visible:outline-none` without a replacement ring — kills keyboard navigation and erases the terracotta "you are here" signal
+- ❌ `cursor-pointer` on a disabled or non-interactive element
+- ❌ Motion that isn't subtle — no spring, bounce, rotate (except `Loader2 animate-spin`), shimmer gradients, parallax, scroll-triggered choreography
+- ❌ Translates > 2px or scales outside `0.98`–`1.02` — subtlety budget exceeded
+- ❌ Durations outside the 100 / 150 / 200 / 300 / 400ms scale
+- ❌ Shimmer-gradient skeleton loaders — pulse-opacity only
+- ❌ Disabled state shown by reduced opacity alone (no cursor, no `pointer-events-none`, no second cue)
+- ❌ State distinguishable by color alone (always pair with text, italic, icon, or border weight)
+- ❌ Buttons that look like links / links that look like filled buttons (use the right shadcn variant)
+- ❌ Custom modal / dropdown / popover instead of the shadcn primitive
+- ❌ Action that produces no visible response within 100ms — even an async-pending state counts; silence does not
+- ❌ shadcn Dialog / Sheet / DropdownMenu with their default `slide-*` / `zoom-*` animation classes left in — strip them, fade only
 
 ## Activation checklist
 
@@ -368,6 +480,8 @@ Before writing any new screen or component in this codebase, run through this:
 - [ ] Are dividers hairlines, not shadows or thick rules?
 - [ ] Is the page width and gutter aligned to `px-10` or `p-12`?
 - [ ] Have you used any color outside the locked palette? (If yes, push back.)
+- [ ] Have you defined every required state on each interactive element (default / hover / focus-visible / active / disabled, plus loading where async), each distinguishable without color alone?
+- [ ] Is every motion an opacity fade or color change, on the canonical duration scale (100 / 150 / 200 / 300 / 400ms) with the right easing?
 
 ## Reference files in this codebase
 
