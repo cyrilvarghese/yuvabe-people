@@ -47,10 +47,16 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+}
 
-  /* Editorial type scale — see yuvabe-design-system skill.
-     Names are semantic so they don't collide with Tailwind defaults
-     (text-xl, text-2xl, etc. still work for non-system code). */
+/* Editorial type scale — see yuvabe-design-system skill.
+   Plain @theme (not inline) because @theme inline only generates
+   utilities for tokens that resolve to var() references; literal
+   px values like these need a regular @theme block to produce the
+   text-h2, text-body, etc. utilities.
+   Names are semantic so they don't collide with Tailwind defaults
+   (text-xl, text-2xl, etc. still work for non-system code). */
+@theme {
   --text-eyebrow: 11px;        /* decorative caps — footer, header tags, glanced labels */
   --text-meta: 12px;           /* informational caps — counts, status, timestamps */
   --text-body-sm: 13px;        /* table cells, sub-row meta */
