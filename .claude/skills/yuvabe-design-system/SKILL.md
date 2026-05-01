@@ -166,7 +166,7 @@ Use `font-serif italic` for: candidate names, page H1 on editorial pages, empty-
 ### Typographic rules
 
 - Tabular numerals on every score, count, or aligned number: `font-variant-numeric: tabular-nums` (a `.tabular` utility is in `globals.css`).
-- Caption-style labels are `font-mono text-[10px] uppercase tracking-[0.18em]` — letter-spacing is what makes them feel editorial, not the font alone.
+- Caption-style labels use the `eyebrow` utility (`font-mono text-eyebrow uppercase tracking-[0.18em]`) — letter-spacing is what makes them feel editorial, not the font alone.
 - **Never use color alone to convey state** — always pair with text. Status badges use background tint + text; score chips use border color + number.
 
 ## Responsiveness
@@ -208,12 +208,13 @@ className="grid grid-cols-1 md:grid-cols-[340px_1fr] overflow-hidden"
 <aside className="border-b border-border md:border-r md:border-b-0 ...">
 ```
 
-**Display sizes**: every Newsreader display moment scales down on mobile.
+**Display sizes**: every Newsreader display moment scales down on mobile. Use tokens.
 ```tsx
-text-3xl md:text-5xl           // ColumnMarker numeral (i. ii.)
-text-xl  md:text-3xl           // Page title (italic)
-text-[2rem] md:text-[2.75rem]  // Candidate name (display-xl)
-text-[2rem] md:text-[3rem]     // Score number (display)
+text-display     md:text-display-xl   // ColumnMarker numeral (i. ii.) — 32 → 64
+text-h2          md:text-h1            // List-row title / column-marker title — 22 → 28
+text-display     md:text-display-lg   // Candidate name on detail page — 32 → 48
+text-display-md  md:text-display-lg   // Score number on detail page — 40 → 48
+text-display     md:text-display-md   // Empty-state quote — 32 → 40
 ```
 
 **Vertical padding tighter on mobile**:
@@ -230,7 +231,7 @@ className="hidden md:flex"     // an entire metadata column when stacked
 
 **Score chip scales**:
 ```tsx
-className="min-w-[44px] md:min-w-[58px] text-[16px] md:text-[20px]"
+className="min-w-[44px] md:min-w-[58px] font-mono text-body-lg md:text-h3 tabular"
 ```
 
 **Header utility links**: collapse text-with-icon to icon-only on mobile.
@@ -246,7 +247,7 @@ className="min-w-[44px] md:min-w-[58px] text-[16px] md:text-[20px]"
 
 ### Anti-patterns
 
-- ❌ Using `text-xs` / `text-[10px]` for body text on mobile to "make it fit". If text is too small at desktop scale, the page needs less content per row, not smaller letters.
+- ❌ Using `text-eyebrow` (11px) or `text-meta` (12px) for *body* text on mobile to "make it fit". If text is too small at desktop scale, the page needs less content per row, not smaller letters. Body uses `text-body` / `text-body-lg`.
 - ❌ Horizontal scroll on the body. The page itself should never scroll horizontally; only specific containers (tab strips, code blocks) may.
 - ❌ Hiding *primary* information on mobile. If a status badge matters at desktop, it matters on mobile — find a place for it. Hide *secondary* metadata (timestamps, secondary counts) only.
 - ❌ Sticky elements that take >40% of the mobile viewport. A 340px sticky aside at 360px viewport is 95% — not sticky, just *blocking*. Convert to a non-sticky top section on mobile.
@@ -284,19 +285,19 @@ These are typographic atoms that recur across the app. Inline them at the top of
 The most-used pattern. Tiny mono caps for metadata, status labels, section antecedents.
 
 ```tsx
-<span className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+<span className="eyebrow text-muted-foreground">
   Source file
 </span>
 ```
 
 ### Roman-numeral column marker
 
-Use at the top of each major column on two-column spreads (job intake, application detail). Numeral in italic Newsreader 5xl, terracotta. Title in italic Newsreader 2xl.
+Use at the top of each major column on two-column spreads (job intake, application detail). Numeral in italic Newsreader display, terracotta. Title in italic Newsreader h1.
 
 ```tsx
-<div className="flex items-baseline gap-4 mb-10">
-  <span className="font-serif italic text-5xl leading-none text-primary tabular">i.</span>
-  <span className="font-serif italic text-2xl leading-none text-foreground/85">The job</span>
+<div className="flex items-baseline gap-3 md:gap-4 mb-6 md:mb-10">
+  <span className="font-serif italic text-display md:text-display-xl leading-none text-primary tabular">i.</span>
+  <span className="font-serif italic text-h2 md:text-h1 leading-none text-foreground/85">The job</span>
 </div>
 ```
 
@@ -316,10 +317,10 @@ Used in result lists (criteria groups, applicant rankings). Caption + count + ex
 
 ```tsx
 <div className="flex items-baseline gap-3 mb-4">
-  <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-foreground/55">
+  <span className="eyebrow text-foreground/55">
     Skills
   </span>
-  <span className="font-mono text-[10px] tabular text-muted-foreground/70">
+  <span className="font-mono text-eyebrow tabular text-muted-foreground/70">
     {String(count).padStart(2, "0")}
   </span>
   <div className="flex-1 border-b border-border/70" />
@@ -334,10 +335,10 @@ Empty states are *thesis statements*, not "no data yet." Quote the principle the
 
 ```tsx
 <div className="h-full flex flex-col items-center justify-center text-center">
-  <p className="font-serif italic text-2xl text-foreground/35 leading-tight max-w-sm">
+  <p className="font-serif italic text-h1 text-foreground/35 leading-tight max-w-sm">
     &ldquo;A score without reasoning is not a score.&rdquo;
   </p>
-  <p className="mt-6 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground/60">
+  <p className="mt-6 eyebrow text-muted-foreground/60">
     Awaiting source ←
   </p>
 </div>
@@ -357,11 +358,11 @@ For showing an uploaded file, a candidate's quick info, etc. Borders not shadows
 <div className="border border-border rounded-sm bg-card px-6 py-5 flex items-start gap-4">
   <FileText className="h-5 w-5 text-foreground/50 mt-0.5 flex-shrink-0" strokeWidth={1.5} />
   <div className="min-w-0 flex-1">
-    <p className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground font-mono mb-1">
+    <p className="caps-action text-muted-foreground mb-1">
       Source file
     </p>
-    <p className="text-sm font-medium truncate">{filename}</p>
-    <p className="font-mono text-[11px] text-muted-foreground mt-1 tabular">{size}</p>
+    <p className="text-body-lg font-medium truncate">{filename}</p>
+    <p className="font-mono text-eyebrow text-muted-foreground mt-1 tabular">{size}</p>
   </div>
 </div>
 ```
@@ -371,7 +372,7 @@ For showing an uploaded file, a candidate's quick info, etc. Borders not shadows
 Mono caps right-aligned, terracotta for primary state, muted for secondary. Letterforms instead of pill shapes.
 
 ```tsx
-<span className={`font-mono text-[10px] uppercase tracking-[0.18em] ${
+<span className={`eyebrow ${
   isPrimary ? "text-primary" : "text-muted-foreground/70"
 }`}>
   {isPrimary ? "Must" : "Nice"}
@@ -388,7 +389,7 @@ When a button needs context, put a caption to the *left* of it on the same row, 
 <div className="mt-auto pt-10">
   <div className="h-px bg-border" />
   <div className="pt-6 flex items-center justify-between gap-4">
-    <p className="text-xs text-muted-foreground max-w-[12rem] leading-relaxed">
+    <p className="text-body-sm text-muted-foreground max-w-[12rem] leading-relaxed">
       One LLM call. No data leaves until you save.
     </p>
     <Button size="lg" className="gap-2 rounded-sm font-medium tracking-tight">
@@ -404,7 +405,7 @@ When a button needs context, put a caption to the *left* of it on the same row, 
 Italic Newsreader + tiny terracotta spinner. Tells the user what is being thought about, not just that thinking is happening.
 
 ```tsx
-<div className="flex items-center gap-3 text-sm text-foreground/70">
+<div className="flex items-center gap-3 text-body text-foreground/70">
   <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
   <span className="font-serif italic">Reading the description…</span>
 </div>
@@ -416,10 +417,10 @@ Left vertical rule in terracotta, eyebrow + body. **No card, no shadow, no icon.
 
 ```tsx
 <div className="border-l-2 border-primary pl-4 py-2 bg-primary/[0.03]">
-  <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-primary mb-1">
+  <p className="caps-action text-primary mb-1">
     Couldn't process this file
   </p>
-  <p className="text-sm text-foreground/80">{error.message}</p>
+  <p className="text-body text-foreground/80">{error.message}</p>
 </div>
 ```
 
@@ -429,7 +430,7 @@ Full-screen pages get a footer hairline. Issue-number conceit (left), italic eth
 
 ```tsx
 <footer className="border-t border-border px-10 py-3 flex items-center justify-between
-                   font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground/70">
+                   eyebrow text-muted-foreground/70">
   <span>Yuvabe ATS · v0.1</span>
   <span className="italic font-serif normal-case tracking-normal text-muted-foreground/50">
     Hiring is a human act.
@@ -613,7 +614,7 @@ Before writing any new screen or component in this codebase, run through this:
 - [ ] Where (if anywhere) does terracotta appear, and why those 3–6 places specifically?
 - [ ] Is there a Roman-numeral column marker or a sequential `01 / 02` step indicator?
 - [ ] Are all numbers tabular (`tabular-nums`)?
-- [ ] Are eyebrow captions mono-caps with `tracking-[0.18em]`?
+- [ ] Are eyebrow captions using the `eyebrow` utility (or `caps-action` / `caps-meta` for the action / informational variants)? No raw `text-[Xpx]` or `tracking-[Xem]` outside `globals.css`.
 - [ ] Are state badges letterforms (mono caps) instead of pill shapes — unless the table density genuinely requires the pill shape for scanning?
 - [ ] Are dividers hairlines, not shadows or thick rules?
 - [ ] Is the page width and gutter aligned to `px-10` or `p-12`?
