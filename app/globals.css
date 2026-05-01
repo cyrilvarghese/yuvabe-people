@@ -47,6 +47,22 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* Editorial type scale — see yuvabe-design-system skill.
+     Names are semantic so they don't collide with Tailwind defaults
+     (text-xl, text-2xl, etc. still work for non-system code). */
+  --text-eyebrow: 11px;        /* decorative caps — footer, header tags, glanced labels */
+  --text-meta: 12px;           /* informational caps — counts, status, timestamps */
+  --text-body-sm: 13px;        /* table cells, sub-row meta */
+  --text-body: 14px;           /* default body */
+  --text-body-lg: 16px;        /* primary body — modern minimum */
+  --text-h3: 18px;             /* card titles, prominent labels */
+  --text-h2: 22px;             /* section heads, list-row titles */
+  --text-h1: 28px;             /* utility H1, large list-row titles */
+  --text-display: 32px;        /* prominent display */
+  --text-display-md: 40px;     /* responsive bridge for editorial display */
+  --text-display-lg: 48px;     /* editorial H1, column-marker numerals (md+) */
+  --text-display-xl: 64px;     /* candidate names, hero column-marker numerals */
 }
 
 :root {
@@ -118,6 +134,34 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+}
+
+/* Editorial caps utilities. The size→tracking inverse rule is baked in here:
+   bigger size → tighter tracking. Compose with color separately, e.g.
+   <span className="caps-meta text-muted-foreground tabular">07 APPLICANTS</span> */
+
+@utility eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--text-eyebrow);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  line-height: 1;
+}
+
+@utility caps-action {
+  font-family: var(--font-mono);
+  font-size: var(--text-eyebrow);
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  line-height: 1;
+}
+
+@utility caps-meta {
+  font-family: var(--font-mono);
+  font-size: var(--text-meta);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  line-height: 1.3;
 }
 
 @layer base {

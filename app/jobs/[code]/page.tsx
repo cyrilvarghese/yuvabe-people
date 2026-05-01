@@ -9,20 +9,16 @@ import NavTabClient from "../_components/nav-tab";
 /* —————————————————————————— atoms (inlined per design system) —————————————————————————— */
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-      {children}
-    </span>
-  );
+  return <span className="eyebrow text-muted-foreground">{children}</span>;
 }
 
 function ColumnMarker({ numeral, title }: { numeral: string; title: string }) {
   return (
     <div className="flex items-baseline gap-3 md:gap-4">
-      <span className="font-serif italic text-3xl md:text-5xl leading-none text-primary tabular">
+      <span className="font-serif italic text-display md:text-display-xl leading-none text-primary tabular">
         {numeral}.
       </span>
-      <h1 className="font-serif italic text-xl md:text-3xl leading-tight md:leading-none text-foreground tracking-tight max-w-[36ch]">
+      <h1 className="font-serif italic text-h2 md:text-h1 leading-tight md:leading-none text-foreground tracking-tight max-w-[36ch]">
         {title}
       </h1>
     </div>
@@ -41,7 +37,7 @@ function ScoreChip({ score }: { score: number }) {
       : "text-primary border-primary/40 bg-primary/[0.06]";
   return (
     <div
-      className={`inline-flex items-baseline justify-center min-w-[44px] md:min-w-[58px] px-2 md:px-2.5 py-1.5 border rounded-sm font-mono text-[15px] md:text-[20px] tabular leading-none ${colorClass}`}
+      className={`inline-flex items-baseline justify-center min-w-[44px] md:min-w-[58px] px-2 md:px-2.5 py-1.5 border rounded-sm font-mono text-body-lg md:text-h3 tabular leading-none ${colorClass}`}
       aria-label={`Match score ${score}`}
     >
       {String(score).padStart(2, "0")}
@@ -133,13 +129,13 @@ export default async function JobDetailPage({
       <header className="flex-shrink-0 border-b border-border bg-background z-10">
         <div className="px-4 md:px-10 pt-4 pb-3 flex items-center justify-between gap-4">
           <div className="flex items-baseline gap-3 min-w-0">
-            <span className="font-serif italic text-lg leading-none">Yuvabe</span>
+            <span className="font-serif italic text-xl leading-none">Yuvabe</span>
             <span className="text-muted-foreground">/</span>
             <Eyebrow>ATS</Eyebrow>
           </div>
           <Link
             href="/jobs"
-            className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
+            className="inline-flex items-center gap-1.5 caps-action text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
           >
             <ArrowLeft className="h-3 w-3" />
             <span className="hidden sm:inline">All jobs</span>
@@ -157,7 +153,7 @@ export default async function JobDetailPage({
           {/* Static top — job title + filter chips */}
           <div className="flex-shrink-0 px-4 sm:px-6 md:px-10 pt-6 md:pt-10 pb-5 border-b border-border bg-background">
             <div className="max-w-5xl">
-              <nav className="mb-4 font-mono text-[10px] uppercase tracking-[0.18em] flex items-center gap-2.5">
+              <nav className="mb-4 eyebrow flex items-center gap-2.5">
                 <Link
                   href="/jobs"
                   className="text-muted-foreground hover:text-foreground transition-colors"
@@ -173,7 +169,7 @@ export default async function JobDetailPage({
               </nav>
               <ColumnMarker numeral="i" title={job.title} />
               <div className="mt-4 flex items-center gap-4 flex-wrap">
-                <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-primary tabular">
+                <span className="caps-meta text-primary tabular">
                   [JOB-{job.code}]
                 </span>
                 <span className="text-border">·</span>
@@ -194,7 +190,7 @@ export default async function JobDetailPage({
                 <Eyebrow>posted {relativeTime(job.createdAt)}</Eyebrow>
                 <Link
                   href={`/jobs/${job.code}/edit`}
-                  className="ml-auto inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm"
+                  className="ml-auto inline-flex items-center gap-1.5 caps-action text-muted-foreground hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm"
                 >
                   Edit
                   <Pencil className="h-3 w-3" strokeWidth={1.75} />
@@ -263,7 +259,7 @@ export default async function JobDetailPage({
       </main>
 
       {/* —————— Footer —————— */}
-      <footer className="border-t border-border px-4 sm:px-6 md:px-10 py-3 flex-shrink-0 flex items-center justify-between gap-3 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+      <footer className="border-t border-border px-4 sm:px-6 md:px-10 py-3 flex-shrink-0 flex items-center justify-between gap-3 eyebrow text-muted-foreground">
         <span className="truncate">Yuvabe ATS &nbsp; · &nbsp; v0.1</span>
         <span className="italic font-serif normal-case tracking-normal text-muted-foreground/80 hidden md:inline">
           Hiring is a human act.
@@ -288,10 +284,10 @@ function ApplicationRow({
       <div className="flex items-center gap-3 md:gap-5 min-w-0 flex-1">
         <ScoreChip score={application.matchScore} />
         <div className="min-w-0 flex-1">
-          <h3 className="font-serif italic text-lg md:text-xl leading-tight tracking-tight truncate">
+          <h3 className="font-serif italic text-xl md:text-2xl leading-tight tracking-tight truncate">
             {candidate.name}
           </h3>
-          <div className="mt-1 flex items-center gap-2 text-[12px] text-muted-foreground">
+          <div className="mt-1 flex items-center gap-2 text-body text-muted-foreground">
             <span className="truncate">{candidate.location}</span>
             <span className="text-border hidden sm:inline">·</span>
             <span className="hidden sm:inline truncate">{candidate.email}</span>
@@ -303,12 +299,10 @@ function ApplicationRow({
         </div>
       </div>
       <div className="flex items-center gap-3 md:gap-5 flex-shrink-0">
-        <span
-          className={`font-mono text-[10px] uppercase tracking-[0.16em] md:tracking-[0.18em] ${STATUS_COLOR[application.status]}`}
-        >
+        <span className={`caps-meta ${STATUS_COLOR[application.status]}`}>
           {STATUS_LABEL[application.status]}
         </span>
-        <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground tabular hidden md:inline">
+        <span className="caps-meta text-muted-foreground tabular hidden md:inline">
           {relativeTime(application.receivedAt)}
         </span>
         <ArrowUpRight
@@ -346,7 +340,7 @@ function StatusFilterChip({
       href={href}
       scroll={false}
       className={`
-        font-mono text-[11px] uppercase tracking-[0.14em] tabular
+        caps-meta tabular
         flex items-center gap-1.5 px-2.5 py-1 rounded-sm
         transition-all duration-150
         ${toneClass}
@@ -374,12 +368,12 @@ function EmptyState({
   if (filter && hasAny) {
     return (
       <div className="h-full flex flex-col items-center justify-center text-center pb-24">
-        <p className="font-serif italic text-3xl text-foreground/55 leading-tight">
+        <p className="font-serif italic text-display md:text-display-md text-foreground/55 leading-tight">
           No {STATUS_LABEL[filter].toLowerCase()} candidates for this role.
         </p>
         <Link
           href={`/jobs/${code}`}
-          className="mt-4 font-mono text-[10px] uppercase tracking-[0.18em] text-primary hover:text-primary/70 transition-colors"
+          className="mt-4 eyebrow text-primary hover:text-primary/70 transition-colors"
         >
           Show all ←
         </Link>
@@ -388,10 +382,10 @@ function EmptyState({
   }
   return (
     <div className="h-full flex flex-col items-center justify-center text-center pb-24">
-      <p className="font-serif italic text-3xl text-foreground/55 leading-tight">
+      <p className="font-serif italic text-display md:text-display-md text-foreground/55 leading-tight">
         No applications yet for this role.
       </p>
-      <p className="mt-4 max-w-md text-sm text-muted-foreground leading-relaxed">
+      <p className="mt-4 max-w-md text-body-lg text-muted-foreground leading-relaxed">
         When candidates apply via email with{" "}
         <span className="font-mono text-primary">[JOB-{code}]</span> in the subject,
         they&apos;ll appear here, scored against the criteria you set.

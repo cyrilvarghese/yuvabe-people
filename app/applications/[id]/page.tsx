@@ -14,11 +14,7 @@ import NavTabClient from "../../jobs/_components/nav-tab";
 /* —————————————————————————— atoms —————————————————————————— */
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-      {children}
-    </span>
-  );
+  return <span className="eyebrow text-muted-foreground">{children}</span>;
 }
 
 const STATUS_LABEL: Record<ApplicationStatus, string> = {
@@ -122,13 +118,13 @@ export default async function ApplicationDetailPage({
       <header className="flex-shrink-0 border-b border-border bg-background z-10">
         <div className="px-4 md:px-10 pt-4 pb-3 flex items-center justify-between gap-3">
           <div className="flex items-baseline gap-3 min-w-0">
-            <span className="font-serif italic text-lg leading-none">Yuvabe</span>
+            <span className="font-serif italic text-xl leading-none">Yuvabe</span>
             <span className="text-muted-foreground">/</span>
             <Eyebrow>ATS</Eyebrow>
           </div>
           <Link
             href={`/jobs/${job.code}`}
-            className="inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground hover:text-foreground transition-colors min-w-0 max-w-[40ch]"
+            className="inline-flex items-center gap-1.5 caps-action text-muted-foreground hover:text-foreground transition-colors min-w-0 max-w-[40ch]"
           >
             <ArrowLeft className="h-3 w-3 flex-shrink-0" />
             <span className="truncate hidden sm:inline">{job.title}</span>
@@ -144,7 +140,7 @@ export default async function ApplicationDetailPage({
       <main className="md:flex-1 grid grid-cols-1 md:grid-cols-[340px_1fr] md:overflow-hidden">
         {/* ════════ LEFT — candidate profile ════════ */}
         <aside className="border-b border-border md:border-r md:border-b-0 md:overflow-y-auto px-4 sm:px-6 md:px-10 py-6 md:py-10 flex flex-col">
-          <nav className="mb-3 font-mono text-[10px] uppercase tracking-[0.18em] flex items-center gap-2.5 flex-wrap">
+          <nav className="mb-3 eyebrow flex items-center gap-2.5 flex-wrap">
             <Link
               href="/jobs"
               className="text-muted-foreground hover:text-foreground transition-colors"
@@ -163,19 +159,19 @@ export default async function ApplicationDetailPage({
               {candidate.name}
             </span>
           </nav>
-          <h1 className="font-serif italic text-[2rem] md:text-[2.75rem] leading-[1.05] mt-1 mb-1 tracking-tight">
+          <h1 className="font-serif italic text-display md:text-display-lg leading-[1.05] mt-1 mb-1 tracking-tight">
             {candidate.name}
           </h1>
 
           {/* Contact */}
-          <div className="mt-5 space-y-2 text-[13px] text-foreground/85">
+          <div className="mt-5 space-y-2 text-body-sm text-foreground/85">
             <div className="flex items-center gap-2.5">
               <Mail className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" strokeWidth={1.5} />
               <span className="truncate">{candidate.email}</span>
             </div>
             <div className="flex items-center gap-2.5">
               <Phone className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" strokeWidth={1.5} />
-              <span className="font-mono text-[12px]">{candidate.phone}</span>
+              <span className="font-mono text-meta">{candidate.phone}</span>
             </div>
             <div className="flex items-center gap-2.5">
               <MapPin className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" strokeWidth={1.5} />
@@ -188,11 +184,11 @@ export default async function ApplicationDetailPage({
             <Eyebrow>Match score</Eyebrow>
             <div className="mt-2 flex items-baseline gap-3">
               <span
-                className={`font-mono text-[2.5rem] md:text-[3rem] leading-none tabular ${bandTextClass(application.matchScore)}`}
+                className={`font-mono text-display-md md:text-display-lg leading-none tabular ${bandTextClass(application.matchScore)}`}
               >
                 {String(application.matchScore).padStart(2, "0")}
               </span>
-              <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+              <span className="eyebrow text-muted-foreground">
                 / 100
               </span>
             </div>
@@ -206,10 +202,10 @@ export default async function ApplicationDetailPage({
           {/* Status */}
           <div className="mt-6 pt-6 border-t border-border">
             <Eyebrow>Status</Eyebrow>
-            <p className={`mt-2 font-mono text-[13px] uppercase tracking-[0.16em] ${STATUS_COLOR[application.status]}`}>
+            <p className={`mt-2 caps-meta ${STATUS_COLOR[application.status]}`}>
               {STATUS_LABEL[application.status]}
             </p>
-            <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground tabular">
+            <p className="mt-1 caps-meta text-muted-foreground tabular">
               Received {relativeTime(application.receivedAt)}
             </p>
           </div>
@@ -218,7 +214,7 @@ export default async function ApplicationDetailPage({
           <div className="mt-6 pt-6 border-t border-border space-y-3">
             <div>
               <Eyebrow>Experience</Eyebrow>
-              <p className="mt-1 font-mono text-sm tabular text-foreground">
+              <p className="mt-1 font-mono text-body tabular text-foreground">
                 {candidate.yearsOfExperience}{" "}
                 {candidate.yearsOfExperience === 1 ? "year" : "years"}
               </p>
@@ -226,10 +222,10 @@ export default async function ApplicationDetailPage({
             {candidate.education[0] && (
               <div>
                 <Eyebrow>Education</Eyebrow>
-                <p className="mt-1 text-sm text-foreground/85 leading-tight">
+                <p className="mt-1 text-body text-foreground/85 leading-tight">
                   {candidate.education[0].degree}
                 </p>
-                <p className="text-[12px] text-muted-foreground italic font-serif">
+                <p className="text-body-sm text-muted-foreground italic font-serif">
                   {candidate.education[0].institution}, {candidate.education[0].year}
                 </p>
               </div>
@@ -241,7 +237,7 @@ export default async function ApplicationDetailPage({
             <button
               type="button"
               disabled
-              className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground/65 italic cursor-not-allowed"
+              className="inline-flex items-center gap-2 caps-action text-muted-foreground/65 italic cursor-not-allowed"
               title="Resume download coming when intake is wired"
             >
               <FileText className="h-3.5 w-3.5" strokeWidth={1.5} />
@@ -252,7 +248,7 @@ export default async function ApplicationDetailPage({
                 href={`https://${candidate.links.linkedin}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground hover:text-foreground transition-colors"
+                className="inline-flex items-center gap-2 caps-action text-muted-foreground hover:text-foreground transition-colors"
               >
                 <ExternalLink className="h-3.5 w-3.5" strokeWidth={1.5} />
                 LinkedIn
@@ -263,7 +259,7 @@ export default async function ApplicationDetailPage({
                 href={`https://${candidate.links.portfolio}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground hover:text-foreground transition-colors"
+                className="inline-flex items-center gap-2 caps-action text-muted-foreground hover:text-foreground transition-colors"
               >
                 <ExternalLink className="h-3.5 w-3.5" strokeWidth={1.5} />
                 Portfolio
@@ -274,7 +270,7 @@ export default async function ApplicationDetailPage({
                 href={`https://${candidate.links.github}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground hover:text-foreground transition-colors"
+                className="inline-flex items-center gap-2 caps-action text-muted-foreground hover:text-foreground transition-colors"
               >
                 <ExternalLink className="h-3.5 w-3.5" strokeWidth={1.5} />
                 GitHub
@@ -287,7 +283,7 @@ export default async function ApplicationDetailPage({
             <button
               type="button"
               disabled
-              className="w-full font-mono text-[10px] uppercase tracking-[0.16em] py-2.5 rounded-sm border border-border text-muted-foreground/70 italic cursor-not-allowed"
+              className="w-full caps-action py-2.5 rounded-sm border border-border text-muted-foreground/70 italic cursor-not-allowed"
               title="Action wiring coming next"
             >
               Shortlist (mock)
@@ -295,7 +291,7 @@ export default async function ApplicationDetailPage({
             <button
               type="button"
               disabled
-              className="w-full font-mono text-[10px] uppercase tracking-[0.16em] py-2.5 rounded-sm text-muted-foreground/70 italic hover:bg-secondary/40 cursor-not-allowed"
+              className="w-full caps-action py-2.5 rounded-sm text-muted-foreground/70 italic hover:bg-secondary/40 cursor-not-allowed"
             >
               Reject (mock)
             </button>
@@ -307,7 +303,7 @@ export default async function ApplicationDetailPage({
           <div className="max-w-3xl">
             {/* Match summary — editorial moment */}
             <Eyebrow>Match summary</Eyebrow>
-            <blockquote className="mt-4 mb-12 font-serif italic text-[19px] leading-[1.55] text-foreground/85 border-l-2 border-primary/40 pl-6 max-w-[64ch]">
+            <blockquote className="mt-4 mb-12 font-serif italic text-h3 leading-[1.55] text-foreground/85 border-l-2 border-primary/40 pl-6 max-w-[64ch]">
               {application.matchSummary}
             </blockquote>
 
@@ -317,10 +313,10 @@ export default async function ApplicationDetailPage({
               {grouped.map((group) => (
                 <div key={group.importance}>
                   <div className="flex items-baseline gap-3 mb-4">
-                    <span className={`font-mono text-[10px] uppercase tracking-[0.18em] ${IMPORTANCE_COLOR[group.importance]}`}>
+                    <span className={`eyebrow ${IMPORTANCE_COLOR[group.importance]}`}>
                       {IMPORTANCE_LABEL[group.importance]}
                     </span>
-                    <span className="font-mono text-[10px] tabular text-muted-foreground">
+                    <span className="font-mono text-eyebrow tabular text-muted-foreground">
                       {String(group.items.length).padStart(2, "0")}
                     </span>
                     <div className="flex-1 border-b border-border/70" />
@@ -334,16 +330,16 @@ export default async function ApplicationDetailPage({
                         <div className="flex items-baseline justify-between gap-6">
                           <div className="flex items-baseline gap-3 min-w-0">
                             <span
-                              className={`font-mono text-[14px] leading-none ${MATCHED_COLOR[c.matched]} flex-shrink-0`}
+                              className={`font-mono text-body-sm leading-none ${MATCHED_COLOR[c.matched]} flex-shrink-0`}
                               aria-label={c.matched}
                             >
                               {MATCHED_GLYPH[c.matched]}
                             </span>
-                            <span className="text-[15px] leading-snug">
+                            <span className="text-body leading-snug">
                               {c.criterionLabel}
                             </span>
                           </div>
-                          <span className="font-mono text-[13px] tabular text-muted-foreground flex-shrink-0">
+                          <span className="font-mono text-body-sm tabular text-muted-foreground flex-shrink-0">
                             {c.score}
                             <span className="text-muted-foreground/60"> / 10</span>
                           </span>
@@ -362,7 +358,7 @@ export default async function ApplicationDetailPage({
                           />
                         </div>
                         {/* Evidence */}
-                        <p className="ml-6 mt-2.5 font-serif italic text-[14px] text-foreground/70 leading-relaxed max-w-[60ch]">
+                        <p className="ml-6 mt-2.5 font-serif italic text-body-sm text-foreground/70 leading-relaxed max-w-[60ch]">
                           &ldquo;{c.evidence}&rdquo;
                         </p>
                       </li>
@@ -376,7 +372,7 @@ export default async function ApplicationDetailPage({
             <div className="mt-16">
               <Eyebrow>Cover letter</Eyebrow>
               <div className="mt-4 border-l-2 border-border pl-6 max-w-[60ch]">
-                <p className="font-serif italic text-[16px] leading-[1.7] text-foreground/85 whitespace-pre-line">
+                <p className="font-serif italic text-body-lg leading-[1.7] text-foreground/85 whitespace-pre-line">
                   {application.coverLetter}
                 </p>
               </div>
@@ -384,13 +380,13 @@ export default async function ApplicationDetailPage({
 
             {/* Resume — collapsible */}
             <details className="mt-16 group">
-              <summary className="cursor-pointer list-none flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground hover:text-foreground transition-colors">
-                <span className="font-mono text-[14px] leading-none group-open:rotate-90 transition-transform">
+              <summary className="cursor-pointer list-none flex items-center gap-3 eyebrow text-muted-foreground hover:text-foreground transition-colors">
+                <span className="font-mono text-body-sm leading-none group-open:rotate-90 transition-transform">
                   ▸
                 </span>
                 Show resume text
               </summary>
-              <p className="mt-5 text-[14px] leading-relaxed text-foreground/80 max-w-[68ch] whitespace-pre-line">
+              <p className="mt-5 text-body leading-relaxed text-foreground/80 max-w-[68ch] whitespace-pre-line">
                 {candidate.resumeText}
               </p>
             </details>
@@ -402,15 +398,15 @@ export default async function ApplicationDetailPage({
                 {candidate.experience.map((e, i) => (
                   <li key={i} className="border-l border-border pl-5 max-w-[60ch]">
                     <div className="flex items-baseline justify-between gap-4">
-                      <h4 className="text-[15px] font-medium text-foreground">
+                      <h4 className="text-body font-medium text-foreground">
                         {e.title}
                         <span className="text-muted-foreground font-normal"> · {e.company}</span>
                       </h4>
-                      <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground tabular flex-shrink-0">
+                      <span className="caps-meta text-muted-foreground tabular flex-shrink-0">
                         {e.startDate} – {e.endDate}
                       </span>
                     </div>
-                    <p className="mt-1.5 text-[13px] text-foreground/75 leading-relaxed">
+                    <p className="mt-1.5 text-body-sm text-foreground/75 leading-relaxed">
                       {e.description}
                     </p>
                   </li>
@@ -422,7 +418,7 @@ export default async function ApplicationDetailPage({
       </main>
 
       {/* —————— Footer —————— */}
-      <footer className="border-t border-border px-4 sm:px-6 md:px-10 py-3 flex-shrink-0 flex items-center justify-between gap-3 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+      <footer className="border-t border-border px-4 sm:px-6 md:px-10 py-3 flex-shrink-0 flex items-center justify-between gap-3 eyebrow text-muted-foreground">
         <span className="truncate">Yuvabe ATS &nbsp; · &nbsp; v0.1</span>
         <span className="italic font-serif normal-case tracking-normal text-muted-foreground/80 hidden md:inline">
           Hiring is a human act.

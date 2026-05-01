@@ -22,7 +22,7 @@ These are non-negotiable. If a request appears to violate one, surface it before
 
 - **shadcn/ui primitives only — no custom UI primitives.** Use `<Button>`, `<Badge>`, `<Card>`, `<Input>`, `<Textarea>`, `<Label>`. *Never* write a `ScoreChip.tsx` or `EditorialQuote.tsx` with its own variants API. Visual identity lives in `className` strings + `globals.css` tokens. The exception: tiny *typographic atoms* defined inline at the top of a page file (e.g. an `Eyebrow` or `ColumnMarker` helper) are fine when they exist only in one file and don't grow a variants API.
 - **Borders, not shadows.** Use 1px hairline borders in `--border` (#E5E0D5). One single shadow exists in the system (bulk action bar + modals only). Otherwise: borders.
-- **Tailwind 4 + CSS-first theming.** Tokens live in `app/globals.css` `:root` block. No `tailwind.config.js`. Custom values via `[10px]`, `tracking-[0.18em]` etc. when the scale doesn't fit.
+- **Tailwind 4 + CSS-first theming.** Tokens live in `app/globals.css` (palette in `:root`, type scale in `@theme inline`, caps utilities via `@utility`). No `tailwind.config.js`. **Use the type tokens (`text-meta`, `text-h2`, etc.) and caps utilities (`eyebrow`, `caps-action`, `caps-meta`) — never `text-[Xpx]` or arbitrary `tracking-[...]` in components.** If a value isn't in the scale, push back, don't invent.
 - **No gradients.** Single subtle one allowed on the login screen background only — nowhere else.
 - **No dark mode for the prototype.** Commit to light, do it well.
 
@@ -102,22 +102,62 @@ font-mono  → Geist Mono
 | **Geist** (UI/body) | Tables, forms, buttons, navigation, body copy | Display moments, editorial flourishes |
 | **Geist Mono** | Scores in tables, timestamps, IDs, eyebrow captions, "MUST"/"NICE" labels, percentages, file sizes, page numbers | Body paragraphs, button labels |
 
-### Type scale — use these exactly
+### Type scale — use the tokens, not raw px
 
-Don't invent intermediate sizes.
+**Hard rule: never use `text-[Xpx]` or arbitrary `tracking-[...]` in components.** All sizes are tokens defined in `app/globals.css @theme`. All the recurring caps patterns are composite utilities (`eyebrow`, `caps-action`, `caps-meta`) that bake in font + size + tracking together. If a value isn't in the table below, it doesn't exist — push back, don't invent.
 
-```css
-display-xl → text-[3.5rem] leading-[1.05]      /* 56/60 — candidate names */
-display-lg → text-[2.5rem] leading-[1.1]       /* 40/44 — editorial H1 */
-h1         → text-[1.75rem] leading-[1.2]      /* 28/32 — utility H1 */
-h2         → text-xl leading-tight             /* 20/24 — section heads */
-h3         → text-base                         /* 16/20 — card titles */
-body       → text-[15px] leading-relaxed       /* 15/24 */
-body-sm    → text-[13px] leading-tight         /* 13/20 — table cells */
-caption    → text-[10px] uppercase tracking-[0.18em]   /* labels, badges */
-mono-sm    → font-mono text-[13px]             /* 13/20 — scores in tables */
-mono       → font-mono text-[15px]             /* 15/24 — score detail */
+**Size tokens** (generate `text-NAME` utilities via Tailwind 4 `@theme inline`):
+
+| Token | Px | Use |
+|---|---|---|
+| `text-eyebrow` | 11 | Decorative caps — footer, header tags, glanced labels (always paired with `eyebrow` utility for tracking) |
+| `text-meta` | 12 | Informational caps — counts, status, timestamps (always paired with `caps-meta` utility) |
+| `text-body-sm` | 13 | Table cells, sub-row metadata, evidence text |
+| `text-body` | 14 | Default body — criterion labels, contact info, sub-row meta |
+| `text-body-lg` | 16 | Primary body — modern minimum, empty-state copy, file labels |
+| `text-h3` | 18 | Card titles, prominent labels, score chips on detail pages |
+| `text-h2` | 22 | Section heads, list-row titles (mobile) |
+| `text-h1` | 28 | Utility H1, list-row titles (desktop), column-marker titles (desktop) |
+| `text-display` | 32 | Prominent display, column-marker numerals (mobile), candidate name (mobile) |
+| `text-display-md` | 40 | Responsive bridge for editorial display, score number (mobile) |
+| `text-display-lg` | 48 | Editorial H1, candidate name (desktop), score number (desktop) |
+| `text-display-xl` | 64 | Hero column-marker numerals (desktop) |
+
+**Composite caps utilities** (each baked in `globals.css @utility` as size + tracking + uppercase + font-mono):
+
+| Utility | Equivalent | Use |
+|---|---|---|
+| `eyebrow` | `font-mono text-eyebrow uppercase tracking-[0.18em] leading-none` | Decorative section markers, footer ethos line, breadcrumbs, "Roman-numeral" auxiliary labels |
+| `caps-action` | `font-mono text-eyebrow uppercase tracking-[0.16em] leading-none` | Button/link labels, tappable caps elements (back links, "Replace", "Reject") |
+| `caps-meta` | `font-mono text-meta uppercase tracking-[0.08em] leading-tight` | Informational caps that the user *reads to extract data* — counts, status pills, timestamps, tab labels, filter chips, JOB-XXX codes |
+
+**Color stays separate** — apply `text-muted-foreground`, `text-primary`, etc. alongside the utility:
+
+```tsx
+<span className="caps-meta text-muted-foreground tabular">
+  07 APPLICANTS
+</span>
 ```
+
+**The size→tracking inverse rule** (already baked into the utilities above): bigger size → tighter tracking. 11px caps at 0.18em reads elegant; 12px caps at 0.18em reads as shouting. Don't override the tracking in the utility unless you have a *very* specific editorial reason.
+
+### Common mappings — what to reach for
+
+| Need | Use |
+|---|---|
+| Section eyebrow ("Source file", "Match summary") | `<span className="eyebrow text-muted-foreground">` (or the inline `<Eyebrow>` atom in each page file) |
+| Status pill in a list ("SHORTLISTED", "REVIEWING") | `<span className="caps-meta text-[#2F5E7A]">` |
+| Count label on a row ("07 APPLICANTS · 11 MUST") | `<span className="caps-meta text-muted-foreground tabular">` |
+| Button label (uppercase mono caps) | `<button className="caps-action text-foreground hover:bg-secondary border ...">` |
+| Tab label (top nav) | `caps-meta` — tabs are read for navigation, not glanced |
+| Footer | `eyebrow text-muted-foreground` |
+| List-row primary title (italic Newsreader) | `font-serif italic text-h2 md:text-h1` |
+| Candidate name on detail page | `font-serif italic text-display md:text-display-lg` |
+| Column marker numeral (`i.`/`ii.`) | `font-serif italic text-display md:text-display-xl text-primary` |
+| Empty-state quote | `font-serif italic text-display md:text-display-md text-foreground/55` |
+| Body paragraph (give it room) | `text-body-lg` (16px) — empty-state copy, primary file labels |
+| Body, default (general use) | `text-body` (14px) — criterion labels, sub-rows, descriptions |
+| Table cell / sub-row metadata | `text-body-sm` (13px) |
 
 ### Italic Newsreader is the signature move
 
