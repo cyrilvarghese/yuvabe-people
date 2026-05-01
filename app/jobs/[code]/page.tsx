@@ -5,6 +5,7 @@ import { listApplicationsByJobCode, type Application, type ApplicationStatus } f
 import { listCandidates, type Candidate } from "@/lib/candidates-store";
 import { ArrowLeft, ArrowUpRight, Pencil } from "lucide-react";
 import NavTabClient from "../_components/nav-tab";
+import { JobIdBadge } from "@/app/_components/job-id-badge";
 
 /* —————————————————————————— atoms (inlined per design system) —————————————————————————— */
 
@@ -129,7 +130,7 @@ export default async function JobDetailPage({
       <header className="flex-shrink-0 border-b border-border bg-background z-10">
         <div className="px-4 md:px-10 pt-4 pb-3 flex items-center justify-between gap-4">
           <div className="flex items-baseline gap-3 min-w-0">
-            <span className="font-serif italic text-xl leading-none">Yuvabe</span>
+            <span className="font-serif italic text-h3 leading-none">Yuvabe</span>
             <span className="text-muted-foreground">/</span>
             <Eyebrow>ATS</Eyebrow>
           </div>
@@ -169,9 +170,7 @@ export default async function JobDetailPage({
               </nav>
               <ColumnMarker numeral="i" title={job.title} />
               <div className="mt-4 flex items-center gap-4 flex-wrap">
-                <span className="caps-meta text-primary tabular">
-                  [JOB-{job.code}]
-                </span>
+                <JobIdBadge code={job.code} />
                 <span className="text-border">·</span>
                 <Eyebrow>
                   <span className="tabular">

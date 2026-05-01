@@ -8,7 +8,7 @@ import {
   type CriterionMatch,
 } from "@/lib/applications-store";
 import { getCandidateById, type Candidate } from "@/lib/candidates-store";
-import { ArrowLeft, ExternalLink, Mail, MapPin, Phone, FileText } from "lucide-react";
+import { ArrowLeft, ExternalLink, FileText } from "lucide-react";
 import NavTabClient from "../../jobs/_components/nav-tab";
 
 /* —————————————————————————— atoms —————————————————————————— */
@@ -118,7 +118,7 @@ export default async function ApplicationDetailPage({
       <header className="flex-shrink-0 border-b border-border bg-background z-10">
         <div className="px-4 md:px-10 pt-4 pb-3 flex items-center justify-between gap-3">
           <div className="flex items-baseline gap-3 min-w-0">
-            <span className="font-serif italic text-xl leading-none">Yuvabe</span>
+            <span className="font-serif italic text-h3 leading-none">Yuvabe</span>
             <span className="text-muted-foreground">/</span>
             <Eyebrow>ATS</Eyebrow>
           </div>
@@ -147,35 +147,35 @@ export default async function ApplicationDetailPage({
             >
               Jobs
             </Link>
-            <span className="text-base leading-none text-muted-foreground/65">›</span>
+            <span className="text-body-lg leading-none text-muted-foreground/65">›</span>
             <Link
               href={`/jobs/${job.code}`}
-              className="text-muted-foreground hover:text-foreground transition-colors truncate max-w-[20ch]"
+              className="text-muted-foreground hover:text-foreground transition-colors truncate max-w-[24ch]"
             >
               {job.title}
             </Link>
-            <span className="text-base leading-none text-muted-foreground/65">›</span>
-            <span className="text-foreground/80 truncate max-w-[20ch]">
-              {candidate.name}
-            </span>
           </nav>
           <h1 className="font-serif italic text-display md:text-display-lg leading-[1.05] mt-1 mb-1 tracking-tight">
             {candidate.name}
           </h1>
 
-          {/* Contact */}
-          <div className="mt-5 space-y-2 text-body-sm text-foreground/85">
-            <div className="flex items-center gap-2.5">
-              <Mail className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" strokeWidth={1.5} />
-              <span className="truncate">{candidate.email}</span>
-            </div>
-            <div className="flex items-center gap-2.5">
-              <Phone className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" strokeWidth={1.5} />
-              <span className="font-mono text-meta">{candidate.phone}</span>
-            </div>
-            <div className="flex items-center gap-2.5">
-              <MapPin className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" strokeWidth={1.5} />
-              <span>{candidate.location}</span>
+          {/* Contact card */}
+          <div className="mt-6 bg-card border border-border rounded p-4 md:p-5">
+            <Eyebrow>Contact</Eyebrow>
+            <div className="mt-2.5 space-y-1.5 text-body-sm text-foreground/85">
+              <a
+                href={`mailto:${candidate.email}`}
+                className="block truncate hover:text-foreground hover:underline underline-offset-2 decoration-muted-foreground/40 transition-colors"
+              >
+                {candidate.email}
+              </a>
+              <a
+                href={`tel:${candidate.phone.replace(/\s+/g, "")}`}
+                className="block font-mono tabular hover:text-foreground hover:underline underline-offset-2 decoration-muted-foreground/40 transition-colors"
+              >
+                {candidate.phone}
+              </a>
+              <p>{candidate.location}</p>
             </div>
           </div>
 
@@ -335,7 +335,7 @@ export default async function ApplicationDetailPage({
                             >
                               {MATCHED_GLYPH[c.matched]}
                             </span>
-                            <span className="text-body leading-snug">
+                            <span className="text-body-lg leading-snug">
                               {c.criterionLabel}
                             </span>
                           </div>
@@ -386,7 +386,7 @@ export default async function ApplicationDetailPage({
                 </span>
                 Show resume text
               </summary>
-              <p className="mt-5 text-body leading-relaxed text-foreground/80 max-w-[68ch] whitespace-pre-line">
+              <p className="mt-5 text-body-lg leading-relaxed text-foreground/80 max-w-[68ch] whitespace-pre-line">
                 {candidate.resumeText}
               </p>
             </details>
@@ -398,7 +398,7 @@ export default async function ApplicationDetailPage({
                 {candidate.experience.map((e, i) => (
                   <li key={i} className="border-l border-border pl-5 max-w-[60ch]">
                     <div className="flex items-baseline justify-between gap-4">
-                      <h4 className="text-body font-medium text-foreground">
+                      <h4 className="text-body-lg font-medium text-foreground">
                         {e.title}
                         <span className="text-muted-foreground font-normal"> · {e.company}</span>
                       </h4>

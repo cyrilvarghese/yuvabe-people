@@ -50,9 +50,10 @@ API routes (no UI): `POST /api/extract-criteria` (JD file → LLM), `GET/POST /a
 | Skill | When it activates | Read it from |
 |---|---|---|
 | `yuvabe-design-system` | Before writing/editing any `.tsx` in `app/` or `components/`, or changing `globals.css` tokens. **Apply this proactively.** | `.claude/skills/yuvabe-design-system/SKILL.md` |
+| `yuvabe-interaction-design` | Before writing any list, table, card-grid, or surface that forks into a detail view. Before adding/removing row actions. **Apply this proactively.** | `.claude/skills/yuvabe-interaction-design/SKILL.md` |
 | `yuvabe-vd-checker` | After completing a screen, when user says "VD check", "audit this screen", "is this on-brand?". | `.claude/skills/yuvabe-vd-checker/SKILL.md` |
 
-The two skills are paired: design-system informs *what to build*; vd-checker verifies *what was built*.
+The three skills divide the design surface: **design-system** governs *how a single surface looks*, **interaction-design** governs *how surfaces compose into flows*, and **vd-checker** *verifies what was built* against the visual system. Design-system + interaction-design are generative (apply before writing); vd-checker is verifying (apply after).
 
 ## Locked constraints
 
