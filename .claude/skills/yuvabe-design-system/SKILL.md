@@ -66,6 +66,8 @@ WCAG AA target: **4.5:1 for normal text** (<18pt), **3:1 for large text** (≥18
 
 **Verification**: run the [`yuvabe-vd-checker`](../yuvabe-vd-checker/SKILL.md) skill after building any new screen. It computes contrast for every text-color combination and flags AA failures.
 
+**Companion skill — flow design**: this skill governs *how a single surface looks*. For *how surfaces compose into flows* — list rows with multiple actions, row-as-link patterns, kebab thresholds, empty states, skeleton loading, drill-down navigation, card-vs-table-vs-list — read [`yuvabe-interaction-design`](../yuvabe-interaction-design/SKILL.md). Activate it before writing any list, table, or card-grid surface.
+
 ### Status (when needed in later slices)
 
 | State | Color | Token name |

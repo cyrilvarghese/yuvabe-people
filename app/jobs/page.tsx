@@ -1,8 +1,17 @@
 import Link from "next/link";
 import { listJobs, type Job } from "@/lib/jobs-store";
 import { listApplications } from "@/lib/applications-store";
-import { ArrowUpRight, Plus } from "lucide-react";
+import { ChevronRight, MoreHorizontal, Plus } from "lucide-react";
 import NavTabClient from "./_components/nav-tab";
+import { JobIdBadge } from "@/app/_components/job-id-badge";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 /* —————————————————————————— small typographic atoms —————————————————————————— */
 
@@ -84,7 +93,7 @@ export default async function JobsPage({
       <header className="flex-shrink-0 border-b border-border bg-background z-10">
         <div className="px-4 md:px-10 pt-4 pb-3 flex items-center justify-between gap-3">
           <div className="flex items-baseline gap-3 min-w-0">
-            <span className="font-serif italic text-xl leading-none">
+            <span className="font-serif italic text-h3 leading-none">
               Yuvabe
             </span>
             <span className="text-muted-foreground">/</span>
@@ -141,84 +150,92 @@ export default async function JobsPage({
                     <li
                       key={job.id}
                       className={`
-                        group border-b border-border/60 last:border-b-0
+                        relative group border-b border-border/60 last:border-b-0
                         ${idx === 0 ? "border-t border-border/60" : ""}
                         ${isNew ? "highlight-new" : ""}
+                        hover:bg-secondary/40 transition-colors
                       `}
                     >
-                      <div className="py-5 md:py-6 -mx-4 px-4 rounded-sm">
-                        <div className="flex items-start justify-between gap-3 md:gap-6">
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-baseline gap-3 mb-2">
-                              <h3 className="font-serif italic text-h2 md:text-h1 leading-tight tracking-tight truncate">
-                                {job.title}
-                              </h3>
-                              {isNew && (
-                                <span className="eyebrow text-primary flex-shrink-0 hidden sm:inline">
-                                  ← just saved
-                                </span>
-                              )}
-                            </div>
-                            <div className="flex items-center gap-2 md:gap-3 flex-wrap">
-                              <span className="caps-meta text-foreground/70 tabular">
-                                [JOB-{job.code}]
+                      <div className="py-5 md:py-6 -mx-4 pl-4 pr-6 md:pr-8 rounded-sm grid grid-cols-[1fr_auto_auto] items-center gap-2 md:gap-3">
+                        <Link
+                          href={`/jobs/${job.code}`}
+                          className="min-w-0 after:absolute after:inset-0 after:content-[''] after:rounded-sm focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-primary focus-visible:after:ring-offset-2 focus-visible:after:ring-offset-background"
+                          aria-label={`View applicants for ${job.title}`}
+                        >
+                          <div className="flex items-baseline gap-3 mb-2">
+                            <h3 className="font-serif italic text-h2 md:text-h1 leading-tight tracking-tight truncate">
+                              {job.title}
+                            </h3>
+                            {isNew && (
+                              <span className="eyebrow text-primary flex-shrink-0 hidden sm:inline">
+                                ← just saved
                               </span>
-                              <span className="text-border">·</span>
-                              <span className="caps-meta text-muted-foreground tabular">
-                                {String(job.criteria.length).padStart(2, "0")} criteria
-                              </span>
-                              <span className="text-border hidden sm:inline">·</span>
-                              <span className="caps-meta tabular hidden sm:inline">
-                                <span
-                                  className={appCount > 0 ? "text-foreground font-medium" : "text-muted-foreground/70"}
-                                >
-                                  {String(appCount).padStart(2, "0")}
-                                </span>{" "}
-                                <span className="text-muted-foreground">
-                                  {appCount === 1 ? "applicant" : "applicants"}
-                                </span>
-                              </span>
-                              <span className="text-border hidden md:inline">·</span>
-                              <span className="caps-meta tabular hidden md:inline">
-                                <span className="text-primary">
-                                  {String(counts.must).padStart(2, "0")} must
-                                </span>
-                                <span className="text-muted-foreground/60 mx-1.5">·</span>
-                                <span className="text-foreground">
-                                  {String(counts.strong).padStart(2, "0")} strong
-                                </span>
-                                <span className="text-muted-foreground/60 mx-1.5">·</span>
-                                <span className="text-muted-foreground">
-                                  {String(counts.nice).padStart(2, "0")} nice
-                                </span>
-                              </span>
-                              <span className="text-border hidden lg:inline">·</span>
-                              <span className="caps-meta text-muted-foreground hidden lg:inline">
-                                {relativeTime(job.createdAt)}
-                              </span>
-                            </div>
+                            )}
                           </div>
-                          <div className="flex flex-col items-stretch gap-1 flex-shrink-0 min-w-[140px]">
-                            <Link
-                              href={`/jobs/${job.code}`}
-                              className="caps-action px-3 py-2 rounded-sm text-foreground hover:bg-secondary border border-border hover:border-foreground/20 transition-colors inline-flex items-center justify-center gap-1.5"
-                            >
-                              View applicants
-                              <ArrowUpRight
-                                className="h-3 w-3"
-                                strokeWidth={2}
-                              />
-                            </Link>
-                            <button
-                              type="button"
-                              disabled
-                              title="Edit coming next"
-                              className="caps-action px-3 py-2 rounded-sm text-muted-foreground/65 italic cursor-not-allowed inline-flex items-center justify-center"
-                            >
-                              Edit
-                            </button>
+                          <div className="flex items-center gap-2 md:gap-3 flex-wrap">
+                            <JobIdBadge code={job.code} />
+                            <span className="text-border">·</span>
+                            <span className="caps-meta text-muted-foreground tabular">
+                              {String(job.criteria.length).padStart(2, "0")} criteria
+                            </span>
+                            <span className="text-border hidden sm:inline">·</span>
+                            <span className="caps-meta tabular hidden sm:inline">
+                              <span
+                                className={appCount > 0 ? "text-foreground font-medium" : "text-muted-foreground/70"}
+                              >
+                                {String(appCount).padStart(2, "0")}
+                              </span>{" "}
+                              <span className="text-muted-foreground">
+                                {appCount === 1 ? "applicant" : "applicants"}
+                              </span>
+                            </span>
+                            <span className="text-border hidden md:inline">·</span>
+                            <span className="caps-meta tabular hidden md:inline">
+                              <span className="text-primary">
+                                {String(counts.must).padStart(2, "0")} must
+                              </span>
+                              <span className="text-muted-foreground/60 mx-1.5">·</span>
+                              <span className="text-foreground">
+                                {String(counts.strong).padStart(2, "0")} strong
+                              </span>
+                              <span className="text-muted-foreground/60 mx-1.5">·</span>
+                              <span className="text-muted-foreground">
+                                {String(counts.nice).padStart(2, "0")} nice
+                              </span>
+                            </span>
+                            <span className="text-border hidden lg:inline">·</span>
+                            <span className="caps-meta text-muted-foreground hidden lg:inline">
+                              {relativeTime(job.createdAt)}
+                            </span>
                           </div>
-                        </div>
+                        </Link>
+
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="relative z-10 h-8 w-8 text-muted-foreground/70 group-hover:text-muted-foreground hover:!text-foreground hover:bg-secondary transition-colors"
+                              aria-label={`More actions for ${job.title}`}
+                            >
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-44">
+                            <DropdownMenuItem disabled>Edit job</DropdownMenuItem>
+                            <DropdownMenuItem disabled>Duplicate</DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem disabled className="text-primary focus:text-primary">
+                              Archive
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+
+                        <ChevronRight
+                          className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-px transition-all flex-shrink-0"
+                          strokeWidth={1.75}
+                          aria-hidden
+                        />
                       </div>
                     </li>
                   );

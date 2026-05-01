@@ -197,6 +197,7 @@ This skill is about *visual* design. Do not flag:
 - React patterns (hooks, server vs. client components)
 - TypeScript type safety
 - Routing / data flow correctness
+- **Flow-level interaction concerns** — row-as-link patterns, primary-action discipline, kebab thresholds, empty-state CTA count, drill-down navigation, card-vs-table-vs-list choice. Those live in [`yuvabe-interaction-design`](../yuvabe-interaction-design/SKILL.md) and have their own audit checklist there. Mention to run that skill if you spot a violation while doing a VD pass, but don't flag it here.
 
 Those are out of scope. The user knows where to find a separate code-review skill if they want those.
 

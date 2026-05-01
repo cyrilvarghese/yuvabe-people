@@ -118,7 +118,7 @@ export default async function ApplicationsListPage({
       <header className="flex-shrink-0 border-b border-border bg-background z-10">
         <div className="px-4 md:px-10 pt-4 pb-3 flex items-center justify-between gap-3">
           <div className="flex items-baseline gap-3 min-w-0">
-            <span className="font-serif italic text-xl leading-none">Yuvabe</span>
+            <span className="font-serif italic text-h3 leading-none">Yuvabe</span>
             <span className="text-muted-foreground">/</span>
             <Eyebrow>ATS</Eyebrow>
           </div>
