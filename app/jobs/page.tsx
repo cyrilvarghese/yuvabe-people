@@ -1,17 +1,10 @@
 import Link from "next/link";
 import { listJobs, type Job } from "@/lib/jobs-store";
 import { listApplications } from "@/lib/applications-store";
-import { ChevronRight, MoreHorizontal, Plus } from "lucide-react";
+import { ChevronRight, Plus } from "lucide-react";
 import NavTabClient from "./_components/nav-tab";
 import { JobIdBadge } from "@/app/_components/job-id-badge";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { JobActionsMenu } from "./_components/job-actions-menu";
 
 /* —————————————————————————— small typographic atoms —————————————————————————— */
 
@@ -210,26 +203,11 @@ export default async function JobsPage({
                           </div>
                         </Link>
 
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="relative z-10 h-8 w-8 text-muted-foreground/70 group-hover:text-muted-foreground hover:!text-foreground hover:bg-secondary transition-colors"
-                              aria-label={`More actions for ${job.title}`}
-                            >
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-44">
-                            <DropdownMenuItem disabled>Edit job</DropdownMenuItem>
-                            <DropdownMenuItem disabled>Duplicate</DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem disabled className="text-primary focus:text-primary">
-                              Archive
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                        <JobActionsMenu
+                          jobCode={job.code}
+                          jobTitle={job.title}
+                          isArchived={!!job.archivedAt}
+                        />
 
                         <ChevronRight
                           className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-px transition-all flex-shrink-0"

@@ -1,8 +1,23 @@
 /**
- * Local JSON store for candidates. Mock data lives in data/candidates.example.json
- * and is shadowed by data/candidates.json once a real candidate is saved (none yet,
- * since intake isn't built). Mirror of the future Supabase `candidates` table —
- * keep field names camelCase and additive.
+ * MIGRATION BOUNDARY — data access for Candidate.
+ *
+ * This file is the only place in the app that reads or writes candidate
+ * persistence. All callers go through the exported async functions
+ * (listCandidates, getCandidateById, createCandidate). They never see the
+ * underlying storage.
+ *
+ * Today's storage: local JSON file at `data/candidates.json`, with
+ * `data/candidates.example.json` as a committed seed fallback when the live
+ * file is empty / absent. (See README of pattern at top of jobs-store.ts.)
+ *
+ * Tomorrow's storage: Supabase `candidates` table. To migrate, replace the
+ * `readStore` / `writeStore` bodies with Supabase queries. The exported
+ * function signatures, return types, and shape of `Candidate` stay the same —
+ * no caller changes required. Field names are camelCase and additive
+ * specifically to make that swap mechanical.
+ *
+ * The example fallback and the read-modify-write race here go away on swap
+ * day; Supabase upserts are atomic and there is one source of truth.
  */
 
 import { promises as fs } from "node:fs";
@@ -74,4 +89,24 @@ export async function listCandidates(): Promise<Candidate[]> {
 export async function getCandidateById(id: string): Promise<Candidate | null> {
   const store = await readStore();
   return store.candidates.find((c) => c.id === id) ?? null;
+}
+
+async function writeStore(store: Store): Promise<void> {
+  await fs.mkdir(DATA_DIR, { recursive: true });
+  await fs.writeFile(FILE, JSON.stringify(store, null, 2), "utf-8");
+}
+
+export type CreateCandidateInput = Omit<Candidate, "id">;
+
+export async function createCandidate(
+  input: CreateCandidateInput
+): Promise<Candidate> {
+  const store = await readStore();
+  const candidate: Candidate = {
+    id: crypto.randomUUID(),
+    ...input,
+  };
+  store.candidates.push(candidate);
+  await writeStore(store);
+  return candidate;
 }

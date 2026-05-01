@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { extractCriteria } from "@/lib/llm";
 import { extractTextFromFile } from "@/lib/parseUpload";
+import { generateCriterionId, type Criterion } from "@/lib/prompts/extractCriteria.v1";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -39,8 +40,16 @@ export async function POST(req: Request) {
 
   try {
     const result = await extractCriteria(trimmed);
+    // Assign a stable id to each criterion now, before they flow into the
+    // recruiter's editor and downstream into createJob. The LLM intentionally
+    // does not generate ids (LLMs are unreliable at random/unique strings).
+    const criteria: Criterion[] = result.criteria.map((c) => ({
+      ...c,
+      id: generateCriterionId(),
+    }));
     return NextResponse.json({
-      ...result,
+      title_suggestion: result.title_suggestion,
+      criteria,
       jd_text: trimmed,
       file: { name: parsed.filename, size: parsed.size },
     });

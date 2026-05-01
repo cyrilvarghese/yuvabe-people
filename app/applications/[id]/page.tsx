@@ -10,6 +10,7 @@ import {
 import { getCandidateById, type Candidate } from "@/lib/candidates-store";
 import { ArrowLeft, ExternalLink, FileText } from "lucide-react";
 import NavTabClient from "../../jobs/_components/nav-tab";
+import { StatusActions } from "./_components/status-actions";
 
 /* —————————————————————————— atoms —————————————————————————— */
 
@@ -87,6 +88,56 @@ function relativeTime(iso: string): string {
   return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
+/**
+ * Prepend `https://` only when the URL doesn't already specify a scheme.
+ * `parseResume` may return either form depending on what the resume contains
+ * (e.g. "linkedin.com/in/foo" or "https://linkedin.com/in/foo"). Without this,
+ * naive concatenation produces broken `https://https://...` links.
+ */
+function ensureHttps(url: string): string {
+  return /^https?:\/\//i.test(url) ? url : `https://${url}`;
+}
+
+/**
+ * Format a tenure between two YYYY-MM dates as a duration string.
+ * Recruiters compare tenure faster than they parse start/end pairs.
+ *   "2023-05" → "2025-05"  → "2y"
+ *   "2024-01" → "2024-08"  → "7m"
+ *   "2022-06" → "present"  → "2y 11m · now"
+ * Falls back to the raw range if either date isn't YYYY-MM.
+ */
+function formatDuration(startDate: string, endDate: string): string {
+  const startMatch = startDate.match(/^(\d{4})-(\d{2})$/);
+  if (!startMatch) return `${startDate} – ${endDate}`;
+  const startY = parseInt(startMatch[1], 10);
+  const startM = parseInt(startMatch[2], 10);
+
+  const ongoing = endDate === "present";
+  let endY: number;
+  let endM: number;
+  if (ongoing) {
+    const now = new Date();
+    endY = now.getFullYear();
+    endM = now.getMonth() + 1;
+  } else {
+    const endMatch = endDate.match(/^(\d{4})-(\d{2})$/);
+    if (!endMatch) return `${startDate} – ${endDate}`;
+    endY = parseInt(endMatch[1], 10);
+    endM = parseInt(endMatch[2], 10);
+  }
+
+  const totalMonths = Math.max(0, (endY - startY) * 12 + (endM - startM));
+  let label: string;
+  if (totalMonths < 1) label = "<1m";
+  else if (totalMonths < 12) label = `${totalMonths}m`;
+  else {
+    const years = Math.floor(totalMonths / 12);
+    const months = totalMonths % 12;
+    label = months === 0 ? `${years}y` : `${years}y ${months}m`;
+  }
+  return ongoing ? `${label} · now` : label;
+}
+
 /* —————————————————————————— page —————————————————————————— */
 
 export default async function ApplicationDetailPage({
@@ -159,7 +210,9 @@ export default async function ApplicationDetailPage({
             {candidate.name}
           </h1>
 
-          {/* Contact card */}
+          {/* Contact card. Empty phone / location render an italic Newsreader
+              "missing" placeholder in muted terracotta so the recruiter notices
+              the gap at a glance. */}
           <div className="mt-6 bg-card border border-border rounded p-4 md:p-5">
             <Eyebrow>Contact</Eyebrow>
             <div className="mt-2.5 space-y-1.5 text-body-sm text-foreground/85">
@@ -169,13 +222,25 @@ export default async function ApplicationDetailPage({
               >
                 {candidate.email}
               </a>
-              <a
-                href={`tel:${candidate.phone.replace(/\s+/g, "")}`}
-                className="block font-mono tabular hover:text-foreground hover:underline underline-offset-2 decoration-muted-foreground/40 transition-colors"
-              >
-                {candidate.phone}
-              </a>
-              <p>{candidate.location}</p>
+              {candidate.phone ? (
+                <a
+                  href={`tel:${candidate.phone.replace(/\s+/g, "")}`}
+                  className="block font-mono tabular hover:text-foreground hover:underline underline-offset-2 decoration-muted-foreground/40 transition-colors"
+                >
+                  {candidate.phone}
+                </a>
+              ) : (
+                <p className="font-serif italic text-primary/65">
+                  No phone provided
+                </p>
+              )}
+              {candidate.location ? (
+                <p>{candidate.location}</p>
+              ) : (
+                <p className="font-serif italic text-primary/65">
+                  No location provided
+                </p>
+              )}
             </div>
           </div>
 
@@ -208,6 +273,12 @@ export default async function ApplicationDetailPage({
             <p className="mt-1 caps-meta text-muted-foreground tabular">
               Received {relativeTime(application.receivedAt)}
             </p>
+            <div className="mt-4">
+              <StatusActions
+                applicationId={application.id}
+                currentStatus={application.status}
+              />
+            </div>
           </div>
 
           {/* Quick stats */}
@@ -245,7 +316,7 @@ export default async function ApplicationDetailPage({
             </button>
             {candidate.links?.linkedin && (
               <a
-                href={`https://${candidate.links.linkedin}`}
+                href={ensureHttps(candidate.links.linkedin)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 caps-action text-muted-foreground hover:text-foreground transition-colors"
@@ -256,7 +327,7 @@ export default async function ApplicationDetailPage({
             )}
             {candidate.links?.portfolio && (
               <a
-                href={`https://${candidate.links.portfolio}`}
+                href={ensureHttps(candidate.links.portfolio)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 caps-action text-muted-foreground hover:text-foreground transition-colors"
@@ -267,7 +338,7 @@ export default async function ApplicationDetailPage({
             )}
             {candidate.links?.github && (
               <a
-                href={`https://${candidate.links.github}`}
+                href={ensureHttps(candidate.links.github)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 caps-action text-muted-foreground hover:text-foreground transition-colors"
@@ -403,7 +474,7 @@ export default async function ApplicationDetailPage({
                         <span className="text-muted-foreground font-normal"> · {e.company}</span>
                       </h4>
                       <span className="caps-meta text-muted-foreground tabular flex-shrink-0">
-                        {e.startDate} – {e.endDate}
+                        {formatDuration(e.startDate, e.endDate)}
                       </span>
                     </div>
                     <p className="mt-1.5 text-body-sm text-foreground/75 leading-relaxed">

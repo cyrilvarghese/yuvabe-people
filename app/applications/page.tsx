@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { listApplications, type ApplicationStatus } from "@/lib/applications-store";
-import { listCandidates, type Candidate } from "@/lib/candidates-store";
 import { listJobs, type Job } from "@/lib/jobs-store";
 import { ArrowUpRight } from "lucide-react";
 import NavTabClient from "../jobs/_components/nav-tab";
@@ -89,13 +88,11 @@ export default async function ApplicationsListPage({
       ? (params.status as ApplicationStatus)
       : null;
 
+  // Listing pages read denormalized snapshots off Application — no candidates
+  // fan-out. The full Candidate doc is only fetched on /applications/[id].
   const allApplications = await listApplications();
-  const candidates = await listCandidates();
   const jobs = await listJobs();
 
-  const candidatesById = new Map<string, Candidate>(
-    candidates.map((c) => [c.id, c])
-  );
   const jobsByCode = new Map<string, Job>(jobs.map((j) => [j.code, j]));
 
   // All counts come from the unfiltered set — chips are navigators, not status.
@@ -173,9 +170,8 @@ export default async function ApplicationsListPage({
             ) : (
               <ul className="max-w-5xl">
                 {applications.map((app, idx) => {
-                  const candidate = candidatesById.get(app.candidateId);
                   const job = jobsByCode.get(app.jobCode);
-                  if (!candidate || !job) return null;
+                  if (!job) return null;
                   return (
                     <li
                       key={app.id}
@@ -192,12 +188,12 @@ export default async function ApplicationsListPage({
                             <ScoreChip score={app.matchScore} />
                             <div className="min-w-0 flex-1">
                               <h3 className="font-serif italic text-xl md:text-2xl leading-tight tracking-tight truncate">
-                                {candidate.name}
+                                {app.candidateName ?? ""}
                               </h3>
                               <div className="mt-1 flex items-center gap-2 text-body text-muted-foreground">
                                 <span className="truncate">{job.title}</span>
                                 <span className="text-border hidden sm:inline">·</span>
-                                <span className="truncate hidden sm:inline">{candidate.location}</span>
+                                <span className="truncate hidden sm:inline">{app.candidateLocation ?? ""}</span>
                               </div>
                             </div>
                           </div>

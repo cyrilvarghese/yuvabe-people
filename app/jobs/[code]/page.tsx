@@ -2,8 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { listJobs } from "@/lib/jobs-store";
 import { listApplicationsByJobCode, type Application, type ApplicationStatus } from "@/lib/applications-store";
-import { listCandidates, type Candidate } from "@/lib/candidates-store";
-import { ArrowLeft, ArrowUpRight, Pencil } from "lucide-react";
+import { ArrowLeft, ArrowUpRight, Eye } from "lucide-react";
 import NavTabClient from "../_components/nav-tab";
 import { JobIdBadge } from "@/app/_components/job-id-badge";
 
@@ -104,11 +103,9 @@ export default async function JobDetailPage({
   const job = jobs.find((j) => j.code === code);
   if (!job) notFound();
 
+  // Listing reads denormalized snapshots off Application — no candidates
+  // fan-out. The full Candidate doc is only fetched on /applications/[id].
   const allApplications = await listApplicationsByJobCode(code);
-  const allCandidates = await listCandidates();
-  const candidatesById = new Map<string, Candidate>(
-    allCandidates.map((c) => [c.id, c])
-  );
 
   // Counts always come from the unfiltered set — chips are navigators.
   const statusCounts = allApplications.reduce<Record<ApplicationStatus, number>>(
@@ -188,11 +185,11 @@ export default async function JobDetailPage({
                 <span className="text-border">·</span>
                 <Eyebrow>posted {relativeTime(job.createdAt)}</Eyebrow>
                 <Link
-                  href={`/jobs/${job.code}/edit`}
+                  href={`/jobs/${job.code}/view`}
                   className="ml-auto inline-flex items-center gap-1.5 caps-action text-muted-foreground hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm"
                 >
-                  Edit
-                  <Pencil className="h-3 w-3" strokeWidth={1.75} />
+                  View criteria
+                  <Eye className="h-3 w-3" strokeWidth={1.75} />
                 </Link>
               </div>
 
@@ -232,25 +229,21 @@ export default async function JobDetailPage({
               />
             ) : (
               <ul className="max-w-5xl">
-                {applications.map((app, idx) => {
-                  const candidate = candidatesById.get(app.candidateId);
-                  if (!candidate) return null;
-                  return (
-                    <li
-                      key={app.id}
-                      className={`group border-b border-border/60 ${
-                        idx === 0 ? "border-t border-border/60" : ""
-                      }`}
+                {applications.map((app, idx) => (
+                  <li
+                    key={app.id}
+                    className={`group border-b border-border/60 ${
+                      idx === 0 ? "border-t border-border/60" : ""
+                    }`}
+                  >
+                    <Link
+                      href={`/applications/${app.id}`}
+                      className="block py-5 -mx-4 px-4 rounded-sm hover:bg-secondary/40 transition-colors"
                     >
-                      <Link
-                        href={`/applications/${app.id}`}
-                        className="block py-5 -mx-4 px-4 rounded-sm hover:bg-secondary/40 transition-colors"
-                      >
-                        <ApplicationRow application={app} candidate={candidate} />
-                      </Link>
-                    </li>
-                  );
-                })}
+                      <ApplicationRow application={app} />
+                    </Link>
+                  </li>
+                ))}
               </ul>
             )}
           </div>
@@ -273,10 +266,8 @@ export default async function JobDetailPage({
 
 function ApplicationRow({
   application,
-  candidate,
 }: {
   application: Application;
-  candidate: Candidate;
 }) {
   return (
     <div className="flex items-center justify-between gap-3 md:gap-6">
@@ -284,15 +275,15 @@ function ApplicationRow({
         <ScoreChip score={application.matchScore} />
         <div className="min-w-0 flex-1">
           <h3 className="font-serif italic text-xl md:text-2xl leading-tight tracking-tight truncate">
-            {candidate.name}
+            {application.candidateName ?? ""}
           </h3>
           <div className="mt-1 flex items-center gap-2 text-body text-muted-foreground">
-            <span className="truncate">{candidate.location}</span>
+            <span className="truncate">{application.candidateLocation ?? ""}</span>
             <span className="text-border hidden sm:inline">·</span>
-            <span className="hidden sm:inline truncate">{candidate.email}</span>
+            <span className="hidden sm:inline truncate">{application.candidateEmail ?? ""}</span>
             <span className="text-border hidden md:inline">·</span>
             <span className="tabular hidden md:inline">
-              {candidate.yearsOfExperience}y experience
+              {application.candidateYearsOfExperience ?? 0}y experience
             </span>
           </div>
         </div>

@@ -3,6 +3,33 @@
 // rather than the fuzzy middle. Two run-to-run instability sources are
 // addressed: (1) here, by removing subjective "feel" from the rules; and
 // (2) in lib/llm.ts, by adding a seed to the OpenAI call.
+//
+// 2026-05-01: added stable per-Criterion `id` (8-char nanoid). Generated in
+// code immediately after extraction (route.ts), with a deterministic backfill
+// in jobs-store for criteria from existing data files. See `Criterion` doc.
+
+import { customAlphabet } from "nanoid";
+import { createHash } from "node:crypto";
+
+const CRITERION_ID_ALPHABET = "23456789abcdefghjkmnpqrstuvwxyz";
+const _generateRandomId = customAlphabet(CRITERION_ID_ALPHABET, 8);
+
+/**
+ * Generate a fresh stable ID for a brand-new criterion (LLM extraction time
+ * or when a recruiter manually adds one in the editor).
+ */
+export function generateCriterionId(): string {
+  return _generateRandomId();
+}
+
+/**
+ * Deterministic backfill: same `label` always maps to the same id across reads.
+ * Used by jobs-store to assign IDs to criteria in seeded / pre-id data without
+ * needing a one-shot migration. SHA-256 → first 8 hex chars.
+ */
+export function backfillCriterionId(label: string): string {
+  return createHash("sha256").update(label).digest("hex").slice(0, 8);
+}
 
 export const EXTRACT_CRITERIA_SYSTEM = `You are an experienced recruiter extracting evaluable match criteria from a job description.
 
@@ -115,12 +142,29 @@ export const IMPORTANCE_WEIGHT: Record<Importance, number> = {
 };
 
 export type Criterion = {
+  /**
+   * Stable per-criterion identifier. Not user-facing.
+   *
+   * Generated in code (not by the LLM) immediately after extraction in
+   * `app/api/extract-criteria/route.ts`. Carried through user edits and into
+   * `createJob`. Matches embedded in `Application.matchBreakdown[*].criterionId`
+   * point at this — so renaming a criterion's `label` no longer orphans
+   * existing breakdown rows. The denormalized `criterionLabel` on each match
+   * row is still kept for read convenience and migration safety.
+   */
+  id: string;
   category: "skill" | "experience" | "education" | "domain" | "other";
   label: string;
   importance: Importance;
 };
 
+/**
+ * Shape of a criterion as the LLM returns it — no `id` yet. The route handler
+ * adds the `id` immediately, producing a fully-formed `Criterion`.
+ */
+export type LLMCriterion = Omit<Criterion, "id">;
+
 export type ExtractCriteriaResult = {
   title_suggestion: string;
-  criteria: Criterion[];
+  criteria: LLMCriterion[];
 };

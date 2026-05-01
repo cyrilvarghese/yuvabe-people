@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createJob, listJobs } from "@/lib/jobs-store";
-import { IMPORTANCE_VALUES } from "@/lib/prompts/extractCriteria.v1";
 
 export const runtime = "nodejs";
 
@@ -11,9 +10,13 @@ const createJobSchema = z.object({
   criteria: z
     .array(
       z.object({
+        // Optional in the request — extract-criteria/route.ts already assigns
+        // an `id` after LLM extraction, but ad-hoc clients can omit it and
+        // createJob's safety net fills any gaps.
+        id: z.string().optional(),
         category: z.enum(["skill", "experience", "education", "domain", "other"]),
         label: z.string().min(1).max(140),
-        importance: z.enum(IMPORTANCE_VALUES as readonly [string, ...string[]]),
+        importance: z.enum(["must", "strong", "nice"]),
       })
     )
     .min(1, "At least one criterion is required")

@@ -5,6 +5,19 @@ import {
   EXTRACT_CRITERIA_SCHEMA,
   type ExtractCriteriaResult,
 } from "./prompts/extractCriteria.v1";
+import {
+  PARSE_RESUME_SYSTEM,
+  PARSE_RESUME_USER,
+  PARSE_RESUME_SCHEMA,
+  type ParseResumeResult,
+} from "./prompts/parseResume.v1";
+import {
+  SCORE_RESUME_SYSTEM,
+  SCORE_RESUME_USER,
+  SCORE_RESUME_SCHEMA,
+  type ScoreResumeResult,
+} from "./prompts/scoreResume.v1";
+import type { Criterion } from "./prompts/extractCriteria.v1";
 
 const MODEL = "gpt-4o";
 
@@ -54,4 +67,66 @@ export async function extractCriteria(jd: string): Promise<ExtractCriteriaResult
   }
 
   return JSON.parse(content) as ExtractCriteriaResult;
+}
+
+export async function parseResume(resumeText: string): Promise<ParseResumeResult> {
+  const openai = getClient();
+
+  const completion = await openai.chat.completions.create({
+    model: MODEL,
+    temperature: 0,
+    seed: 42,
+    messages: [
+      { role: "system", content: PARSE_RESUME_SYSTEM },
+      { role: "user", content: PARSE_RESUME_USER(resumeText) },
+    ],
+    response_format: {
+      type: "json_schema",
+      json_schema: {
+        name: "parse_resume_result",
+        schema: PARSE_RESUME_SCHEMA,
+        strict: true,
+      },
+    },
+  });
+
+  const content = completion.choices[0]?.message?.content;
+  if (!content) {
+    throw new Error("LLM returned empty response");
+  }
+
+  return JSON.parse(content) as ParseResumeResult;
+}
+
+export async function scoreResume(
+  resumeText: string,
+  coverLetter: string,
+  criteria: Criterion[]
+): Promise<ScoreResumeResult> {
+  const openai = getClient();
+
+  const completion = await openai.chat.completions.create({
+    model: MODEL,
+    temperature: 0,
+    seed: 42,
+    messages: [
+      { role: "system", content: SCORE_RESUME_SYSTEM },
+      { role: "user", content: SCORE_RESUME_USER(resumeText, coverLetter, criteria) },
+    ],
+    response_format: {
+      type: "json_schema",
+      json_schema: {
+        name: "score_resume_result",
+        schema: SCORE_RESUME_SCHEMA,
+        strict: true,
+      },
+    },
+  });
+
+  const content = completion.choices[0]?.message?.content;
+  if (!content) {
+    throw new Error("LLM returned empty response");
+  }
+
+  return JSON.parse(content) as ScoreResumeResult;
 }
