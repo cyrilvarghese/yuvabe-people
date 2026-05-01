@@ -65,11 +65,7 @@ function formatSize(bytes: number) {
 /* —————————————————————————— small typographic atoms —————————————————————————— */
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-      {children}
-    </span>
-  );
+  return <span className="eyebrow text-muted-foreground">{children}</span>;
 }
 
 function ColumnMarker({
@@ -81,10 +77,10 @@ function ColumnMarker({
 }) {
   return (
     <div className="flex items-baseline gap-3 md:gap-4 mb-6 md:mb-10">
-      <span className="font-serif italic text-3xl md:text-5xl leading-none text-primary tabular">
+      <span className="font-serif italic text-display md:text-display-xl leading-none text-primary tabular">
         {numeral}.
       </span>
-      <span className="font-serif italic text-xl md:text-2xl leading-none text-foreground/85">
+      <span className="font-serif italic text-h2 md:text-h1 leading-none text-foreground/85">
         {title}
       </span>
     </div>
@@ -110,8 +106,7 @@ function NavTab({
     <Link
       href={href}
       className={`
-        font-mono text-[10px] uppercase tracking-[0.18em]
-        py-3 -mb-px border-b-2 transition-colors
+        caps-meta py-3 -mb-px border-b-2 transition-colors
         ${
           active
             ? "text-foreground border-primary"
@@ -148,7 +143,7 @@ function FilterChip({
       type="button"
       onClick={onClick}
       className={`
-        font-mono text-[11px] uppercase tracking-[0.14em] tabular
+        caps-meta tabular
         flex items-center gap-1.5 px-2.5 py-1 rounded-sm
         transition-all duration-150
         ${toneClass}
@@ -327,7 +322,7 @@ export default function NewJobPage() {
             {result && (
               <button
                 onClick={reset}
-                className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground hover:text-primary transition-colors"
+                className="caps-action text-muted-foreground hover:text-primary transition-colors"
               >
                 <span className="hidden sm:inline">Start over →</span>
                 <span className="sm:hidden">Reset →</span>
@@ -386,10 +381,10 @@ export default function NewJobPage() {
                 `}
               >
                 {/* corner ornament — barely there */}
-                <div className="absolute top-3 left-3 font-mono text-[9px] uppercase tracking-[0.18em] text-muted-foreground/75">
+                <div className="absolute top-3 left-3 eyebrow text-muted-foreground/75">
                   ◦ source
                 </div>
-                <div className="absolute top-3 right-3 font-mono text-[9px] uppercase tracking-[0.18em] text-muted-foreground/75">
+                <div className="absolute top-3 right-3 eyebrow text-muted-foreground/75">
                   drop here
                 </div>
 
@@ -397,16 +392,16 @@ export default function NewJobPage() {
                   className="h-7 w-7 text-foreground/40 mb-8"
                   strokeWidth={1.25}
                 />
-                <p className="font-serif italic text-3xl leading-tight max-w-xs">
+                <p className="font-serif italic text-display md:text-display-md leading-tight max-w-xs">
                   Drop the job
                   <br />
                   description.
                 </p>
-                <p className="mt-5 text-sm text-muted-foreground max-w-xs leading-relaxed">
+                <p className="mt-5 text-body-lg text-muted-foreground max-w-xs leading-relaxed">
                   We&apos;ll read the file and pull out the criteria a recruiter
                   would screen on.
                 </p>
-                <div className="mt-10 flex items-center gap-4 text-[10px] uppercase tracking-[0.18em] text-muted-foreground font-mono">
+                <div className="mt-10 flex items-center gap-4 eyebrow text-muted-foreground">
                   <span>pdf</span>
                   <span className="text-border">·</span>
                   <span>docx</span>
@@ -428,14 +423,14 @@ export default function NewJobPage() {
                     strokeWidth={1.5}
                   />
                   <div className="min-w-0 flex-1">
-                    <p className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground font-mono mb-1">
+                    <p className="caps-action text-muted-foreground mb-1">
                       Source file
                     </p>
-                    <p className="text-sm font-medium truncate">
+                    <p className="text-body-lg font-medium truncate">
                       {file?.name}
                     </p>
                     {file && (
-                      <p className="font-mono text-[11px] text-muted-foreground mt-1 tabular">
+                      <p className="font-mono text-eyebrow text-muted-foreground mt-1 tabular">
                         {formatSize(file.size)}
                       </p>
                     )}
@@ -443,7 +438,7 @@ export default function NewJobPage() {
                   {!loading && (
                     <button
                       onClick={pick}
-                      className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground hover:text-primary transition-colors flex-shrink-0"
+                      className="caps-action text-muted-foreground hover:text-primary transition-colors flex-shrink-0"
                     >
                       Replace
                     </button>
@@ -453,13 +448,13 @@ export default function NewJobPage() {
                 {/* loading state */}
                 {loading && (
                   <div className="mt-8 flex flex-col items-start gap-3">
-                    <div className="flex items-center gap-3 text-sm text-foreground/70">
+                    <div className="flex items-center gap-3 text-body text-foreground/70">
                       <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
                       <span className="font-serif italic">
                         Reading the description…
                       </span>
                     </div>
-                    <p className="text-xs text-muted-foreground max-w-md leading-relaxed">
+                    <p className="text-body-sm text-muted-foreground max-w-md leading-relaxed">
                       Parsing the file, then asking the model for the criteria
                       a recruiter would screen on. Usually 5–10 seconds.
                     </p>
@@ -469,10 +464,10 @@ export default function NewJobPage() {
                 {/* error */}
                 {!loading && error && (
                   <div className="mt-6 border-l-2 border-primary pl-4 py-2 bg-primary/[0.03]">
-                    <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-primary mb-1">
+                    <p className="caps-action text-primary mb-1">
                       Couldn&apos;t process this file
                     </p>
-                    <p className="text-sm text-foreground/80">{error}</p>
+                    <p className="text-body text-foreground/80">{error}</p>
                   </div>
                 )}
 
@@ -481,7 +476,7 @@ export default function NewJobPage() {
                   <div className="mt-auto pt-10">
                     <HairRule />
                     <div className="pt-6 flex items-center justify-between gap-4">
-                      <p className="text-xs text-muted-foreground max-w-[12rem] leading-relaxed">
+                      <p className="text-body-sm text-muted-foreground max-w-[12rem] leading-relaxed">
                         One LLM call. No data leaves until you save.
                       </p>
                       <Button
@@ -501,10 +496,10 @@ export default function NewJobPage() {
                   <div className="mt-auto pt-10">
                     <HairRule />
                     <div className="pt-6 flex items-center justify-between">
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-body-sm text-muted-foreground">
                         Criteria ready. Review on the right.
                       </p>
-                      <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+                      <span className="caps-action text-muted-foreground">
                         ii. →
                       </span>
                     </div>
@@ -526,10 +521,10 @@ export default function NewJobPage() {
                   <ColumnMarker numeral="ii" title="The criteria" />
                   <div className="flex-1 flex flex-col items-center justify-center text-center">
                     <div className="max-w-sm">
-                      <p className="font-serif italic text-2xl text-foreground/55 leading-tight">
+                      <p className="font-serif italic text-h1 text-foreground/55 leading-tight">
                         &ldquo;A score without reasoning is not a score.&rdquo;
                       </p>
-                      <p className="mt-6 text-[10px] uppercase tracking-[0.18em] text-muted-foreground font-mono">
+                      <p className="mt-6 eyebrow text-muted-foreground">
                         Awaiting source ←
                       </p>
                     </div>
@@ -623,7 +618,7 @@ export default function NewJobPage() {
               <div className="flex-shrink-0 px-4 sm:px-6 md:px-12 pt-6 md:pt-10 pb-5 border-b border-border bg-background">
                 <div className="max-w-2xl">
                   <Eyebrow>Extracted from {result.file.name}</Eyebrow>
-                  <h2 className="font-serif italic text-4xl leading-[1.05] mt-3 mb-4 tracking-tight">
+                  <h2 className="font-serif italic text-display md:text-display-md leading-[1.05] mt-3 mb-4 tracking-tight">
                     {result.title_suggestion}
                   </h2>
                   <div className="flex items-center gap-1 flex-wrap -ml-2.5">
@@ -656,7 +651,7 @@ export default function NewJobPage() {
                       tone="neutral"
                     />
                   </div>
-                  <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground tabular">
+                  <p className="mt-3 caps-meta text-muted-foreground tabular">
                     Showing {String(visibleCount).padStart(2, "0")} of {String(criteria.length).padStart(2, "0")}
                     {filter !== "all" && (
                       <span className="ml-2 text-muted-foreground/75">
@@ -672,12 +667,12 @@ export default function NewJobPage() {
                 <div className="max-w-2xl">
                   {grouped.length === 0 && (
                     <div className="py-12 text-center border border-dashed border-border rounded-sm">
-                      <p className="font-serif italic text-xl text-foreground/55">
+                      <p className="font-serif italic text-h2 text-foreground/55">
                         No {filter} criteria for this role.
                       </p>
                       <button
                         onClick={() => setFilter("all")}
-                        className="mt-3 font-mono text-[10px] uppercase tracking-[0.18em] text-primary hover:text-primary/70 transition-colors"
+                        className="mt-3 eyebrow text-primary hover:text-primary/70 transition-colors"
                       >
                         Show all ←
                       </button>
@@ -688,10 +683,10 @@ export default function NewJobPage() {
                     {grouped.map((group) => (
                     <div key={group.category}>
                       <div className="flex items-baseline gap-3 mb-4">
-                        <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-foreground/70">
+                        <span className="eyebrow text-foreground/70">
                           {CATEGORY_LABEL[group.category]}
                         </span>
-                        <span className="font-mono text-[10px] tabular text-muted-foreground">
+                        <span className="font-mono text-eyebrow tabular text-muted-foreground">
                           {String(group.items.length).padStart(2, "0")}
                         </span>
                         <div className="flex-1 border-b border-border/70" />
@@ -702,7 +697,7 @@ export default function NewJobPage() {
                             key={c.idx}
                             className="flex items-center justify-between gap-6 py-1.5 border-b border-border/50 last:border-b-0"
                           >
-                            <span className="text-[15px] leading-snug">
+                            <span className="text-body leading-snug">
                               {c.label}
                             </span>
                             <Select
@@ -717,7 +712,7 @@ export default function NewJobPage() {
                                   border-0 shadow-none rounded-sm
                                   bg-secondary/50 hover:bg-secondary
                                   data-[state=open]:bg-accent/60
-                                  font-mono text-[10px] uppercase tracking-[0.18em]
+                                  eyebrow
                                   focus-visible:ring-0 focus-visible:ring-offset-0
                                   transition-colors
                                   ${IMPORTANCE_COLOR[c.importance]}
@@ -733,19 +728,19 @@ export default function NewJobPage() {
                               >
                                 <SelectItem
                                   value="must"
-                                  className="font-mono text-[10px] uppercase tracking-[0.18em] text-primary"
+                                  className="eyebrow text-primary"
                                 >
                                   {IMPORTANCE_LABEL.must}
                                 </SelectItem>
                                 <SelectItem
                                   value="strong"
-                                  className="font-mono text-[10px] uppercase tracking-[0.18em] text-foreground"
+                                  className="eyebrow text-foreground"
                                 >
                                   {IMPORTANCE_LABEL.strong}
                                 </SelectItem>
                                 <SelectItem
                                   value="nice"
-                                  className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground"
+                                  className="eyebrow text-muted-foreground"
                                 >
                                   {IMPORTANCE_LABEL.nice}
                                 </SelectItem>
@@ -767,11 +762,11 @@ export default function NewJobPage() {
             <div className="border-t border-border bg-background px-4 sm:px-6 md:px-12 py-4 flex items-center justify-between gap-4 flex-shrink-0">
               <div className="flex-1 min-w-0">
                 {saveState === "error" && saveError ? (
-                  <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-primary">
+                  <p className="caps-action text-primary">
                     Couldn&apos;t save · {saveError}
                   </p>
                 ) : (
-                  <p className="text-xs text-muted-foreground italic font-serif truncate">
+                  <p className="text-body-sm text-muted-foreground italic font-serif truncate">
                     {criteria.length} criteria locked in.
                     <span className="font-sans not-italic ml-2 text-muted-foreground">
                       Saving stores the job locally in <span className="font-mono">data/jobs.json</span>.
@@ -783,7 +778,7 @@ export default function NewJobPage() {
                 onClick={saveJob}
                 disabled={saveState === "saving"}
                 size="sm"
-                className="rounded-sm font-mono text-[10px] uppercase tracking-[0.16em] gap-2 min-w-[110px]"
+                className="rounded-sm caps-action gap-2 min-w-[110px]"
               >
                 {saveState === "saving" ? (
                   <>
@@ -803,7 +798,7 @@ export default function NewJobPage() {
       </main>
 
       {/* —————— Bottom rule —————— */}
-      <footer className="border-t border-border px-4 sm:px-6 md:px-10 py-3 flex-shrink-0 flex items-center justify-between gap-3 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+      <footer className="border-t border-border px-4 sm:px-6 md:px-10 py-3 flex-shrink-0 flex items-center justify-between gap-3 eyebrow text-muted-foreground">
         <span className="truncate">
           Yuvabe ATS &nbsp; · &nbsp; v0.1
         </span>

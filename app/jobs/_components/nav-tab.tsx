@@ -18,8 +18,7 @@ export default function NavTab({
     <Link
       href={href}
       className={`
-        font-mono text-[10px] uppercase tracking-[0.18em]
-        py-3 -mb-px border-b-2 transition-colors
+        caps-meta py-3 -mb-px border-b-2 transition-colors
         ${
           active
             ? "text-foreground border-primary"

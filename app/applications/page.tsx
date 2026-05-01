@@ -8,20 +8,16 @@ import NavTabClient from "../jobs/_components/nav-tab";
 /* —————————————————————————— atoms —————————————————————————— */
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-      {children}
-    </span>
-  );
+  return <span className="eyebrow text-muted-foreground">{children}</span>;
 }
 
 function ColumnMarker({ numeral, title }: { numeral: string; title: string }) {
   return (
     <div className="flex items-baseline gap-3 md:gap-4">
-      <span className="font-serif italic text-3xl md:text-5xl leading-none text-primary tabular">
+      <span className="font-serif italic text-display md:text-display-xl leading-none text-primary tabular">
         {numeral}.
       </span>
-      <span className="font-serif italic text-xl md:text-2xl leading-none text-foreground/85">
+      <span className="font-serif italic text-h2 md:text-h1 leading-none text-foreground/85">
         {title}
       </span>
     </div>
@@ -37,7 +33,7 @@ function ScoreChip({ score }: { score: number }) {
       : "text-primary border-primary/40 bg-primary/[0.06]";
   return (
     <div
-      className={`inline-flex items-baseline justify-center min-w-[44px] md:min-w-[52px] px-2 py-1 border rounded-sm font-mono text-[14px] md:text-[16px] tabular leading-none ${colorClass}`}
+      className={`inline-flex items-baseline justify-center min-w-[44px] md:min-w-[52px] px-2 py-1 border rounded-sm font-mono text-body-lg md:text-h3 tabular leading-none ${colorClass}`}
     >
       {String(score).padStart(2, "0")}
     </div>
@@ -122,7 +118,7 @@ export default async function ApplicationsListPage({
       <header className="flex-shrink-0 border-b border-border bg-background z-10">
         <div className="px-4 md:px-10 pt-4 pb-3 flex items-center justify-between gap-3">
           <div className="flex items-baseline gap-3 min-w-0">
-            <span className="font-serif italic text-lg leading-none">Yuvabe</span>
+            <span className="font-serif italic text-xl leading-none">Yuvabe</span>
             <span className="text-muted-foreground">/</span>
             <Eyebrow>ATS</Eyebrow>
           </div>
@@ -148,7 +144,7 @@ export default async function ApplicationsListPage({
           {/* Static top */}
           <div className="flex-shrink-0 px-4 sm:px-6 md:px-10 pt-6 md:pt-10 pb-5 border-b border-border bg-background">
             <ColumnMarker numeral="i" title="Applications" />
-            <p className="mt-4 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground tabular">
+            <p className="mt-4 caps-meta text-muted-foreground tabular">
               {String(applications.length).padStart(2, "0")} of {String(total).padStart(2, "0")}
               &nbsp;·&nbsp; sorted by recency
               {filter && <> &nbsp;·&nbsp; filtered by {filter}</>}
@@ -195,27 +191,23 @@ export default async function ApplicationsListPage({
                           <div className="flex items-center gap-3 md:gap-5 min-w-0 flex-1">
                             <ScoreChip score={app.matchScore} />
                             <div className="min-w-0 flex-1">
-                              <h3 className="font-serif italic text-lg md:text-xl leading-tight tracking-tight truncate">
+                              <h3 className="font-serif italic text-xl md:text-2xl leading-tight tracking-tight truncate">
                                 {candidate.name}
                               </h3>
-                              <div className="mt-1 flex items-center gap-2 text-[12px] text-muted-foreground">
+                              <div className="mt-1 flex items-center gap-2 text-body text-muted-foreground">
                                 <span className="truncate">{job.title}</span>
                                 <span className="text-border hidden sm:inline">·</span>
-                                <span className="font-mono text-primary hidden sm:inline">
-                                  [JOB-{job.code}]
-                                </span>
-                                <span className="text-border hidden md:inline">·</span>
-                                <span className="truncate hidden md:inline">{candidate.location}</span>
+                                <span className="truncate hidden sm:inline">{candidate.location}</span>
                               </div>
                             </div>
                           </div>
                           <div className="flex items-center gap-3 md:gap-5 flex-shrink-0">
                             <span
-                              className={`font-mono text-[10px] uppercase tracking-[0.16em] md:tracking-[0.18em] ${STATUS_COLOR[app.status]}`}
+                              className={`caps-meta ${STATUS_COLOR[app.status]}`}
                             >
                               {STATUS_LABEL[app.status]}
                             </span>
-                            <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground tabular hidden md:inline">
+                            <span className="caps-meta text-muted-foreground tabular hidden md:inline">
                               {relativeTime(app.receivedAt)}
                             </span>
                             <ArrowUpRight
@@ -234,7 +226,7 @@ export default async function ApplicationsListPage({
         </section>
       </main>
 
-      <footer className="border-t border-border px-4 sm:px-6 md:px-10 py-3 flex-shrink-0 flex items-center justify-between gap-3 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+      <footer className="border-t border-border px-4 sm:px-6 md:px-10 py-3 flex-shrink-0 flex items-center justify-between gap-3 eyebrow text-muted-foreground">
         <span className="truncate">Yuvabe ATS &nbsp; · &nbsp; v0.1</span>
         <span className="italic font-serif normal-case tracking-normal text-muted-foreground/80 hidden md:inline">
           Hiring is a human act.
@@ -271,7 +263,7 @@ function FilterPill({
       href={href}
       scroll={false}
       className={`
-        font-mono text-[11px] uppercase tracking-[0.14em] tabular
+        caps-meta tabular
         flex items-center gap-1.5 px-2.5 py-1 rounded-sm
         transition-all duration-150
         ${toneClass}
@@ -297,12 +289,12 @@ function EmptyState({
     // Filter excluded everything
     return (
       <div className="h-full flex flex-col items-center justify-center text-center pb-24">
-        <p className="font-serif italic text-3xl text-foreground/55 leading-tight">
+        <p className="font-serif italic text-display md:text-display-md text-foreground/55 leading-tight">
           No {STATUS_LABEL[filter].toLowerCase()} applications.
         </p>
         <Link
           href="/applications"
-          className="mt-4 font-mono text-[10px] uppercase tracking-[0.18em] text-primary hover:text-primary/70 transition-colors"
+          className="mt-4 eyebrow text-primary hover:text-primary/70 transition-colors"
         >
           Show all ←
         </Link>
@@ -311,10 +303,10 @@ function EmptyState({
   }
   return (
     <div className="h-full flex flex-col items-center justify-center text-center pb-24">
-      <p className="font-serif italic text-3xl text-foreground/55 leading-tight">
+      <p className="font-serif italic text-display md:text-display-md text-foreground/55 leading-tight">
         No applications yet.
       </p>
-      <p className="mt-4 max-w-md text-sm text-muted-foreground leading-relaxed">
+      <p className="mt-4 max-w-md text-body-lg text-muted-foreground leading-relaxed">
         When candidates apply via email with a job code, their applications
         appear here, scored against that job&apos;s criteria.
       </p>

@@ -7,11 +7,7 @@ import NavTabClient from "./_components/nav-tab";
 /* —————————————————————————— small typographic atoms —————————————————————————— */
 
 function Eyebrow({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-      {children}
-    </span>
-  );
+  return <span className="eyebrow text-muted-foreground">{children}</span>;
 }
 
 function ColumnMarker({
@@ -23,10 +19,10 @@ function ColumnMarker({
 }) {
   return (
     <div className="flex items-baseline gap-3 md:gap-4">
-      <span className="font-serif italic text-3xl md:text-5xl leading-none text-primary tabular">
+      <span className="font-serif italic text-display md:text-display-xl leading-none text-primary tabular">
         {numeral}.
       </span>
-      <span className="font-serif italic text-xl md:text-2xl leading-none text-foreground/85">
+      <span className="font-serif italic text-h2 md:text-h1 leading-none text-foreground/85">
         {title}
       </span>
     </div>
@@ -88,7 +84,7 @@ export default async function JobsPage({
       <header className="flex-shrink-0 border-b border-border bg-background z-10">
         <div className="px-4 md:px-10 pt-4 pb-3 flex items-center justify-between gap-3">
           <div className="flex items-baseline gap-3 min-w-0">
-            <span className="font-serif italic text-lg leading-none">
+            <span className="font-serif italic text-xl leading-none">
               Yuvabe
             </span>
             <span className="text-muted-foreground">/</span>
@@ -118,14 +114,14 @@ export default async function JobsPage({
               <ColumnMarker numeral="i" title="Jobs" />
               <Link
                 href="/jobs/new"
-                className="inline-flex items-center gap-2 rounded-sm bg-primary text-primary-foreground px-4 py-2 font-mono text-[10px] uppercase tracking-[0.16em] hover:bg-primary/90 transition-colors"
+                className="inline-flex items-center gap-2 rounded-sm bg-primary text-primary-foreground px-4 py-2 caps-action hover:bg-primary/90 transition-colors"
               >
                 <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />
                 New job
               </Link>
             </div>
             {count > 0 && (
-              <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground tabular">
+              <p className="mt-3 caps-meta text-muted-foreground tabular">
                 {String(count).padStart(2, "0")} {count === 1 ? "role" : "roles"} posted &nbsp;·&nbsp; sorted by newest
               </p>
             )}
@@ -154,25 +150,25 @@ export default async function JobsPage({
                         <div className="flex items-start justify-between gap-3 md:gap-6">
                           <div className="min-w-0 flex-1">
                             <div className="flex items-baseline gap-3 mb-2">
-                              <h3 className="font-serif italic text-xl md:text-2xl leading-tight tracking-tight truncate">
+                              <h3 className="font-serif italic text-h2 md:text-h1 leading-tight tracking-tight truncate">
                                 {job.title}
                               </h3>
                               {isNew && (
-                                <span className="font-mono text-[9px] uppercase tracking-[0.18em] text-primary flex-shrink-0 hidden sm:inline">
+                                <span className="eyebrow text-primary flex-shrink-0 hidden sm:inline">
                                   ← just saved
                                 </span>
                               )}
                             </div>
                             <div className="flex items-center gap-2 md:gap-3 flex-wrap">
-                              <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-primary tabular">
+                              <span className="caps-meta text-foreground/70 tabular">
                                 [JOB-{job.code}]
                               </span>
                               <span className="text-border">·</span>
-                              <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground tabular">
+                              <span className="caps-meta text-muted-foreground tabular">
                                 {String(job.criteria.length).padStart(2, "0")} criteria
                               </span>
                               <span className="text-border hidden sm:inline">·</span>
-                              <span className="font-mono text-[10px] uppercase tracking-[0.14em] tabular hidden sm:inline">
+                              <span className="caps-meta tabular hidden sm:inline">
                                 <span
                                   className={appCount > 0 ? "text-foreground font-medium" : "text-muted-foreground/70"}
                                 >
@@ -183,7 +179,7 @@ export default async function JobsPage({
                                 </span>
                               </span>
                               <span className="text-border hidden md:inline">·</span>
-                              <span className="font-mono text-[10px] uppercase tracking-[0.14em] tabular hidden md:inline">
+                              <span className="caps-meta tabular hidden md:inline">
                                 <span className="text-primary">
                                   {String(counts.must).padStart(2, "0")} must
                                 </span>
@@ -197,7 +193,7 @@ export default async function JobsPage({
                                 </span>
                               </span>
                               <span className="text-border hidden lg:inline">·</span>
-                              <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground hidden lg:inline">
+                              <span className="caps-meta text-muted-foreground hidden lg:inline">
                                 {relativeTime(job.createdAt)}
                               </span>
                             </div>
@@ -205,7 +201,7 @@ export default async function JobsPage({
                           <div className="flex flex-col items-stretch gap-1 flex-shrink-0 min-w-[140px]">
                             <Link
                               href={`/jobs/${job.code}`}
-                              className="font-mono text-[10px] uppercase tracking-[0.16em] px-3 py-2 rounded-sm text-foreground hover:bg-secondary border border-border hover:border-foreground/20 transition-colors inline-flex items-center justify-center gap-1.5"
+                              className="caps-action px-3 py-2 rounded-sm text-foreground hover:bg-secondary border border-border hover:border-foreground/20 transition-colors inline-flex items-center justify-center gap-1.5"
                             >
                               View applicants
                               <ArrowUpRight
@@ -217,7 +213,7 @@ export default async function JobsPage({
                               type="button"
                               disabled
                               title="Edit coming next"
-                              className="font-mono text-[10px] uppercase tracking-[0.16em] px-3 py-2 rounded-sm text-muted-foreground/65 italic cursor-not-allowed inline-flex items-center justify-center"
+                              className="caps-action px-3 py-2 rounded-sm text-muted-foreground/65 italic cursor-not-allowed inline-flex items-center justify-center"
                             >
                               Edit
                             </button>
@@ -234,7 +230,7 @@ export default async function JobsPage({
       </main>
 
       {/* —————— Footer —————— */}
-      <footer className="border-t border-border px-4 sm:px-6 md:px-10 py-3 flex-shrink-0 flex items-center justify-between gap-3 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+      <footer className="border-t border-border px-4 sm:px-6 md:px-10 py-3 flex-shrink-0 flex items-center justify-between gap-3 eyebrow text-muted-foreground">
         <span className="truncate">Yuvabe ATS &nbsp; · &nbsp; v0.1</span>
         <span className="italic font-serif normal-case tracking-normal text-muted-foreground/80 hidden md:inline">
           Hiring is a human act.
@@ -250,16 +246,16 @@ export default async function JobsPage({
 function EmptyState() {
   return (
     <div className="h-full flex flex-col items-center justify-center text-center pb-24">
-      <p className="font-serif italic text-3xl text-foreground/55 leading-tight">
+      <p className="font-serif italic text-display md:text-display-md text-foreground/55 leading-tight">
         No jobs yet.
       </p>
-      <p className="mt-4 max-w-sm text-sm text-muted-foreground leading-relaxed">
+      <p className="mt-4 max-w-sm text-body-lg text-muted-foreground leading-relaxed">
         Upload a job description and we&apos;ll pull out the criteria
         recruiters screen on. Saved jobs appear here.
       </p>
       <Link
         href="/jobs/new"
-        className="mt-8 inline-flex items-center gap-2 rounded-sm bg-primary text-primary-foreground px-5 py-2.5 font-mono text-[10px] uppercase tracking-[0.16em] hover:bg-primary/90 transition-colors"
+        className="mt-8 inline-flex items-center gap-2 rounded-sm bg-primary text-primary-foreground px-5 py-2.5 caps-action hover:bg-primary/90 transition-colors"
       >
         <Plus className="h-3.5 w-3.5" strokeWidth={2.5} />
         Create the first job
