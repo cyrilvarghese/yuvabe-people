@@ -59,7 +59,7 @@ The three skills divide the design surface: **design-system** governs *how a sin
 These are non-negotiable. If a request seems to conflict with one, surface it before silently overriding.
 
 - **shadcn primitives only — no custom UI primitives.** Visual identity in `className` and `globals.css` tokens, never new components in `components/`.
-- **Borders, not shadows.** Only one shadow exists system-wide (modal / bulk action bar).
+- **Borders, not shadows.** Two shadows exist, and only two: the *heavy* shadow on modals + the bulk-action bar, and the *hairline* `--shadow-hover` (`0 1px 2px rgb(26 24 21 / 0.04)`) used for hover-lift on row-as-link surfaces and clickable cards (NOT buttons). No third — never reach for `shadow-sm`/`shadow-md`/etc. Everywhere else: borders.
 - **Warm palette is locked.** `#FAF8F4` bg, `#1A1815` ink, `#8A857B` muted, `#B8553A` terracotta accent. No new color tokens without explicit user request.
 - **WCAG AA target.** Use `text-foreground/X` to dim text, never `text-muted-foreground/X` below 80% on informational text.
 - **Responsive by default.** Stack on `<md`, scale display sizes, gutter `px-4 md:px-10` etc. See design-system skill §Responsiveness.

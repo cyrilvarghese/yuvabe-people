@@ -9,6 +9,7 @@ import { getCandidateById } from "@/lib/candidates-store";
 import { ArrowLeft, ExternalLink, FileText } from "lucide-react";
 import NavTabClient from "../../jobs/_components/nav-tab";
 import { StatusActions } from "./_components/status-actions";
+import { SignOutButton } from "@/app/_components/sign-out-button";
 
 /* —————————————————————————— atoms —————————————————————————— */
 
@@ -151,7 +152,7 @@ export default async function ApplicationDetailPage({
       <header className="flex-shrink-0 border-b border-border bg-background z-10">
         <div className="px-4 md:px-10 pt-4 pb-3 flex items-center justify-between gap-3">
           <div className="flex items-baseline gap-3 min-w-0">
-            <span className="font-serif italic text-h3 leading-none">Yuvabe</span>
+            <Link href="/" className="font-serif italic text-h3 leading-none hover:opacity-70 transition-opacity">Yuvabe</Link>
             <span className="text-muted-foreground">/</span>
             <Eyebrow>ATS</Eyebrow>
           </div>
@@ -160,13 +161,14 @@ export default async function ApplicationDetailPage({
             className="inline-flex items-center gap-1.5 caps-action text-muted-foreground hover:text-foreground transition-colors min-w-0 max-w-[40ch]"
           >
             <ArrowLeft className="h-3 w-3 flex-shrink-0" />
-            <span className="truncate hidden sm:inline">{job.title}</span>
+            <span className="truncate">{job.title}</span>
           </Link>
         </div>
-        <nav className="px-4 md:px-10 flex items-center gap-6 md:gap-8 overflow-x-auto">
+        <nav className="px-4 md:px-10 flex items-center gap-6 md:gap-8 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <NavTabClient href="/jobs" label="Jobs" prefix="/jobs" />
           <NavTabClient href="/applications" label="Applicants" prefix="/applications" />
-          <NavTabClient href="/review" label="Review" prefix="/review" />
+          <NavTabClient href="/shortlist" label="Shortlist" prefix="/shortlist" />
+          <SignOutButton className="ml-auto" />
         </nav>
       </header>
 
@@ -188,7 +190,7 @@ export default async function ApplicationDetailPage({
               {job.title}
             </Link>
           </nav>
-          <h1 className="font-serif italic text-display md:text-display-lg leading-[1.05] mt-1 mb-1 tracking-tight">
+          <h1 className="font-serif italic text-display md:text-display-lg leading-[1.05] mt-1 mb-1 tracking-tight break-words">
             {candidate.name}
           </h1>
 

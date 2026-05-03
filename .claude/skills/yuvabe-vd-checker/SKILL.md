@@ -137,21 +137,49 @@ The DS Behavior layer rules cover *how* interactive elements behave. Audit each 
 - **WARN**: a clickable `<div>` (with `onClick`) that is missing `cursor-pointer`, `role="button"`, `tabIndex={0}`, or keyboard handlers — pick a real `<button>` instead.
 - **WARN**: button styled to look like a link (no border, no bg) without `<Button variant="link">`, or a link styled to look like a filled button without the right variant.
 
-**Motion** — subtle, in service of clarity. Look for:
+**Motion — violations** (the existing rules; flag the wrong motion). Look for:
 
 - **FAIL**: `animate-bounce`, `animate-spin` outside an explicit loading spinner (`Loader2`), `animate-ping`, or any `animation-*` referencing shimmer / parallax / scroll-driven choreography.
 - **FAIL**: spring / bounce easing or any custom cubic-bezier overshooting 1.0 (`ease-[cubic-bezier(...)]` with values >1 or <0).
 - **FAIL**: translates outside the subtlety budget — `translate-x-2` and larger, `translate-y-2` and larger. Allowed: `translate-x-px`, `-translate-x-px`, `translate-y-px`, `-translate-y-px` (1–2px).
-- **FAIL**: scales outside `0.98`–`1.02`. Specifically flag `scale-95`, `scale-90`, `scale-105`, `scale-110`, `hover:scale-105`+.
+- **FAIL**: scales outside `0.98`–`1.02`. Specifically flag `scale-95`, `scale-90`, `scale-105`, `scale-110`, `hover:scale-105`+. Press scale `active:scale-[0.99]` is permitted on buttons.
 - **FAIL**: any `rotate-*` on `hover:` or `data-[state=*]` (loading spinner is the only allowed rotate).
-- **FAIL**: `duration-*` outside the canonical `duration-100` / `duration-150` / `duration-200` / `duration-300` / `duration-400` / `duration-[400ms]` set. Specifically flag `duration-500`, `duration-700`, `duration-1000`.
-- **WARN**: shadcn `DialogContent` / `SheetContent` / `DropdownMenuContent` / `PopoverContent` with default `data-[state=open]:zoom-in-95` left in (5% scale exceeds the 2% budget). Default to fade-only; a ≤2px translate is acceptable as a directional cue.
+- **FAIL**: `duration-*` outside the canonical `duration-100` / `duration-150` / `duration-200` / `duration-300` / `duration-400` / `duration-[800ms]` set. Specifically flag `duration-500`, `duration-700`, `duration-1000`. The `800ms` slot is reserved for the in-page confirmation flash (`.highlight-confirm`). The `5s` of `.highlight-new` is the *one* legitimate exception — it fires on page-load arrival, not in-page; flag any *new* 5s duration that isn't `.highlight-new`.
+- **FAIL** *(new)*: `hover:shadow-sm` / `hover:shadow-md` / `hover:shadow-lg` / `hover:shadow-xl` / `hover:shadow-2xl` or any Tailwind `shadow-*` utility on a hover state — the system has exactly two shadows (`--shadow-hover` for hover-lift on rows/cards, the heavy modal shadow for modals + bulk-action bar). Tailwind's defaults are too heavy for the editorial palette.
+- **FAIL** *(new)*: `hover:-translate-y-*` or `hover:shadow-[...]` on a `<Button>` element — the lift is a *destination* affordance (cards / rows / row-as-link only). Buttons stay color-only on hover.
+- **FAIL** *(new)*: A component references `var(--shadow-hover)` but `app/globals.css` does not define the `--shadow-hover` token — token referenced but not defined.
+- **FAIL** *(new)*: A component references `animation: button-shake` (or applies a `button-shake` class) but `app/globals.css` does not define `@keyframes button-shake` — keyframe referenced but not defined.
+- **FAIL** *(new)*: Animating `width`, `height`, `top`, `left`, `border-color`, or `background-color` for any transition with `duration > 100ms`. Only `transform` and `opacity` are permitted on every-frame paths. Color hover/focus is the one exception, capped at `100–150ms`.
+- **WARN**: shadcn `DialogContent` / `SheetContent` / `DropdownMenuContent` / `PopoverContent` / `SelectContent` with default `data-[state=open]:zoom-in-95` left in (5% scale exceeds the 2% budget). Default to fade-only; a ≤2px translate is acceptable as a directional cue.
+- **WARN**: shadcn primitive with `slide-in-from-{side}-2` or larger (8px+ slide distance) — cap at `slide-in-from-{side}-px` (1–2px).
 - **WARN**: a skeleton loader using a shimmer/gradient `bg-gradient-to-r` with `animate-*` instead of plain `animate-pulse` on a hairline-bordered surface.
 - **WARN**: a "Loading…" string with no specific subject (should be "Saving candidate…", "Reading the description…", etc.).
+- **WARN** *(new)*: more than one motion verb composed on a single element per state — e.g., `hover:-translate-y-px hover:scale-[1.01] hover:shadow-[...]` is three motions; pick one (the `--shadow-hover` lift token already pairs translate + shadow as one).
+- **WARN** *(new)*: looped `button-shake` (or any `animate-iteration-count: infinite` on a shake/error animation) — error feedback is one oscillation, never looped.
+
+**Motion — completeness** *(new subsection — flag *absences* where motion is needed):
+
+- **WARN**: a `<button>` whose `onClick` triggers `fetch(...)`, `startTransition(...)`, or any async handler — but the button has no `<Loader2>`, no text-swap (e.g., `"Save"` ⇄ `"Saving…"`), and no `aria-busy={...}`. Invisible pending state. (See DS §Motion VERB 2: ACKNOWLEDGE.)
+- **WARN**: component uses `useTransition()` / `isPending` and the *only* visible pending change is `disabled={isPending}` — same problem; needs spinner or optimistic + flash.
+- **WARN**: optimistic-UI handler (`useOptimistic` / `setOptimisticStatus`) on a button that *also* sets `disabled={isPending}` — the action already happened in the user's mental model; disabling reads as "broken."
+- **WARN**: list-row / `<a>` row / card with `hover:bg-*` only and no `hover:-translate-y-px` + `hover:shadow-[var(--shadow-hover)]` — row-as-link hover affordance incomplete. (See DS §Motion VERB 1: RESPOND.)
+- **WARN**: row-as-link surface missing `focus-within:ring-2 focus-within:ring-ring` — keyboard users get no "you are here" signal.
+- **WARN**: page-level `<Suspense>` whose `fallback` is unstyled HTML, raw text, or a non-shape-matching skeleton — skeleton must mirror the final layout (same hairlines, same row heights, same column counts) or the swap shifts layout.
+- **WARN**: long-running async (LLM call, multi-second fetch) that uses a *skeleton* instead of a labeled spinner — skeletons require predictable output shape; LLM responses don't have one. (See DS §Motion VERB 3: REVEAL decision tree.)
+- **WARN**: async error path that surfaces only as a toast, with no inline error caption next to the failed control — toast can be missed; the button or form section must own the error.
+
+**Route-level pending feedback and transitions** *(new subsection — the most common cause of "the screen sat there, then suddenly swapped"):
+
+- **FAIL** *(new)*: a route segment whose `page.tsx` `await`s a database/network read (Supabase, fetch, LLM, etc.) but has no sibling `loading.tsx`. Without it, the user clicks a `<Link>` and stares at the previous page until data resolves. Fix: add `app/<segment>/loading.tsx` whose skeleton mirrors the destination layout (same outer shell, same header/footer, same hairlines, same row heights, same column counts). Reference `app/jobs/new/page.tsx:537-609` for the canonical skeleton pattern.
+- **WARN** *(new)*: `app/layout.tsx` doesn't wrap `{children}` in either (a) a route-fade wrapper (CSS opacity transition keyed on `pathname`) **or** (b) a React `<ViewTransition>` after enabling `experimental.viewTransition: true` in `next.config`. Either is fine; the current default — a hard cut between routes — is a clarity failure for an editorial brand. The fade wrapper is the simpler, lower-risk option for v0.1.
+- **WARN** *(new)*: a route-fade wrapper exists but is missing `data-fade` (or `.fade-preserve`) — the reduced-motion CSS block in `globals.css` flattens *all* transitions to 1ms, which turns the route fade into a hard cut precisely for users who already chose to reduce motion. The opacity fade should be the *one* motion they keep.
+- **FYI** *(new)*: route uses `<Link prefetch={false}>` without a `useLinkStatus`-driven inline hint — the user gets no acknowledgement until the destination renders. Either restore prefetch or wire the hint per https://nextjs.org/docs/app/api-reference/functions/use-link-status. Note that with `loading.tsx` in place at the destination, this rarely matters.
 
 **Reduced motion** — look for:
 
 - **FYI**: `app/globals.css` lacks a `@media (prefers-reduced-motion: reduce)` block reducing `animation-duration` / `transition-duration` to 1ms. Should exist once, project-wide.
+- **FYI** *(new)*: reduced-motion block exists but doesn't preserve opacity-fade transitions (a `data-fade` / `.fade-preserve` opt-out, or equivalent) — flat 1ms turns content swaps into hard cuts, which is jarring even for motion-sensitive users.
+- **FYI** *(new)*: reduced-motion block doesn't reset `*:hover { transform: none !important; }` — hover-lift should degrade to hover-color-only for motion-sensitive users.
 
 ## Output format
 

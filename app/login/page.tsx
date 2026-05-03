@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { Suspense, useState, type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -13,8 +13,35 @@ import { Label } from "@/components/ui/label";
  *
  * Editorial styling: Newsreader italic display, mono-caps eyebrow, hairline
  * input borders, single terracotta primary button. No card, no shadow.
+ *
+ * The Suspense boundary is required by Next.js 16 because LoginForm calls
+ * useSearchParams(), which can't be resolved during static prerender.
  */
 export default function LoginPage() {
+  return (
+    <Suspense fallback={<LoginShell />}>
+      <LoginForm />
+    </Suspense>
+  );
+}
+
+/** Static skeleton shown during the brief Suspense fallback. */
+function LoginShell() {
+  return (
+    <main className="min-h-screen bg-background flex items-center justify-center px-4">
+      <div className="w-full max-w-sm">
+        <div className="text-center mb-12">
+          <span className="eyebrow text-muted-foreground">ATS</span>
+          <h1 className="mt-3 font-serif italic text-display leading-none">
+            Yuvabe
+          </h1>
+        </div>
+      </div>
+    </main>
+  );
+}
+
+function LoginForm() {
   const params = useSearchParams();
   const next = params.get("next") || "/jobs";
 

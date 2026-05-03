@@ -768,7 +768,7 @@ export default function NewJobPage() {
                 ) : (
                   <p className="text-body-sm text-muted-foreground italic font-serif truncate">
                     {criteria.length} criteria locked in.
-                    <span className="font-sans not-italic ml-2 text-muted-foreground">
+                    <span className="font-sans not-italic ml-2 text-muted-foreground hidden md:inline">
                       Saving stores the job in Supabase.
                     </span>
                   </p>

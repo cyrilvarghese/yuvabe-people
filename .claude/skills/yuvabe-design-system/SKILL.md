@@ -21,7 +21,7 @@ Everything here serves three principles, in priority order:
 These are non-negotiable. If a request appears to violate one, surface it before proceeding.
 
 - **shadcn/ui primitives only — no custom UI primitives.** Use `<Button>`, `<Badge>`, `<Card>`, `<Input>`, `<Textarea>`, `<Label>`. *Never* write a `ScoreChip.tsx` or `EditorialQuote.tsx` with its own variants API. Visual identity lives in `className` strings + `globals.css` tokens. The exception: tiny *typographic atoms* defined inline at the top of a page file (e.g. an `Eyebrow` or `ColumnMarker` helper) are fine when they exist only in one file and don't grow a variants API.
-- **Borders, not shadows.** Use 1px hairline borders in `--border` (#E5E0D5). One single shadow exists in the system (bulk action bar + modals only). Otherwise: borders.
+- **Borders, not shadows.** Use 1px hairline borders in `--border` (#E5E0D5). Two shadows exist in the system, and only two: the *heavy* shadow on modals + the bulk-action bar, and the *hairline* `--shadow-hover` (`0 1px 2px rgb(26 24 21 / 0.04)`) for hover-lift on row-as-link surfaces and clickable cards. Both belong to specific use-cases — never reach for a Tailwind shadow utility (`shadow-sm`, `shadow-md`, etc.). Everywhere else: borders.
 - **Tailwind 4 + CSS-first theming.** Tokens live in `app/globals.css` (palette in `:root`, type scale in `@theme inline`, caps utilities via `@utility`). No `tailwind.config.js`. **Use the type tokens (`text-meta`, `text-h2`, etc.) and caps utilities (`eyebrow`, `caps-action`, `caps-meta`) — never `text-[Xpx]` or arbitrary `tracking-[...]` in components.** If a value isn't in the scale, push back, don't invent.
 - **No gradients.** Single subtle one allowed on the login screen background only — nowhere else.
 - **No dark mode for the prototype.** Commit to light, do it well.
@@ -477,7 +477,7 @@ Every `<button>`, `<a>`, `<input>`, `<select>`, `<textarea>`, and shadcn primiti
 | State | Recipe | Notes |
 |---|---|---|
 | Default | base classes | The canonical resting look |
-| Hover | `hover:bg-secondary` or `hover:text-foreground` | Color/opacity only — no movement |
+| Hover | `hover:bg-secondary` or `hover:text-foreground` (buttons, inputs); `hover:-translate-y-px` + `hover:shadow-[var(--shadow-hover)]` (row-as-link surfaces and clickable cards only) | Color/opacity for controls; hairline lift for destinations. See §Motion VERB 1: RESPOND for the rules per surface class. |
 | Focus-visible | `focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background` | Required on every interactive element |
 | Active / pressed | `active:bg-secondary/80` or color shift | Subtle color shift; scale ≤1.02 only if used |
 | Disabled | `disabled:opacity-50 disabled:pointer-events-none disabled:cursor-not-allowed` + a non-color cue | Opacity alone is **not** enough |
@@ -514,45 +514,407 @@ Every microinteraction has four parts: **Trigger → Rules → Feedback → Loop
 | Bulk-action selection | `Checkbox` per row + sticky bar | row highlights + bar fades in | bar shows count and actions |
 | Row delete | `Button` + `AlertDialog` | row fades out 150ms | toast with undo for 5s |
 
-### Motion — subtle, in service of clarity
+### Motion — opinionated, prescriptive, in service of clarity
 
-The master principle is **subtlety**. Motion is allowed when it adds clarity (a fade in, an arrow leaning toward where it leads, a panel arriving) — never when it's decorative or attention-grabbing. If a motion would feel at home on a designer's portfolio site, it doesn't belong here.
+> *Every state transition is a sentence — say it on purpose, or don't say it.*
 
-**Permitted primitives** (use sparingly, one motion per element):
+Motion in this system has exactly four legitimate jobs. If a piece of motion isn't doing one of these four, it's noise — delete it.
 
-- **Opacity fades** — `transition-opacity`, `animate-pulse`, `data-[state=open]:fade-in-0`, `data-[state=closed]:fade-out-0`.
-- **Color transitions** — `transition-colors` for hover/focus state changes.
-- **Tiny translates** — `translate-x-px`, `-translate-y-px` (1–2px max). The canonical use is an arrow icon leaning toward its destination on `group-hover`. Never more than 2px in any direction.
-- **Tiny scales** — between `scale-[0.98]` and `scale-[1.02]` only, used sparingly for press feedback. Default to no scale.
-- **Number count-up** — 400ms `requestAnimationFrame` for score updates.
+| Verb | Says to the user | Where it shows up |
+|---|---|---|
+| **RESPOND** | *"You can touch this."* | Hover, focus, press |
+| **ACKNOWLEDGE** | *"I heard you."* | Action-button feedback, optimistic UI, error revert |
+| **REVEAL** | *"Here is what's happening."* | Skeletons, spinners, progress bars |
+| **DIRECT** | *"You are going somewhere."* | Page transitions, panel mount/unmount |
 
-**Forbidden** — these are the "designer-portfolio" tells, always:
+The master principle is still **subtlety**. If a motion would feel at home on a designer's portfolio site, it doesn't belong here. Subtle does not mean *absent*, though — the failure mode of this codebase today is silence: async buttons that show no pending state, rows that don't lift, routes that hard-cut. Both extremes are clarity failures.
 
-- Spring physics, bounce easing, elastic.
-- Rotate (any degree, any duration) — except a `Loader2 animate-spin` icon.
-- Shimmer gradients (`bg-gradient-to-r` with `animate-*`) — `animate-pulse` is the only loading shimmer.
-- Parallax, scroll-triggered choreography, magnetic cursors.
-- Translates > 2px, scales outside 0.98–1.02.
-- Durations > 400ms or < 100ms.
+#### Hard constraints (the motion budget)
 
-**Duration scale** — use one of these, never an in-between:
+1. **Duration scale**: `100 / 150 / 200 / 300 / 400 / 800ms` for everything in-page. The `800ms` slot is reserved for the in-page confirmation flash (`.highlight-confirm` — applied to a row the user is already looking at after a successful mutation). One exception lives outside this scale: `.highlight-new` runs at `5s` because it fires on page-load arrival (e.g., `/jobs?new={code}`) when the user is still orienting and needs the longer window to *find* the just-created row. Both classes share the same `@keyframes highlight-fade` — only the duration differs. Never invent another off-scale duration.
+2. **Easing scale**: `ease-out` for entrances, `ease-in` for exits, `ease-in-out` for color-only state changes, `linear` *only* for indeterminate spinners (`animate-spin`) and progress-bar width fills. Never spring. Never bounce. Never elastic. Never a custom `cubic-bezier(...)` with control points outside `[0,1]`.
+3. **One motion per element per state**. Never compose `translate + scale + shadow` on hover; pick one. The hover-lift token (`-translate-y-px` + hairline shadow) ships as a *paired* token but counts as one motion.
+4. **Animate `transform` and `opacity` only** on any path that runs every frame. Never `width`, `height`, `top`, `left`, `border-color`, `background-color` for transitions longer than `100ms`. Color hover/focus is the one exception, and it stays at `100–150ms`.
+5. **Honour `prefers-reduced-motion`**. Transforms drop entirely. Opacity transitions stay (the fade *is* the reduced-motion experience).
 
-| Duration | Use |
+#### Tokens (added to `app/globals.css`)
+
+Two new tokens carry the system's expanded motion vocabulary:
+
+```css
+:root {
+  --shadow-hover: 0 1px 2px rgb(26 24 21 / 0.04);
+}
+
+@keyframes button-shake {
+  0%, 100% { transform: translateX(0); }
+  25%      { transform: translateX(-2px); }
+  75%      { transform: translateX(2px); }
+}
+```
+
+`--shadow-hover` is the project's *second* shadow — a hairline used only for hover-lift on row-as-link surfaces and clickable cards. The first shadow (heavy, on modals + the bulk-action bar) is unchanged. There is no third.
+
+`button-shake` is the canonical error-revert microanimation. Used once, never looped. Always paired with an error caption.
+
+The existing `@keyframes highlight-fade` (in `app/globals.css`) keeps its current definition. Two classes consume it:
+
+- **`.highlight-new`** (5s) — for the user *arriving* at a list after creating something (e.g., `/jobs?new={code}`). The slow fade gives a still-orienting user time to find the row.
+- **`.highlight-confirm`** (800ms) — for an in-page mutation success on a row the user is already looking at (e.g., Shortlist click). Brief, snappy, gone before it overstays.
+
+Same gradient, different attention contexts. Pick by use case, not by aesthetics.
+
+---
+
+#### VERB 1: RESPOND — hover, focus, press
+
+The rule by surface class:
+
+| Surface | Hover | Focus-visible | Active / pressed |
+|---|---|---|---|
+| **Buttons** (shadcn `<Button>`) | `hover:bg-secondary` (color only — no lift) | `focus-visible:ring-2 ring-ring ring-offset-2` | `active:scale-[0.99]` (NEW default for primary buttons) |
+| **Row-as-link** (job rows, applicant rows) | `hover:-translate-y-px` + `hover:shadow-[var(--shadow-hover)]` (paired — counts as one) | `focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2` (REQUIRED for keyboard) | none |
+| **Cards** (any bordered, padded container that is itself clickable) | Same as row-as-link | Same as row-as-link | none |
+| **Icon-only buttons** (e.g., `MoreHorizontal` overflow trigger) | `hover:bg-secondary` (no lift — they're tools, not destinations) | `focus-visible:ring-2 ring-ring` | none |
+| **Inputs / selects** | no hover change | ring fade-in 100ms ease-out | none |
+| **Arrow icons inside row-as-link** (`ArrowUpRight`, `ChevronRight`) | `group-hover:translate-x-px` (1px directional cue — UNCHANGED, this rule already exists in the codebase) | inherits from parent | none |
+
+Every interactive element gets `transition-all duration-150 ease-out` as the canonical hover transition (or `transition-colors duration-100` if only color is moving).
+
+Canonical row-as-link example (formalizes the pattern already in `app/jobs/page.tsx`):
+
+```tsx
+<li className="
+  group relative
+  border-b border-border
+  px-4 py-3
+  transition-all duration-150 ease-out
+  hover:-translate-y-px hover:shadow-[var(--shadow-hover)]
+  focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2
+">
+  <Link
+    href={`/jobs/${code}`}
+    className="absolute inset-0 z-10"
+    aria-label={`View ${title}`}
+  />
+  <h3 className="...">{title}</h3>
+  <p className="caps-meta text-muted-foreground">{count} APPLICANTS</p>
+  <ArrowUpRight
+    className="
+      h-4 w-4 text-muted-foreground
+      transition-transform duration-150 ease-out
+      group-hover:translate-x-px group-hover:text-foreground
+    "
+  />
+</li>
+```
+
+**Anti-patterns for RESPOND**:
+
+- ❌ `hover:scale-105` (out of subtlety budget — max is 1.02, and even 1.02 is press-only)
+- ❌ `hover:shadow-md` or any Tailwind shadow utility (use `--shadow-hover`; default Tailwind shadows are too heavy for the editorial palette)
+- ❌ Hover-lift on a `<Button>` (lift = "I am a destination"; buttons are actions)
+- ❌ Color hover *plus* lift on the same element (one motion per state — pick one)
+- ❌ `focus-visible:outline-none` without a replacement ring — kills keyboard navigation
+- ❌ Row with no `focus-within:ring-*` — keyboard users get no "you are here"
+
+---
+
+#### VERB 2: ACKNOWLEDGE — action-button feedback
+
+Every button that triggers async work owes the user one of these responses, picked by the *expected* return time:
+
+| If the action returns in… | Then show… |
 |---|---|
-| 100ms | Hover color/opacity, instant feedback |
-| 150ms | Default state changes (`transition-colors duration-150`) |
-| 200ms | Status badge color changes |
-| 300ms | Panel / Sheet / Dialog / DropdownMenu fade in & out |
-| 400ms | Score number count-up via `requestAnimationFrame` |
+| `< 100ms` | Optimistic UI only (no spinner — the spinner *would* be slower than the action) |
+| `100ms – 1000ms` | In-button spinner + button-text swap (`"Save"` → `"Saving…"`) |
+| `1000ms – 3000ms` | Spinner + status caption *beneath* the button (italic Newsreader: *"Reviewing your resume…"*) |
+| `> 3000ms` | All of the above + ARIA live region announcement + cancel affordance if cancelable |
 
-**Easing**:
+The four canonical patterns:
 
-- `ease-out` for entrances (fade-in, panel arriving, hover translate)
-- `ease-in` for exits (fade-out, panel leaving)
-- `ease-in-out` for color-only state transitions
-- Never `linear` for UI motion. Never spring. Never bounce.
+**1. Optimistic UI** (canonical use: `app/applications/[id]/_components/status-actions.tsx` Review/Shortlist/Reject)
 
-**Reduced motion** — drop all non-essential motion to 1ms. Add to `app/globals.css`:
+The action *already happened* in the user's mental model. Reflect it immediately, recover gracefully on failure.
+
+```tsx
+const [optimisticStatus, setOptimisticStatus] = useOptimistic(status);
+const [error, setError] = useState<string | null>(null);
+const buttonRef = useRef<HTMLButtonElement>(null);
+
+async function handleStatusChange(next: Status) {
+  setOptimisticStatus(next);              // UI updates instantly
+  setError(null);
+  try {
+    await fetch(`/api/applications/${id}/status`, {
+      method: "PATCH",
+      body: JSON.stringify({ status: next }),
+    });
+    // Success: row already shows new state. Add a confirmation flash.
+    rowRef.current?.classList.add("highlight-new");
+  } catch (e) {
+    // Error: revert is automatic via useOptimistic, but flag it.
+    setError("Couldn't save. Try again.");
+    buttonRef.current?.style.animation = "button-shake 200ms ease-in-out";
+    buttonRef.current?.addEventListener(
+      "animationend",
+      () => { buttonRef.current!.style.animation = ""; },
+      { once: true }
+    );
+  }
+}
+```
+
+**Do not disable the button during the optimistic period.** The action already took effect; disabling reads as "broken." This is a *change* from the current `disabled={isPending}` pattern in `status-actions.tsx` and `job-actions-menu.tsx` — that pattern is now wrong.
+
+**2. In-button spinner** (canonical use: login form submit, `Save job` button)
+
+For actions where the result is uncertain enough that optimistic UI would lie:
+
+```tsx
+<Button type="submit" disabled={submitting} aria-busy={submitting}>
+  {submitting ? (
+    <>
+      <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden />
+      Saving…
+    </>
+  ) : (
+    "Save job"
+  )}
+</Button>
+```
+
+The text swap is mandatory — it carries the verb. *"Saving…"* not *"Loading…"*. *"Archiving…"* not *"Working…"*.
+
+**3. Confirmation flash** (canonical use: any successful mutation)
+
+Reuses the existing `@keyframes highlight-fade` in `globals.css` via the `.highlight-confirm` class (800ms). For in-page mutations, this is the canonical success cue — apply on the success branch of the handler, remove on `animationend` so it can re-trigger on the next mutation.
+
+```tsx
+// After a successful PATCH on a row the user is already looking at:
+rowRef.current?.classList.add("highlight-confirm");
+rowRef.current?.addEventListener(
+  "animationend",
+  () => rowRef.current?.classList.remove("highlight-confirm"),
+  { once: true }
+);
+```
+
+Use `.highlight-new` (5s) instead when the user is *arriving* at the page after creating the row — the longer fade gives them time to find it. Don't use `.highlight-new` for in-page mutations; 5s on a row you're staring at feels like a stuck animation.
+
+**4. Error shake** (canonical use: any failed mutation)
+
+Reuses the new `@keyframes button-shake`. 200ms, one oscillation, never looped. Always paired with an error caption that names what went wrong.
+
+```tsx
+<div className="space-y-2">
+  <Button ref={buttonRef} ...>Submit</Button>
+  {error && (
+    <p className="text-sm text-primary border-l-2 border-primary pl-3 py-1 italic font-serif">
+      {error}
+    </p>
+  )}
+</div>
+```
+
+**Anti-patterns for ACKNOWLEDGE**:
+
+- ❌ `disabled={isPending}` as the *only* feedback on an async button (invisible pending state)
+- ❌ Disabling an optimistic-UI button during the optimistic period (the action already happened)
+- ❌ Spinner on an action that returns in `<300ms` (creates false latency — UI feels slower than it is)
+- ❌ `"Loading…"` with no subject (rule restated from existing system)
+- ❌ Error toast with no inline indication on the button that failed (toast can be missed; the button must own the error)
+- ❌ Looping the shake animation (one oscillation only — looped shake reads as "broken")
+
+---
+
+#### VERB 3: REVEAL — progress and loading
+
+Picking the right indicator is a function of two questions: *do you know the shape of what's coming?* and *how long will it take?*
+
+| Content shape | Duration | Show |
+|---|---|---|
+| Predictable (you know the layout) | `< 300ms` | Nothing — show stale data, swap silently |
+| Predictable | `300ms – 2000ms` | Skeleton matching the final layout (`animate-pulse` only) |
+| Predictable | `> 2000ms` | Skeleton + caption (*"Loading 21 applicants…"*) |
+| Unpredictable (LLM stream, free-form response) | Any duration | Labeled spinner — never a skeleton (lying about layout) |
+| Known progress (% complete) | `> 2000ms` | Progress bar (NEW pattern, see below) |
+
+**Skeleton pattern** (canonical use: `app/jobs/new/page.tsx` extraction placeholder)
+
+Skeletons must mirror the *exact* shape of the final content — same hairline borders, same row heights, same column counts. A skeleton that doesn't match its content layout is worse than no skeleton (the layout shift on swap is jarring).
+
+```tsx
+<ul className="divide-y divide-border">
+  {Array.from({ length: 5 }).map((_, i) => (
+    <li key={i} className="px-4 py-3 animate-pulse">
+      <div className="h-4 w-2/3 bg-muted rounded-sm" />
+      <div className="mt-2 h-3 w-1/4 bg-muted rounded-sm" />
+    </li>
+  ))}
+</ul>
+```
+
+The skeleton-to-content swap is *always* a fade, never a slide:
+
+```tsx
+<div className={`transition-opacity duration-300 ease-out ${ready ? "opacity-100" : "opacity-0"}`}>
+  {ready ? <ApplicantsList items={items} /> : <ApplicantsListSkeleton />}
+</div>
+```
+
+**Spinner pattern** (canonical use: `app/jobs/new/apply-form.tsx` LLM call)
+
+Use a spinner only when the result shape is genuinely unpredictable. Always pair with a labeled subject:
+
+```tsx
+<div className="flex items-center gap-2 text-foreground/70">
+  <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" aria-hidden />
+  <p className="font-serif italic text-sm">Reviewing your resume…</p>
+</div>
+```
+
+`Loader2` from `lucide-react` is the *only* spinner. `animate-spin` is the *only* legitimate rotation in the system. The spinner spins linearly (the one place `linear` easing is permitted).
+
+**Progress bar pattern** (NEW — for known-progress operations like file upload, multi-step extraction)
+
+A hairline rule with terracotta fill on a muted track. No shadow, no glow, no pulsing. The bar's width transitions linearly (the second permitted use of `linear`).
+
+```tsx
+<div className="space-y-2">
+  <div className="h-px w-full bg-muted relative overflow-hidden">
+    <div
+      className="absolute inset-y-0 left-0 bg-primary transition-[width] duration-300 ease-linear"
+      style={{ width: `${pct}%` }}
+      role="progressbar"
+      aria-valuenow={pct}
+      aria-valuemin={0}
+      aria-valuemax={100}
+    />
+  </div>
+  <p className="caps-meta text-muted-foreground tabular-nums">
+    {pct}% — {label}
+  </p>
+</div>
+```
+
+**Anti-patterns for REVEAL**:
+
+- ❌ Skeleton on an action where output shape is unknown (use a spinner — skeletons that don't match content layout are jarring on swap)
+- ❌ Spinner on an action that returns in `<300ms` (false latency)
+- ❌ Shimmer-gradient skeletons (`bg-gradient-to-r animate-pulse`) — `animate-pulse` opacity-only is the *only* loading shimmer in this system
+- ❌ Progress bar with non-linear easing or any decoration on the bar itself (glow, shadow, animated fill)
+- ❌ Skeleton-to-content swap that slides (always fade)
+- ❌ Multiple skeletons + spinners on the same surface at once (pick one indicator per loading boundary)
+
+---
+
+#### VERB 4: DIRECT — page transitions and mount/unmount
+
+**Page-to-page navigation.** Two layers, applied in order. The first is mandatory; the second is polish.
+
+**Layer 1 (mandatory): `loading.tsx` per slow route segment.** This is the *primary* fix for "the screen sits, then suddenly swaps." Next.js prefetches `loading.tsx` with the route, so the moment the user clicks a `<Link>`, the destination's skeleton appears instantly. Real content streams in to replace it when the database/network read resolves.
+
+Add `app/<segment>/loading.tsx` for **every** route whose `page.tsx` `await`s a Supabase query, fetch, or LLM call. The skeleton must mirror the destination layout — same outer shell, same header/footer, same hairline rows, same column counts. See `app/jobs/new/page.tsx:537-609` for the canonical in-codebase pattern, or any of the existing `loading.tsx` files.
+
+Skeleton rules (restated from §VERB 3 REVEAL):
+- `animate-pulse` only — no shimmer gradients
+- Hairline-bordered rows, never solid blobs
+- Reuse `Eyebrow` / `ColumnMarker` atoms inline so the chrome doesn't shift on swap
+
+**Layer 2 (polish): a route fade — either CSS or View Transitions.** Even with `loading.tsx`, the *swap* from skeleton → content is a hard cut at the pixel level. A 200ms cross-fade smooths it.
+
+*Option A — CSS fade wrapper (simpler, recommended for v0.1).* Already wired in this codebase at `app/_components/route-fade.tsx`, mounted in `app/layout.tsx`:
+
+```tsx
+"use client";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+
+export function RouteFade({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const [visible, setVisible] = useState(true);
+  useEffect(() => {
+    setVisible(false);
+    const id = requestAnimationFrame(() => setVisible(true));
+    return () => cancelAnimationFrame(id);
+  }, [pathname]);
+  return (
+    <div
+      data-fade
+      className={`flex-1 flex flex-col transition-opacity duration-200 ease-out ${visible ? "opacity-100" : "opacity-0"}`}
+    >
+      {children}
+    </div>
+  );
+}
+```
+
+`requestAnimationFrame` (not `setTimeout(0)`) is required — without it React batches the two state updates and the transition never plays. The `data-fade` attribute opts the fade into surviving the reduced-motion override (the fade is the *one* motion that's preserved for motion-sensitive users — a hard cut is more jarring than a fade).
+
+*Option B — Next.js 16 View Transitions API (richer, opt-in).* Enables shared-element morphs (e.g., applicant name list → detail) and directional slides. Requires:
+
+1. Enable in `next.config`:
+
+```ts
+const nextConfig: NextConfig = {
+  experimental: { viewTransition: true },
+};
+```
+
+2. Import React's component (not Next's — there is no `unstable_ViewTransition` export from `next` in v16):
+
+```tsx
+import { ViewTransition } from "react";
+
+<ViewTransition name={`jobTitle-${code}`}>
+  <h1 className="...">{title}</h1>
+</ViewTransition>
+```
+
+Suggested shared-element names if/when adopted:
+
+| Transition name | Source surface → Destination surface |
+|---|---|
+| `jobTitle-{code}` | Job title in `/jobs` row → `/jobs/[code]` heading |
+| `applicantRow-{id}` | Applicant row in `/applications` → `/applications/[id]` heading |
+| `jobBreadcrumb-{code}` | Job heading in any subpage → breadcrumb on the next subpage |
+
+Back-navigation reverses direction automatically. See `node_modules/next/dist/docs/01-app/02-guides/view-transitions.md` for the full API surface (directional slides via `transitionTypes`, asymmetric Suspense reveals, header anchoring).
+
+**Don't reach for `useLinkStatus`.** Per the Next docs: *"Before adding inline feedback, consider if … the route has a `loading.js` file, enabling instant transitions with a route-level fallback."* With Layer 1 in place, `useLinkStatus` is unnecessary — and would *add* visual noise on top of the already-instant skeleton. Reserve it for the rare case where you set `prefetch={false}`.
+
+**Mount / unmount of non-route content** (sheets, dialogs, dropdowns, popovers).
+
+Already covered by Radix's `data-[state=open]` / `data-[state=closed]` attributes via `tw-animate-css`. The rule:
+
+- **Permitted**: `fade-in-0` / `fade-out-0` + an optional `slide-in-from-{side}-px` / `slide-out-to-{side}-px` (1px directional cue) at `duration-100`.
+- **Forbidden** (override the shadcn defaults): `zoom-in-95` / `zoom-out-95` (5% scale exceeds the 2% subtlety budget) and `slide-in-from-{side}-2`+ (translate exceeds the 2px budget).
+
+Strip the zoom from every shadcn `DialogContent`, `SheetContent`, `DropdownMenuContent`, `PopoverContent`, `SelectContent` you generate. Default to fade-only.
+
+**Mount / unmount of inline content** (expanding `<details>`, revealing an error message, showing a tooltip):
+
+- Opacity fade only. `duration-200 ease-out` in, `duration-150 ease-in` out.
+- **No height animation.** Either show or don't. Animating height is paint-heavy and exposes the layout-shift problem (the content underneath bumps).
+- Stagger child reveals only when the parent is a list of `>5` items *and* the total stagger fits in `<300ms` (so `<60ms per child for 5+ children`). Below 5 items, stagger reads as fussy.
+
+**Anti-patterns for DIRECT**:
+
+- ❌ Page transition without a `prefers-reduced-motion` fallback (the fade-only rule already handles this — but verify on every implementation)
+- ❌ Animating `height` on `<details>` open (paint-heavy + layout shift; either show or don't)
+- ❌ Staggered reveals on a list of `<5` items (reads as fussy)
+- ❌ shadcn `DialogContent` / `SheetContent` / `DropdownMenuContent` / `PopoverContent` with default `data-[state=open]:zoom-in-95` left in (rule restated and enforced)
+- ❌ Slide-in distances `>2px` (e.g., `slide-in-from-top-2` is `8px` — too much)
+- ❌ Page transition that re-runs on `searchParams` change (filter chip clicks shouldn't fade the whole page)
+
+---
+
+#### Reduced motion (more nuanced than before)
+
+The current globals.css block drops *all* animation/transition durations to 1ms. That works for transforms and color but flattens opacity fades into hard cuts, which is jarring even for motion-sensitive users (a content swap that pops feels like a glitch, not an accommodation).
+
+Updated block to add to `app/globals.css`:
 
 ```css
 @media (prefers-reduced-motion: reduce) {
@@ -561,17 +923,31 @@ The master principle is **subtlety**. Motion is allowed when it adds clarity (a 
     animation-iteration-count: 1 !important;
     transition-duration: 1ms !important;
   }
+  /* Preserve opacity fades — the fade IS the reduced-motion experience for content swaps. */
+  .fade-preserve,
+  [data-fade] {
+    transition-duration: revert !important;
+  }
+  /* Hover-lift becomes hover-color-only for motion-sensitive users. */
+  *:hover {
+    transform: none !important;
+  }
 }
 ```
 
-**Override shadcn defaults toward subtlety.** shadcn's Dialog, Sheet, and DropdownMenu ship with full slide+zoom animations (`data-[state=open]:slide-in-from-…`, `data-[state=open]:zoom-in-95`). Strip the zoom (it scales 5%, exceeds our 2% budget) and replace the long slide with `fade-in-0` plus an optional ≤2px translate via inline style if a directional cue is genuinely needed. Default: fade only.
+Apply `data-fade` to the route-fade wrapper and the skeleton-to-content swap container so those keep their fade timing under reduced motion.
 
-### Loading & skeletons — clarity over decoration
+---
 
-- **Skeletons mirror final shape.** Rect for image, text-line for text, hairline-bordered block for card. Reuse `border border-border rounded-sm` (the existing card recipe), not a soft gray rounded box.
-- **Pulse is fine** (`animate-pulse` is opacity-only — fits the rule). **Shimmer-gradient skeletons are forbidden** — that is "designer-portfolio" energy.
-- **Spinner only when shape is genuinely unpredictable** (e.g. a free-form LLM response). Always paired with what is loading: *"Reading the description…"*, *"Saving candidate…"*. Never a bare *"Loading…"*.
-- **Skeleton → content swap is a fade**, not a slide. Wrap the content in a `transition-opacity duration-300` and toggle `opacity-0` ↔ `opacity-100` on the data-ready boundary.
+#### Override shadcn defaults toward subtlety
+
+shadcn primitives ship with motion that exceeds this system's budget. Override on every use:
+
+- **`DialogContent`, `SheetContent`, `DropdownMenuContent`, `PopoverContent`, `SelectContent`**: strip `data-[state=open]:zoom-in-95` and `data-[state=closed]:zoom-out-95`. Replace with `data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0` plus an optional `slide-in-from-{side}-px`. Duration stays `duration-100`.
+- **`Toast` / `Sonner`**: fade only on enter and exit. No slide-from-bottom-full (too distance, too long).
+- **`Accordion`**: fade only. No height animation on the panel.
+
+If a shadcn primitive's default motion is genuinely needed (e.g., the slide on `Sheet` is a directional cue), keep the slide but cap the distance at 2px and the duration at 100ms.
 
 ## Anti-patterns — never do
 
@@ -622,7 +998,9 @@ Before writing any new screen or component in this codebase, run through this:
 - [ ] Is the page width and gutter aligned to `px-10` or `p-12`?
 - [ ] Have you used any color outside the locked palette? (If yes, push back.)
 - [ ] Have you defined every required state on each interactive element (default / hover / focus-visible / active / disabled, plus loading where async), each distinguishable without color alone?
-- [ ] Is every motion an opacity fade or color change, on the canonical duration scale (100 / 150 / 200 / 300 / 400ms) with the right easing?
+- [ ] **Motion verbs**: every async button does ACKNOWLEDGE (spinner / optimistic / shake), every row-as-link does RESPOND (hover-lift on cards/rows; color-only on buttons), every loading boundary does REVEAL (skeleton matching layout / labeled spinner / progress bar — picked from the decision tree), every route change does DIRECT (View Transitions if wired; CSS fade fallback otherwise)?
+- [ ] **Motion budget**: every animation uses `transform` + `opacity` only? Durations on the `100 / 150 / 200 / 300 / 400 / 800ms` scale (800ms only for `highlight-fade`)? Easings drawn from `ease-out` / `ease-in` / `ease-in-out` / `linear` (linear only for spinners and progress)? At most one motion per element per state?
+- [ ] **Reduced motion**: `app/globals.css` has the `prefers-reduced-motion` block that drops transforms but preserves opacity-fade for content swaps?
 
 ## Reference files in this codebase
 

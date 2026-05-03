@@ -4,6 +4,7 @@ import { listJobs } from "@/lib/jobs-store";
 import { ArrowLeft } from "lucide-react";
 import NavTabClient from "../../_components/nav-tab";
 import { JobIdBadge } from "@/app/_components/job-id-badge";
+import { SignOutButton } from "@/app/_components/sign-out-button";
 import type { Criterion, Importance } from "@/lib/prompts/extractCriteria.v1";
 
 /* —————————————————————————— atoms (inlined per design system) —————————————————————————— */
@@ -88,7 +89,7 @@ export default async function JobViewPage({
       <header className="flex-shrink-0 border-b border-border bg-background z-10">
         <div className="px-4 md:px-10 pt-4 pb-3 flex items-center justify-between gap-4">
           <div className="flex items-baseline gap-3 min-w-0">
-            <span className="font-serif italic text-h3 leading-none">Yuvabe</span>
+            <Link href="/" className="font-serif italic text-h3 leading-none hover:opacity-70 transition-opacity">Yuvabe</Link>
             <span className="text-muted-foreground">/</span>
             <Eyebrow>ATS</Eyebrow>
           </div>
@@ -100,10 +101,11 @@ export default async function JobViewPage({
             <span className="hidden sm:inline">Applicants</span>
           </Link>
         </div>
-        <nav className="px-4 md:px-10 flex items-center gap-6 md:gap-8 overflow-x-auto">
+        <nav className="px-4 md:px-10 flex items-center gap-6 md:gap-8 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <NavTabClient href="/jobs" label="Jobs" prefix="/jobs" />
           <NavTabClient href="/applications" label="Applicants" prefix="/applications" />
-          <NavTabClient href="/review" label="Review" prefix="/review" />
+          <NavTabClient href="/shortlist" label="Shortlist" prefix="/shortlist" />
+          <SignOutButton className="ml-auto" />
         </nav>
       </header>
 

@@ -50,7 +50,9 @@
 
   /* Editorial type scale — see yuvabe-design-system skill.
      Names are semantic so they don't collide with Tailwind defaults
-     (text-xl, text-2xl, etc. still work for non-system code). */
+     (text-xl, text-2xl, etc. still work for non-system code).
+     Display tiers use var indirection so a media query on :root can bend
+     them on mobile without rebuilding utilities. */
   --text-eyebrow: 11px;        /* decorative caps — footer, header tags, glanced labels */
   --text-meta: 12px;           /* informational caps — counts, status, timestamps */
   --text-body-sm: 13px;        /* table cells, sub-row meta */
@@ -59,13 +61,20 @@
   --text-h3: 18px;             /* card titles, prominent labels */
   --text-h2: 22px;             /* section heads, list-row titles */
   --text-h1: 28px;             /* utility H1, large list-row titles */
-  --text-display: 32px;        /* prominent display */
-  --text-display-md: 40px;     /* responsive bridge for editorial display */
-  --text-display-lg: 48px;     /* editorial H1, column-marker numerals (md+) */
-  --text-display-xl: 64px;     /* candidate names, hero column-marker numerals */
+  --text-display: var(--font-size-display);          /* prominent display */
+  --text-display-md: var(--font-size-display-md);    /* responsive bridge */
+  --text-display-lg: var(--font-size-display-lg);    /* editorial H1 (md+) */
+  --text-display-xl: var(--font-size-display-xl);    /* hero candidate names */
 }
 
 :root {
+  /* Editorial display sizes — bent down at <640px (see media query below)
+     so headlines fit narrow viewports without overflow. */
+  --font-size-display: 32px;
+  --font-size-display-md: 40px;
+  --font-size-display-lg: 48px;
+  --font-size-display-xl: 64px;
+
   /* Yuvabe ATS — Considered Editorial × Operational Precision.
      Warm, restrained palette per the Design Brief. Borders, not shadows. */
   --background: #FAF8F4;          /* warm off-white page */
@@ -92,6 +101,13 @@
   --chart-4: #B8553A;
   --chart-5: #E8D5CC;
   --radius: 0.25rem;              /* tighter radii (4px) per brief */
+
+  /* Elevation — see yuvabe-design-system §Motion VERB 1: RESPOND.
+     Two shadows exist in the system. The heavy one lives on shadcn modal
+     primitives (Dialog/Sheet/Popover). The hairline below is for hover-lift
+     on row-as-link surfaces and clickable cards only — never on buttons. */
+  --shadow-hover: 0 1px 2px rgb(26 24 21 / 0.04);
+
   --sidebar: #FAF8F4;
   --sidebar-foreground: #1A1815;
   --sidebar-primary: #B8553A;
@@ -134,6 +150,17 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+}
+
+/* Mobile bends the editorial display tier so headlines fit a 375px viewport.
+   Body sizes (h3/h2/h1, body, body-lg) stay constant — they're already mobile-safe. */
+@media (max-width: 640px) {
+  :root {
+    --font-size-display: 26px;
+    --font-size-display-md: 32px;
+    --font-size-display-lg: 36px;
+    --font-size-display-xl: 44px;
+  }
 }
 
 /* Editorial caps utilities. The size→tracking inverse rule is baked in here:
@@ -198,13 +225,57 @@
     font-variant-numeric: tabular-nums;
   }
 
-  /* Highlight a just-saved row briefly when arriving via ?new=<code> */
+  /* Highlight a just-saved row briefly when arriving via ?new=<code>.
+     Also the canonical confirmation flash for any successful mutation
+     (see yuvabe-design-system §Motion VERB 2: ACKNOWLEDGE). */
   @keyframes highlight-fade {
     0%   { background-color: rgb(232 213 204 / 1); }
     20%  { background-color: rgb(232 213 204 / 0.8); }
     100% { background-color: rgb(232 213 204 / 0); }
   }
+  /* .highlight-new — for arrivals (page-load after creating something).
+     The 5s lets a still-orienting user find the row they just made.
+     Used at app/jobs/page.tsx:153 when the URL carries ?new=<code>. */
   .highlight-new {
     animation: highlight-fade 5s ease-out forwards;
+  }
+
+  /* .highlight-confirm — for in-page mutations the user is already looking at
+     (e.g., a Shortlist click that updates a row in place). 800ms is enough to
+     register "the action took" without lingering. Apply imperatively from the
+     handler's success branch and remove on animationend to allow re-triggering. */
+  .highlight-confirm {
+    animation: highlight-fade 800ms ease-out forwards;
+  }
+
+  /* Error-revert microanimation for failed actions (see VERB 2: ACKNOWLEDGE).
+     One oscillation only, never looped. Pair with an inline error caption. */
+  @keyframes button-shake {
+    0%, 100% { transform: translateX(0); }
+    25%      { transform: translateX(-2px); }
+    75%      { transform: translateX(2px); }
+  }
+  .button-shake {
+    animation: button-shake 200ms ease-in-out;
+  }
+}
+
+/* Reduced motion — see yuvabe-design-system §Motion.
+   Drops transforms entirely (so hover-lift becomes color-only) and
+   collapses animations to 1ms. Opacity transitions are preserved via
+   the [data-fade] / .fade-preserve opt-out so content swaps still fade
+   instead of hard-cutting (a hard cut is more jarring than a fade,
+   even for motion-sensitive users). */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+  }
+  [data-fade], .fade-preserve {
+    transition-duration: revert !important;
+  }
+  *:hover {
+    transform: none !important;
   }
 }

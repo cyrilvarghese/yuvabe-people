@@ -5,6 +5,7 @@ import { ChevronRight, Plus } from "lucide-react";
 import NavTabClient from "./_components/nav-tab";
 import { JobIdBadge } from "@/app/_components/job-id-badge";
 import { JobActionsMenu } from "./_components/job-actions-menu";
+import { SignOutButton } from "@/app/_components/sign-out-button";
 
 /* —————————————————————————— small typographic atoms —————————————————————————— */
 
@@ -86,9 +87,12 @@ export default async function JobsPage({
       <header className="flex-shrink-0 border-b border-border bg-background z-10">
         <div className="px-4 md:px-10 pt-4 pb-3 flex items-center justify-between gap-3">
           <div className="flex items-baseline gap-3 min-w-0">
-            <span className="font-serif italic text-h3 leading-none">
+            <Link
+              href="/"
+              className="font-serif italic text-h3 leading-none hover:opacity-70 transition-opacity"
+            >
               Yuvabe
-            </span>
+            </Link>
             <span className="text-muted-foreground">/</span>
             <Eyebrow>ATS</Eyebrow>
           </div>
@@ -97,14 +101,15 @@ export default async function JobsPage({
             &nbsp;{count === 1 ? "job" : "jobs"}
           </Eyebrow>
         </div>
-        <nav className="px-4 md:px-10 flex items-center gap-6 md:gap-8 overflow-x-auto">
+        <nav className="px-4 md:px-10 flex items-center gap-6 md:gap-8 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <NavTabClient href="/jobs" label="Jobs" prefix="/jobs" />
           <NavTabClient
             href="/applications"
             label="Applicants"
             prefix="/applications"
           />
-          <NavTabClient href="/review" label="Review" prefix="/review" />
+          <NavTabClient href="/shortlist" label="Shortlist" prefix="/shortlist" />
+          <SignOutButton className="ml-auto" />
         </nav>
       </header>
 

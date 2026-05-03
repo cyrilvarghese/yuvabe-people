@@ -3,6 +3,7 @@ import { listApplications, type ApplicationStatus } from "@/lib/applications-sto
 import { listJobs, type Job } from "@/lib/jobs-store";
 import { ArrowUpRight } from "lucide-react";
 import NavTabClient from "../jobs/_components/nav-tab";
+import { SignOutButton } from "@/app/_components/sign-out-button";
 
 /* —————————————————————————— atoms —————————————————————————— */
 
@@ -115,7 +116,7 @@ export default async function ApplicationsListPage({
       <header className="flex-shrink-0 border-b border-border bg-background z-10">
         <div className="px-4 md:px-10 pt-4 pb-3 flex items-center justify-between gap-3">
           <div className="flex items-baseline gap-3 min-w-0">
-            <span className="font-serif italic text-h3 leading-none">Yuvabe</span>
+            <Link href="/" className="font-serif italic text-h3 leading-none hover:opacity-70 transition-opacity">Yuvabe</Link>
             <span className="text-muted-foreground">/</span>
             <Eyebrow>ATS</Eyebrow>
           </div>
@@ -129,10 +130,11 @@ export default async function ApplicationsListPage({
             <span className="sm:hidden">{total === 1 ? "app" : "apps"}</span>
           </Eyebrow>
         </div>
-        <nav className="px-4 md:px-10 flex items-center gap-6 md:gap-8 overflow-x-auto">
+        <nav className="px-4 md:px-10 flex items-center gap-6 md:gap-8 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <NavTabClient href="/jobs" label="Jobs" prefix="/jobs" />
           <NavTabClient href="/applications" label="Applicants" prefix="/applications" />
-          <NavTabClient href="/review" label="Review" prefix="/review" />
+          <NavTabClient href="/shortlist" label="Shortlist" prefix="/shortlist" />
+          <SignOutButton className="ml-auto" />
         </nav>
       </header>
 
@@ -260,7 +262,7 @@ function FilterPill({
       scroll={false}
       className={`
         caps-meta tabular
-        flex items-center gap-1.5 px-2.5 py-1 rounded-sm
+        flex items-center gap-1.5 px-3 py-2.5 md:py-1 rounded-sm
         transition-all duration-150
         ${toneClass}
         ${active ? "bg-secondary opacity-100" : "opacity-65 hover:opacity-100 hover:bg-secondary/40"}
