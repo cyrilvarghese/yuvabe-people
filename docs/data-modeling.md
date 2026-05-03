@@ -24,7 +24,7 @@ If you remember nothing else from this doc, remember that.
 
 ## What we have today
 
-The ATS has three top-level entities. Each has its own JSON file (today) and will become its own collection / table when we move to a real database.
+The ATS has three top-level entities. Each is a Postgres table in Supabase, with embedded sub-collections stored as `jsonb` columns.
 
 ```
 Job ────────────< Application >───────── Candidate
@@ -142,13 +142,36 @@ const jobs = await listJobs();                       // 3
 // then a JS-side join on candidateId / jobId
 ```
 
-With a local JSON file this is free — everything's already in memory. With Supabase or MongoDB it's three round trips per page load, including a full scan of the candidates table just to look up a name.
+With a local JSON file this used to be free — everything was already in memory. Post-Supabase migration each round trip is real network I/O, and a full scan of the candidates table just to look up a name would be wasteful.
 
 **Fix:** at submission time, write a snapshot of the Candidate's name / email / location *onto* the Application row. List views read from the snapshot. The detail view (`/applications/[id]`) still fetches the full Candidate doc because it renders the rich profile (experience, education, skills) — snapshots are just for list views.
 
 **Why this is safe:** name, email, and location are written once on apply and almost never change. Read-heavy, write-rare → perfect denormalization candidates.
 
 **Lesson:** *Denormalize fields that are read often and updated rarely. Frequently-updated fields are the wrong target — you'll create write amplification.*
+
+#### Snapshot fields, concretely
+
+What's snapshotted and where each one is used:
+
+| Snapshotted field | Lives on | Used by | Used by detail page? |
+|---|---|---|---|
+| `candidateName` | Application | `/applications`, `/jobs/[code]` (each row) | No — page reads `candidate.name` from full Candidate doc |
+| `candidateEmail` | Application | `/applications` (each row) | No |
+| `candidateLocation` | Application | `/applications`, `/jobs/[code]` (each row) | No |
+| `candidateYearsOfExperience` | Application | `/applications` (each row) | No |
+| `jobCode` | Application | All routes that resolve `/applications/[id]` and need to link back to `/jobs/[code]` | Yes (it's a link target, not a profile field) |
+| `criterionLabel` + `importance` | Each `matchBreakdown` row inside Application | `/applications/[id]` criterion breakdown | Yes — the labels are the *value* of the breakdown, not a duplicate |
+
+The pattern: **list pages query one table** (`applications`), **detail pages legitimately fan out** because they show rich profile data that can't reasonably be snapshotted (10-element experience array, full resume text). One round trip on the list, three on the detail — the detail page is OK because it's one row, not 21.
+
+#### What would be wrong to snapshot
+
+- `Application.matchScore` snapshotted *back* onto the Candidate — match scores are per-Job, so a Candidate would need an array of `{jobId, score}` pairs that grow forever. Wrong shape, write-frequent.
+- `Job.applicationCount` snapshotted onto Job — every new submission would have to update the parent Job row. Write amplification on a hot path.
+- A Candidate's *current* phone number snapshotted onto past Applications — if they change phones, you have stale numbers everywhere with no clean way to reconcile.
+
+The snapshot rule needs all three of "read often, written rarely, stale-tolerant" to be true. Drop any one and the snapshot becomes a liability.
 
 ### Gap 3 — the rules aren't captured anywhere reusable
 
@@ -160,18 +183,18 @@ Every time we add a new entity (next: Interview? Stage? FeedbackNote?), we'll re
 
 ---
 
-## What we're going to ship
+## What we shipped
 
-Four small stages. Each is independently verifiable. None of them are visible in the UI — the user-facing app behaves identically — but each makes the model cleaner for the next person who touches it.
+The four R-stages above all landed, plus a full migration from local JSON files to Supabase Postgres in five further stages (Stage 0 setup → Stages 1–3 per-store cutover → Stage 4 cleanup).
 
-| Stage | What changes | Visible to a user? |
-|---|---|---|
-| R1 | Each Criterion gains an `id`; each matchBreakdown row gains an optional `criterionId` | No |
-| R2 | Each Application gains `candidateName`, `candidateEmail`, `candidateLocation` snapshots written at submission time | No |
-| R3 | Listing pages stop fetching the candidates table; they read from snapshots | No (but logs show fewer fetches) |
-| R4 | A `yuvabe-data-modeling` skill is added that activates whenever entity types or store files are being modified | No, until next time someone changes the data model — at which point the skill surfaces this doc and its checklist |
+Storage shape on Supabase:
+- One Postgres table per top-level entity: `jobs`, `candidates`, `applications`.
+- Embedded sub-collections live in `jsonb` columns — `Job.criteria`, `Candidate.skills/experience/education/links`, `Application.matchBreakdown`. The "data accessed together stored together" rule is preserved exactly: each parent row plus its children round-trips as a single SQL row.
+- snake_case columns in Postgres; the canonical TypeScript shapes stay camelCase. Each `lib/*-store.ts` has a small `rowToFoo()` adapter that's the only place the conversion happens.
+- Foreign keys are real Postgres FKs (`applications.job_id → jobs.id`, `applications.candidate_id → candidates.id`) with `ON DELETE CASCADE`.
+- Three indexes mirror the actual selective query patterns (`applications.job_code`, `applications.received_at desc`, and the composite `(job_code, match_score desc)` for the main job-detail page).
 
-Backwards compatible: all field additions are *additive*. Existing data parses correctly without these new fields, and we backfill them lazily on read.
+If a `jsonb` column ever needs to be queried independently of its parent (e.g., "all match-breakdown rows where matched = no across all applications"), the migration path is: promote the JSONB to a child table with a view + dual-write window, no destructive change required.
 
 ---
 
@@ -185,8 +208,8 @@ When the team adds the next thing — say, an `Interview` entity tracking a recr
 4. **What references does it carry?** What other entity does it point to? Is the relationship one-to-one, one-to-few, or one-to-many?
 5. **What does it denormalize?** For each list view, identify which fields from referenced entities are needed. If those fields are write-rare, snapshot them.
 6. **What happens when an upstream entity changes?** If the parent changes a field that this entity has snapshotted, is that field expected to update everywhere — or is the snapshot a "point in time" record? Both are valid; pick consciously.
-7. **Add the MIGRATION BOUNDARY header.** The new store file is the only place `fs.*` (or future `supabase.*` / `mongodb.*`) lives.
-8. **Match camelCase + additive conventions.** New fields default-safe so old data still parses.
+7. **Add the new entity to its own `lib/*-store.ts` file.** Callers go through async functions only; they never see the Supabase client. A new Postgres table + a `supabase/migrations/<n>_<name>.sql` migration get added together.
+8. **Match camelCase TS + snake_case Postgres conventions.** New fields are additive; the `rowToFoo()` adapter handles the mapping.
 
 If you can answer all eight, you have a NoSQL-friendly schema that will survive the swap to Supabase or MongoDB without surprises.
 
@@ -198,4 +221,4 @@ If you can answer all eight, you have a NoSQL-friendly schema that will survive 
 - [MongoDB: 6 Rules of Thumb for Schema Design](https://www.mongodb.com/company/blog/mongodb/6-rules-of-thumb-for-mongodb-schema-design) — embedding vs referencing decision tree
 - [Azure Cosmos DB: Data Modeling](https://learn.microsoft.com/en-us/azure/cosmos-db/modeling-data) — same principles, slightly more general framing
 - [Couchbase: When to Embed, When to Refer](https://www.couchbase.com/blog/data-modelling-when-embed-or-refer/) — practical checklist
-- The codebase: each `lib/*-store.ts` file has a `MIGRATION BOUNDARY` header documenting how it'll be swapped to a real DB
+- The codebase: each `lib/*-store.ts` file documents the snake_case → camelCase adapter pattern; `supabase/migrations/*.sql` is the canonical schema source

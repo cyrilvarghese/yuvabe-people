@@ -3,11 +3,9 @@ import { notFound } from "next/navigation";
 import { listJobs } from "@/lib/jobs-store";
 import {
   getApplicationById,
-  type Application,
-  type ApplicationStatus,
   type CriterionMatch,
 } from "@/lib/applications-store";
-import { getCandidateById, type Candidate } from "@/lib/candidates-store";
+import { getCandidateById } from "@/lib/candidates-store";
 import { ArrowLeft, ExternalLink, FileText } from "lucide-react";
 import NavTabClient from "../../jobs/_components/nav-tab";
 import { StatusActions } from "./_components/status-actions";
@@ -17,22 +15,6 @@ import { StatusActions } from "./_components/status-actions";
 function Eyebrow({ children }: { children: React.ReactNode }) {
   return <span className="eyebrow text-muted-foreground">{children}</span>;
 }
-
-const STATUS_LABEL: Record<ApplicationStatus, string> = {
-  new: "New",
-  reviewing: "Reviewing",
-  shortlisted: "Shortlisted",
-  rejected: "Rejected",
-  offered: "Offered",
-};
-
-const STATUS_COLOR: Record<ApplicationStatus, string> = {
-  new: "text-foreground",
-  reviewing: "text-foreground",
-  shortlisted: "text-[#2F5E7A]",
-  rejected: "text-muted-foreground",
-  offered: "text-[#3F6B3F]",
-};
 
 function ScoreBand(score: number): "high" | "mid" | "low" {
   return score >= 75 ? "high" : score >= 50 ? "mid" : "low";
@@ -188,7 +170,7 @@ export default async function ApplicationDetailPage({
         </nav>
       </header>
 
-      <main className="md:flex-1 grid grid-cols-1 md:grid-cols-[340px_1fr] md:overflow-hidden">
+      <main className="md:flex-1 grid grid-cols-1 md:grid-cols-[390px_1fr] md:overflow-hidden">
         {/* ════════ LEFT — candidate profile ════════ */}
         <aside className="border-b border-border md:border-r md:border-b-0 md:overflow-y-auto px-4 sm:px-6 md:px-10 py-6 md:py-10 flex flex-col">
           <nav className="mb-3 eyebrow flex items-center gap-2.5 flex-wrap">
@@ -266,12 +248,9 @@ export default async function ApplicationDetailPage({
 
           {/* Status */}
           <div className="mt-6 pt-6 border-t border-border">
-            <Eyebrow>Status</Eyebrow>
-            <p className={`mt-2 caps-meta ${STATUS_COLOR[application.status]}`}>
-              {STATUS_LABEL[application.status]}
-            </p>
-            <p className="mt-1 caps-meta text-muted-foreground tabular">
-              Received {relativeTime(application.receivedAt)}
+            <Eyebrow>Received</Eyebrow>
+            <p className="mt-2 caps-meta text-muted-foreground tabular">
+              {relativeTime(application.receivedAt)}
             </p>
             <div className="mt-4">
               <StatusActions
@@ -349,24 +328,6 @@ export default async function ApplicationDetailPage({
             )}
           </div>
 
-          {/* Actions */}
-          <div className="mt-auto pt-8 space-y-2">
-            <button
-              type="button"
-              disabled
-              className="w-full caps-action py-2.5 rounded-sm border border-border text-muted-foreground/70 italic cursor-not-allowed"
-              title="Action wiring coming next"
-            >
-              Shortlist (mock)
-            </button>
-            <button
-              type="button"
-              disabled
-              className="w-full caps-action py-2.5 rounded-sm text-muted-foreground/70 italic hover:bg-secondary/40 cursor-not-allowed"
-            >
-              Reject (mock)
-            </button>
-          </div>
         </aside>
 
         {/* ════════ RIGHT — match analysis ════════ */}

@@ -1,31 +1,16 @@
 /**
- * MIGRATION BOUNDARY — data access for Candidate.
+ * Candidates store, backed by Supabase Postgres.
  *
- * This file is the only place in the app that reads or writes candidate
- * persistence. All callers go through the exported async functions
- * (listCandidates, getCandidateById, createCandidate). They never see the
- * underlying storage.
+ * Public function signatures and entity shapes are unchanged from the prior
+ * JSON-backed implementation — every caller (pages, API routes) keeps working
+ * without edits. The only thing that changed is what's behind these functions.
  *
- * Today's storage: local JSON file at `data/candidates.json`, with
- * `data/candidates.example.json` as a committed seed fallback when the live
- * file is empty / absent. (See README of pattern at top of jobs-store.ts.)
- *
- * Tomorrow's storage: Supabase `candidates` table. To migrate, replace the
- * `readStore` / `writeStore` bodies with Supabase queries. The exported
- * function signatures, return types, and shape of `Candidate` stay the same —
- * no caller changes required. Field names are camelCase and additive
- * specifically to make that swap mechanical.
- *
- * The example fallback and the read-modify-write race here go away on swap
- * day; Supabase upserts are atomic and there is one source of truth.
+ * Schema: see supabase/migrations/0001_init.sql. Mapping is snake_case in the
+ * DB, camelCase in TypeScript. The local `rowToCandidate()` adapter is the
+ * only place that conversion happens.
  */
 
-import { promises as fs } from "node:fs";
-import path from "node:path";
-
-const DATA_DIR = path.join(process.cwd(), "data");
-const FILE = path.join(DATA_DIR, "candidates.json");
-const EXAMPLE = path.join(DATA_DIR, "candidates.example.json");
+import { supabase } from "@/lib/supabase";
 
 export type ExperienceEntry = {
   company: string;
@@ -62,38 +47,55 @@ export type Candidate = {
   resumeText: string;          // full parsed resume text
 };
 
-type Store = { candidates: Candidate[] };
+/** Row shape as returned by Supabase (snake_case columns, JSONB sub-collections). */
+type CandidateRow = {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  location: string;
+  summary: string;
+  years_of_experience: number;
+  skills: string[];
+  experience: ExperienceEntry[];
+  education: EducationEntry[];
+  links: CandidateLinks | null;
+  resume_text: string;
+};
 
-async function readStore(): Promise<Store> {
-  // Try the live file first, fall back to the committed example.
-  try {
-    const raw = await fs.readFile(FILE, "utf-8");
-    const parsed = JSON.parse(raw) as Store;
-    if (parsed.candidates && parsed.candidates.length > 0) return parsed;
-  } catch {
-    // fall through to example
-  }
-  try {
-    const raw = await fs.readFile(EXAMPLE, "utf-8");
-    return JSON.parse(raw) as Store;
-  } catch {
-    return { candidates: [] };
-  }
+function rowToCandidate(row: CandidateRow): Candidate {
+  const candidate: Candidate = {
+    id: row.id,
+    name: row.name,
+    email: row.email,
+    phone: row.phone,
+    location: row.location,
+    summary: row.summary,
+    yearsOfExperience: row.years_of_experience,
+    skills: row.skills ?? [],
+    experience: row.experience ?? [],
+    education: row.education ?? [],
+    resumeText: row.resume_text,
+  };
+  // Postgres null becomes undefined in the canonical TS shape (links is optional).
+  if (row.links) candidate.links = row.links;
+  return candidate;
 }
 
 export async function listCandidates(): Promise<Candidate[]> {
-  const store = await readStore();
-  return store.candidates;
+  const { data, error } = await supabase.from("candidates").select("*");
+  if (error) throw new Error(`listCandidates failed: ${error.message}`);
+  return (data as CandidateRow[]).map(rowToCandidate);
 }
 
 export async function getCandidateById(id: string): Promise<Candidate | null> {
-  const store = await readStore();
-  return store.candidates.find((c) => c.id === id) ?? null;
-}
-
-async function writeStore(store: Store): Promise<void> {
-  await fs.mkdir(DATA_DIR, { recursive: true });
-  await fs.writeFile(FILE, JSON.stringify(store, null, 2), "utf-8");
+  const { data, error } = await supabase
+    .from("candidates")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
+  if (error) throw new Error(`getCandidateById failed: ${error.message}`);
+  return data ? rowToCandidate(data as CandidateRow) : null;
 }
 
 export type CreateCandidateInput = Omit<Candidate, "id">;
@@ -101,12 +103,26 @@ export type CreateCandidateInput = Omit<Candidate, "id">;
 export async function createCandidate(
   input: CreateCandidateInput
 ): Promise<Candidate> {
-  const store = await readStore();
-  const candidate: Candidate = {
+  const newRow = {
     id: crypto.randomUUID(),
-    ...input,
+    name: input.name,
+    email: input.email,
+    phone: input.phone,
+    location: input.location,
+    summary: input.summary,
+    years_of_experience: input.yearsOfExperience,
+    skills: input.skills,
+    experience: input.experience,
+    education: input.education,
+    links: input.links ?? null,
+    resume_text: input.resumeText,
   };
-  store.candidates.push(candidate);
-  await writeStore(store);
-  return candidate;
+
+  const { data, error } = await supabase
+    .from("candidates")
+    .insert(newRow)
+    .select()
+    .single();
+  if (error) throw new Error(`createCandidate failed: ${error.message}`);
+  return rowToCandidate(data as CandidateRow);
 }

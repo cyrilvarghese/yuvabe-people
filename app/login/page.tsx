@@ -1,0 +1,120 @@
+"use client";
+
+import { useState, type FormEvent } from "react";
+import { useSearchParams } from "next/navigation";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+
+/**
+ * Hardcoded-credentials login. POSTs to /api/auth/login; the cookie is set
+ * by the route handler. On success, redirect to the `next` query param
+ * (preserved by middleware on initial redirect) or default to /jobs.
+ *
+ * Editorial styling: Newsreader italic display, mono-caps eyebrow, hairline
+ * input borders, single terracotta primary button. No card, no shadow.
+ */
+export default function LoginPage() {
+  const params = useSearchParams();
+  const next = params.get("next") || "/jobs";
+
+  const [user, setUser] = useState("");
+  const [pass, setPass] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  async function onSubmit(e: FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setSubmitting(true);
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user, pass }),
+      });
+      if (!res.ok) {
+        const data = (await res.json().catch(() => ({}))) as { error?: string };
+        setError(data.error ?? "Couldn't sign in.");
+        setSubmitting(false);
+        return;
+      }
+      // Hard navigation so middleware reads the new cookie on the next request.
+      window.location.href = next;
+    } catch {
+      setError("Network error. Try again.");
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <main className="min-h-screen bg-background flex items-center justify-center px-4">
+      <div className="w-full max-w-sm">
+        <div className="text-center mb-12">
+          <span className="eyebrow text-muted-foreground">ATS</span>
+          <h1 className="mt-3 font-serif italic text-display leading-none">
+            Yuvabe
+          </h1>
+          <p className="mt-4 font-serif italic text-body-lg text-foreground/70">
+            Sign in to continue
+          </p>
+        </div>
+
+        <form onSubmit={onSubmit} className="space-y-5">
+          <div className="space-y-2">
+            <Label
+              htmlFor="user"
+              className="eyebrow text-muted-foreground"
+            >
+              Username
+            </Label>
+            <Input
+              id="user"
+              type="text"
+              value={user}
+              onChange={(e) => setUser(e.target.value)}
+              autoComplete="username"
+              autoFocus
+              required
+              className="h-10"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label
+              htmlFor="pass"
+              className="eyebrow text-muted-foreground"
+            >
+              Password
+            </Label>
+            <Input
+              id="pass"
+              type="password"
+              value={pass}
+              onChange={(e) => setPass(e.target.value)}
+              autoComplete="current-password"
+              required
+              className="h-10"
+            />
+          </div>
+
+          <Button
+            type="submit"
+            disabled={submitting}
+            className="w-full caps-action h-10"
+          >
+            {submitting ? "Signing in…" : "Sign in"}
+          </Button>
+
+          {error && (
+            <p className="text-center caps-meta text-primary">{error}</p>
+          )}
+        </form>
+
+        <p className="mt-12 text-center font-serif italic text-body-sm text-muted-foreground/70">
+          Hiring is a human act.
+        </p>
+      </div>
+    </main>
+  );
+}

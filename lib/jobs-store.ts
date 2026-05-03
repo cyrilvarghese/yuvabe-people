@@ -1,18 +1,18 @@
 /**
- * Local JSON-as-database for the prototype. Single file at `data/jobs.json`.
+ * Jobs store, backed by Supabase Postgres.
  *
- * The shape of `Job` here IS the shape we'll mirror in Supabase later — keep
- * fields camelCase and add new ones additively so the migration is trivial.
+ * Public function signatures and entity shapes are unchanged from the prior
+ * JSON-backed implementation — every caller (pages, API routes) keeps working
+ * without edits. The only thing that changed is what's behind these functions.
  *
- * NOT atomic. Don't bring this to production. Read-modify-write is fine for
- * a solo dev with one tab open; concurrent writes can lose data.
+ * Schema: see supabase/migrations/0001_init.sql. Mapping is snake_case in the
+ * DB, camelCase in TypeScript. The local `rowToJob()` adapter is the only
+ * place that conversion happens.
  */
 
-import { promises as fs } from "node:fs";
-import path from "node:path";
 import { customAlphabet } from "nanoid";
+import { supabase } from "@/lib/supabase";
 import {
-  backfillCriterionId,
   generateCriterionId,
   type Criterion,
 } from "@/lib/prompts/extractCriteria.v1";
@@ -20,10 +20,6 @@ import {
 /** Unambiguous alphabet — no 0/O, 1/I/L confusion. ~10^9 unique 6-char codes. */
 const codeAlphabet = "23456789ABCDEFGHJKMNPQRSTUVWXYZ";
 const generateCode = customAlphabet(codeAlphabet, 6);
-
-const DATA_DIR = path.join(process.cwd(), "data");
-const FILE = path.join(DATA_DIR, "jobs.json");
-const EXAMPLE = path.join(DATA_DIR, "jobs.example.json");
 
 export type Job = {
   id: string;
@@ -40,68 +36,44 @@ export type Job = {
   archivedAt?: string;
 };
 
-type Store = {
-  jobs: Job[];
+/** Row shape as returned by Supabase (snake_case columns). */
+type JobRow = {
+  id: string;
+  code: string;
+  title: string;
+  description: string;
+  criteria: Criterion[];
+  created_at: string;
+  archived_at: string | null;
 };
 
-async function ensureFile(): Promise<Store> {
-  await fs.mkdir(DATA_DIR, { recursive: true });
-
-  // Read example seed (always — it's mock data we want visible alongside real).
-  let exampleJobs: Job[] = [];
-  try {
-    const raw = await fs.readFile(EXAMPLE, "utf-8");
-    exampleJobs = (JSON.parse(raw) as Store).jobs ?? [];
-  } catch {
-    // No example file — that's fine, we'll just have live data.
-  }
-
-  // Read live file (real saved jobs).
-  let liveJobs: Job[] = [];
-  try {
-    const raw = await fs.readFile(FILE, "utf-8");
-    liveJobs = (JSON.parse(raw) as Store).jobs ?? [];
-  } catch (err) {
-    if ((err as NodeJS.ErrnoException).code === "ENOENT") {
-      // Initialize the live file as empty so subsequent createJob writes work.
-      await fs.writeFile(FILE, JSON.stringify({ jobs: [] }, null, 2), "utf-8");
-    } else {
-      throw err;
-    }
-  }
-
-  // Merge: live wins on id OR code collision; example fills the rest.
-  const liveIds = new Set(liveJobs.map((j) => j.id));
-  const liveCodes = new Set(liveJobs.map((j) => j.code));
-  const merged = [
-    ...liveJobs,
-    ...exampleJobs.filter((j) => !liveIds.has(j.id) && !liveCodes.has(j.code)),
-  ];
-
-  // Backfill: criteria from older data files (pre-2026-05-01) lack `id`.
-  // We assign a deterministic id derived from the label so the same criterion
-  // always gets the same id across reads, no matter how many readers race.
-  for (const job of merged) {
-    for (const c of job.criteria) {
-      if (!c.id) c.id = backfillCriterionId(c.label);
-    }
-  }
-  return { jobs: merged };
-}
-
-async function writeStore(store: Store): Promise<void> {
-  await fs.writeFile(FILE, JSON.stringify(store, null, 2), "utf-8");
+function rowToJob(row: JobRow): Job {
+  const job: Job = {
+    id: row.id,
+    code: row.code,
+    title: row.title,
+    description: row.description,
+    criteria: row.criteria ?? [],
+    createdAt: row.created_at,
+  };
+  if (row.archived_at) job.archivedAt = row.archived_at;
+  return job;
 }
 
 /** List all jobs, newest first. Archived jobs are hidden by default. */
 export async function listJobs(opts?: { includeArchived?: boolean }): Promise<Job[]> {
-  const store = await ensureFile();
-  const filtered = opts?.includeArchived
-    ? store.jobs
-    : store.jobs.filter((j) => !j.archivedAt);
-  return [...filtered].sort((a, b) =>
-    b.createdAt.localeCompare(a.createdAt)
-  );
+  let query = supabase
+    .from("jobs")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (!opts?.includeArchived) {
+    query = query.is("archived_at", null);
+  }
+
+  const { data, error } = await query;
+  if (error) throw new Error(`listJobs failed: ${error.message}`);
+  return (data as JobRow[]).map(rowToJob);
 }
 
 /**
@@ -109,28 +81,37 @@ export async function listJobs(opts?: { includeArchived?: boolean }): Promise<Jo
  * state — old applications keep rendering, archived jobs stay viewable.
  */
 export async function getJobByCode(code: string): Promise<Job | null> {
-  const store = await ensureFile();
-  return store.jobs.find((j) => j.code === code) ?? null;
+  const { data, error } = await supabase
+    .from("jobs")
+    .select("*")
+    .eq("code", code)
+    .maybeSingle();
+  if (error) throw new Error(`getJobByCode failed: ${error.message}`);
+  return data ? rowToJob(data as JobRow) : null;
 }
 
 /** Archive a job (soft delete). Idempotent — re-archiving updates the timestamp. */
 export async function archiveJob(code: string): Promise<Job | null> {
-  const store = await ensureFile();
-  const job = store.jobs.find((j) => j.code === code);
-  if (!job) return null;
-  job.archivedAt = new Date().toISOString();
-  await writeStore(store);
-  return job;
+  const { data, error } = await supabase
+    .from("jobs")
+    .update({ archived_at: new Date().toISOString() })
+    .eq("code", code)
+    .select()
+    .maybeSingle();
+  if (error) throw new Error(`archiveJob failed: ${error.message}`);
+  return data ? rowToJob(data as JobRow) : null;
 }
 
 /** Restore an archived job. No-op if it wasn't archived. */
 export async function unarchiveJob(code: string): Promise<Job | null> {
-  const store = await ensureFile();
-  const job = store.jobs.find((j) => j.code === code);
-  if (!job) return null;
-  delete job.archivedAt;
-  await writeStore(store);
-  return job;
+  const { data, error } = await supabase
+    .from("jobs")
+    .update({ archived_at: null })
+    .eq("code", code)
+    .select()
+    .maybeSingle();
+  if (error) throw new Error(`unarchiveJob failed: ${error.message}`);
+  return data ? rowToJob(data as JobRow) : null;
 }
 
 /**
@@ -145,22 +126,13 @@ export type CreateJobInput = {
   criteria: Array<Omit<Criterion, "id"> & { id?: string }>;
 };
 
-/** Append a new job, generating a unique 6-char code with up to 5 retries on collision. */
+/**
+ * Append a new job, generating a unique 6-char code with up to 5 retries on
+ * collision. Collision detection is delegated to the Postgres unique
+ * constraint on `jobs.code` (error code 23505); we retry on that specific
+ * code and bubble anything else.
+ */
 export async function createJob(input: CreateJobInput): Promise<Job> {
-  const store = await ensureFile();
-
-  let code = "";
-  for (let attempt = 0; attempt < 5; attempt++) {
-    const candidate = generateCode();
-    if (!store.jobs.some((j) => j.code === candidate)) {
-      code = candidate;
-      break;
-    }
-  }
-  if (!code) {
-    throw new Error("Could not generate a unique job code after 5 attempts");
-  }
-
   // Safety net: any criterion arriving without an id (e.g., manually added by
   // the recruiter in the editor after extraction) gets one fresh nanoid here.
   // Existing ids are preserved.
@@ -169,16 +141,31 @@ export async function createJob(input: CreateJobInput): Promise<Job> {
     id: c.id ?? generateCriterionId(),
   }));
 
-  const job: Job = {
-    id: crypto.randomUUID(),
-    code,
-    title: input.title.trim(),
-    description: input.description,
-    criteria: criteriaWithIds,
-    createdAt: new Date().toISOString(),
-  };
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const code = generateCode();
+    const newRow = {
+      id: crypto.randomUUID(),
+      code,
+      title: input.title.trim(),
+      description: input.description,
+      criteria: criteriaWithIds,
+      // created_at defaults to now() in Postgres; archived_at defaults to null
+    };
 
-  store.jobs.push(job);
-  await writeStore(store);
-  return job;
+    const { data, error } = await supabase
+      .from("jobs")
+      .insert(newRow)
+      .select()
+      .single();
+
+    if (!error) return rowToJob(data as JobRow);
+
+    // 23505 = unique_violation. Only retry on the code collision; bubble
+    // everything else (network, RLS, schema mismatch).
+    if (error.code !== "23505") {
+      throw new Error(`createJob failed: ${error.message}`);
+    }
+  }
+
+  throw new Error("Could not generate a unique job code after 5 attempts");
 }

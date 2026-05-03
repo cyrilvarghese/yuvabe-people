@@ -769,7 +769,7 @@ export default function NewJobPage() {
                   <p className="text-body-sm text-muted-foreground italic font-serif truncate">
                     {criteria.length} criteria locked in.
                     <span className="font-sans not-italic ml-2 text-muted-foreground">
-                      Saving stores the job locally in <span className="font-mono">data/jobs.json</span>.
+                      Saving stores the job in Supabase.
                     </span>
                   </p>
                 )}

@@ -11,7 +11,7 @@ The thesis the product embodies: *"a score without reasoning is not a score."* E
 - **Tailwind 4** (CSS-first theming via `@theme` in `globals.css`; no `tailwind.config.js`)
 - **shadcn/ui** primitives only — no custom UI primitives. Visual identity lives in `className` + design tokens.
 - **OpenAI** (`gpt-4o`, `temperature: 0`, `seed: 42`) for JD criteria extraction. Single wrapper at `lib/llm.ts`.
-- **Local JSON files** for data (`data/*.json`, with `*.example.json` seeded mock data committed to git). **Future: Supabase Postgres** — the store interface is already designed to migrate cleanly.
+- **Supabase Postgres** for data. Three tables (`jobs`, `candidates`, `applications`) with JSONB columns for embedded sub-collections (criteria, skills, experience, education, matchBreakdown). Server-only client at `lib/supabase.ts` uses the new-format secret key (`sb_secret_...`); RLS is currently off (auth is a future plan). Schema lives in `supabase/migrations/*.sql`. The committed mock seed in `data/*.example.json` loads via `pnpm db:seed`.
 - **File parsing**: `unpdf` (PDF), `mammoth` (DOCX), native UTF-8 (TXT/MD). See `lib/parseUpload.ts`.
 - **Fonts**: Newsreader (display/italic), Geist (UI/body), Geist Mono (numerics/captions). Wired in `app/layout.tsx` via `next/font/google`.
 
@@ -34,16 +34,15 @@ API routes (no UI): `POST /api/extract-criteria` (JD file → LLM), `GET/POST /a
 
 ## What's built vs. what's deferred
 
-**Built:** Job creation flow, criteria extraction + editing (3-tier importance with editable dropdown), JSON-backed jobs/candidates/applications stores with mock seeds, full applicant detail with editorial match breakdown, status filtering via URL params, full responsive layouts, contrast-AA-compliant text styling, breadcrumb IA on detail pages.
+**Built:** Job creation flow, criteria extraction + editing (3-tier importance with editable dropdown), Supabase-backed jobs/candidates/applications stores, full applicant detail with editorial match breakdown, status filtering via URL params + status toggle group on detail page, full responsive layouts, contrast-AA-compliant text styling, breadcrumb IA on detail pages, real apply submission pipeline (resume upload → LLM parse + score → Postgres write).
 
-**Mocked but not real:** 3 jobs, 15 candidates, 21 applications come from `data/*.example.json`. The `data/*.json` (live) files shadow these when populated, but no real intake is wired yet.
+**Seeded mock universe:** 3 jobs, 15 candidates, 21 applications loaded from `data/*.example.json` via `pnpm db:seed`.
 
 **Deferred** (deliberately, see `docs/queries.md` and `docs/prd.md`):
 - Email intake via Postmark webhook (the actual receive-and-score flow)
-- Shortlist / Reject actions on `/applications/[id]` (currently disabled mock buttons)
 - `/jobs/[code]/edit` (currently a disabled CTA)
-- Auth (currently no auth — anyone with the URL has full access)
-- Migration from JSON store to Supabase
+- Auth + Row-Level Security (currently no auth — service-role key, anyone with the URL has full access)
+- Realtime subscriptions for live status updates across recruiters
 
 ## Skills loaded automatically
 
@@ -65,7 +64,7 @@ These are non-negotiable. If a request seems to conflict with one, surface it be
 - **WCAG AA target.** Use `text-foreground/X` to dim text, never `text-muted-foreground/X` below 80% on informational text.
 - **Responsive by default.** Stack on `<md`, scale display sizes, gutter `px-4 md:px-10` etc. See design-system skill §Responsiveness.
 - **Tailwind 4, not Tailwind 3.** No `tailwind.config.js`. Theme tokens live in `app/globals.css` `@theme inline`.
-- **Mock data is *committed* (`*.example.json`); live data is gitignored (`*.json`).**
+- **Seed data is *committed* (`data/*.example.json`); it loads into Supabase via `pnpm db:seed`.** No live JSON shadows — Postgres is the only runtime store.
 
 ## File map
 
@@ -85,30 +84,37 @@ app/
   globals.css                  Palette tokens + grain texture + animations
   layout.tsx                   Font wiring (Geist + Geist Mono + Newsreader)
 lib/
-  jobs-store.ts                Live JSON merge with example fallback
-  candidates-store.ts          Read-only candidates store
-  applications-store.ts        Read-only applications store with by-job query
+  supabase.ts                  Server-only Supabase client + dev-mode query logger
+  jobs-store.ts                Jobs CRUD against Supabase
+  candidates-store.ts          Candidates CRUD against Supabase
+  applications-store.ts        Applications CRUD against Supabase
   llm.ts                       OpenAI wrapper (single export: extractCriteria)
   parseUpload.ts               PDF / DOCX / TXT parsing
   prompts/
     extractCriteria.v1.ts      Section-anchored prompt for 3-tier importance
 components/ui/                 shadcn primitives (button, badge, select, etc.)
+supabase/
+  migrations/
+    0001_init.sql              Initial schema (3 tables, JSONB sub-collections)
+    0002_tighten_application_snapshots.sql  Stage 4 — NOT NULL on snapshot fields
+scripts/
+  seed-supabase.ts             Reads data/*.example.json → inserts into Supabase
 data/
-  jobs.example.json            Seeded jobs (committed)
-  candidates.example.json      Seeded candidates (committed)
-  applications.example.json    Seeded applications (committed)
-  *.json                       Live data (gitignored, takes precedence over example)
+  jobs.example.json            Seed jobs (committed; loaded via pnpm db:seed)
+  candidates.example.json      Seed candidates (committed)
+  applications.example.json    Seed applications (committed)
 docs/
   prd.md                       Original PRD — full system spec, source of intent
   design-brief.md              Visual design brief — palette, typography, screen specs
   queries.md                   Open business questions for stakeholder review
+  data-modeling.md             Schema design rationale + access-pattern rules
 CONTEXT.md                     Canonical domain glossary
 ```
 
 ## Workflow conventions
 
 - **Business judgment vs. technical** — when ambiguity needs *business* input (policy, naming, workflow, audience), suggest adding to `docs/queries.md`. The pattern + capture format is in `AGENTS.md` below.
-- **Fresh session orientation** — start by checking what `data/jobs.json` exists (it shadows seeds), then `pnpm dev` and visit `/jobs`. The mock universe gives you 3 jobs + 21 applications immediately.
+- **Fresh session orientation** — confirm `SUPABASE_URL` + `SUPABASE_SECRET_KEY` are set in `.env.local`, run `pnpm db:seed` if Postgres is empty, then `pnpm dev` and visit `/jobs`. The mock universe gives you 3 jobs + 15 candidates + 21 applications immediately.
 - **Before any UI change**: invoke the `yuvabe-design-system` skill. After: invoke `yuvabe-vd-checker`. Don't skip either, especially when adding screens.
 - **Pages are server components by default**; only `/jobs/new` is `"use client"` because of upload + dropdown state. Filtering uses URL search params (`?status=...`) so the server still does the work and pages stay bookmarkable.
 

@@ -1,42 +1,25 @@
 /**
- * MIGRATION BOUNDARY — data access for Application + CriterionMatch.
+ * Applications store, backed by Supabase Postgres.
  *
- * This file is the only place in the app that reads or writes application
- * persistence. All callers go through the exported async functions
- * (listApplications, listApplicationsByJobCode, getApplicationById,
- * countApplicationsByJobCode, createApplication). They never see the
- * underlying storage.
+ * Public function signatures and entity shapes are unchanged from the prior
+ * JSON-backed implementation — every caller (pages, API routes) keeps working
+ * without edits. The only thing that changed is what's behind these functions.
  *
- * Today's storage: local JSON file at `data/applications.json`, with
- * `data/applications.example.json` as a committed seed fallback when the live
- * file is empty / absent. (See README of pattern at top of jobs-store.ts.)
+ * Schema: see supabase/migrations/0001_init.sql. Mapping is snake_case in the
+ * DB, camelCase in TypeScript. The local `rowToApplication()` adapter is the
+ * only place that conversion happens.
  *
- * Tomorrow's storage: Supabase `applications` table (one row per Application,
- * with matchBreakdown likely persisted as JSONB or split into a child
- * `criterion_matches` table). To migrate, replace the `readStore` / `writeStore`
- * bodies with Supabase queries; the exported function signatures, return
- * types, and shapes of `Application` + `CriterionMatch` stay the same — no
- * caller changes required. Field names are camelCase and additive specifically
- * to make that swap mechanical.
- *
- * The denormalised `jobCode` on Application can stay (cheap direct-route
- * lookups without a join) or be retired in favour of a `jobs(code)` join —
- * either way, no caller change.
- *
- * The example fallback and the read-modify-write race here go away on swap
- * day; Supabase upserts are atomic and there is one source of truth.
+ * The lazy candidate-snapshot backfill that the JSON store did on every read
+ * is gone: the seed script populates snapshots at insert time, and the
+ * `/api/applications` POST handler does the same for new submissions. Stage 4
+ * will tighten the snapshot fields from optional to required at both the
+ * TS and Postgres layers.
  */
 
-import { promises as fs } from "node:fs";
-import path from "node:path";
+import { supabase } from "@/lib/supabase";
 import type { Importance } from "@/lib/prompts/extractCriteria.v1";
-import { getCandidateById } from "@/lib/candidates-store";
 
-const DATA_DIR = path.join(process.cwd(), "data");
-const FILE = path.join(DATA_DIR, "applications.json");
-const EXAMPLE = path.join(DATA_DIR, "applications.example.json");
-
-/** Per-criterion analysis produced by future matching pipeline. */
+/** Per-criterion analysis produced by the matching pipeline. */
 export type CriterionMatch = {
   /**
    * Reference back to the parent Job's `Criterion.id`. Optional because
@@ -73,13 +56,13 @@ export type Application = {
    * just to render rows. The full Candidate doc is still fetched on
    * /applications/[id] where the rich profile is shown.
    *
-   * Optional in the type to keep older seeded rows parseable; readStore
-   * lazily backfills any missing snapshots from candidates-store on first read.
+   * Required as of migration 0002 — every application carries snapshots from
+   * insert. The Postgres columns are NOT NULL; this TS type matches.
    */
-  candidateName?: string;
-  candidateEmail?: string;
-  candidateLocation?: string;
-  candidateYearsOfExperience?: number;
+  candidateName: string;
+  candidateEmail: string;
+  candidateLocation: string;
+  candidateYearsOfExperience: number;
   matchScore: number;           // 0–100, rounded
   matchSummary: string;         // one-paragraph editorial overview (LLM "Match summary")
   matchBreakdown: CriterionMatch[];
@@ -88,113 +71,90 @@ export type Application = {
   status: ApplicationStatus;
 };
 
-type Store = { applications: Application[] };
+/** Row shape as returned by Supabase (snake_case columns, JSONB sub-collections). */
+type ApplicationRow = {
+  id: string;
+  job_id: string;
+  job_code: string;
+  candidate_id: string;
+  candidate_name: string;
+  candidate_email: string;
+  candidate_location: string;
+  candidate_years_of_experience: number;
+  match_score: number;
+  match_summary: string;
+  match_breakdown: CriterionMatch[];
+  cover_letter: string;
+  received_at: string;
+  status: ApplicationStatus;
+};
 
-async function readStore(): Promise<Store> {
-  let store: Store | null = null;
-  let loadedFromLive = false;
-
-  try {
-    const raw = await fs.readFile(FILE, "utf-8");
-    const parsed = JSON.parse(raw) as Store;
-    if (parsed.applications && parsed.applications.length > 0) {
-      store = parsed;
-      loadedFromLive = true;
-    }
-  } catch {
-    // fall through to example
-  }
-
-  if (!store) {
-    try {
-      const raw = await fs.readFile(EXAMPLE, "utf-8");
-      store = JSON.parse(raw) as Store;
-    } catch {
-      store = { applications: [] };
-    }
-  }
-
-  // Lazy backfill: join to candidates-store once for any application missing
-  // its candidate snapshot fields, then persist back to FILE so subsequent
-  // reads are O(1). Idempotent — converges to "every row has snapshots".
-  let mutated = false;
-  for (const app of store.applications) {
-    if (
-      app.candidateName !== undefined &&
-      app.candidateEmail !== undefined &&
-      app.candidateLocation !== undefined &&
-      app.candidateYearsOfExperience !== undefined
-    ) {
-      continue;
-    }
-    const c = await getCandidateById(app.candidateId);
-    if (!c) continue;
-    if (app.candidateName === undefined) {
-      app.candidateName = c.name;
-      mutated = true;
-    }
-    if (app.candidateEmail === undefined) {
-      app.candidateEmail = c.email;
-      mutated = true;
-    }
-    if (app.candidateLocation === undefined) {
-      app.candidateLocation = c.location;
-      mutated = true;
-    }
-    if (app.candidateYearsOfExperience === undefined) {
-      app.candidateYearsOfExperience = c.yearsOfExperience;
-      mutated = true;
-    }
-  }
-
-  // Persist if we enriched anything. Writes always go to FILE — if we loaded
-  // from EXAMPLE on a fresh clone, this also "promotes" the seed data into a
-  // live file (matching the existing convention that live shadows example).
-  if (mutated) {
-    await fs.mkdir(DATA_DIR, { recursive: true });
-    await fs.writeFile(FILE, JSON.stringify(store, null, 2), "utf-8");
-  }
-
-  // `loadedFromLive` is currently informational only; keeping it as a hook
-  // for future logic that may want to differentiate (e.g. cache-busting).
-  void loadedFromLive;
-  return store;
+function rowToApplication(row: ApplicationRow): Application {
+  return {
+    id: row.id,
+    jobId: row.job_id,
+    jobCode: row.job_code,
+    candidateId: row.candidate_id,
+    candidateName: row.candidate_name,
+    candidateEmail: row.candidate_email,
+    candidateLocation: row.candidate_location,
+    candidateYearsOfExperience: row.candidate_years_of_experience,
+    matchScore: row.match_score,
+    matchSummary: row.match_summary,
+    matchBreakdown: row.match_breakdown ?? [],
+    coverLetter: row.cover_letter,
+    receivedAt: row.received_at,
+    status: row.status,
+  };
 }
 
+/** All applications, newest first by `receivedAt`. */
 export async function listApplications(): Promise<Application[]> {
-  const store = await readStore();
-  return [...store.applications].sort((a, b) =>
-    b.receivedAt.localeCompare(a.receivedAt)
-  );
+  const { data, error } = await supabase
+    .from("applications")
+    .select("*")
+    .order("received_at", { ascending: false });
+  if (error) throw new Error(`listApplications failed: ${error.message}`);
+  return (data as ApplicationRow[]).map(rowToApplication);
 }
 
 /** All applications for a given job, sorted by match score desc. */
 export async function listApplicationsByJobCode(
   jobCode: string
 ): Promise<Application[]> {
-  const store = await readStore();
-  return store.applications
-    .filter((a) => a.jobCode === jobCode)
-    .sort((a, b) => b.matchScore - a.matchScore);
+  const { data, error } = await supabase
+    .from("applications")
+    .select("*")
+    .eq("job_code", jobCode)
+    .order("match_score", { ascending: false });
+  if (error)
+    throw new Error(`listApplicationsByJobCode failed: ${error.message}`);
+  return (data as ApplicationRow[]).map(rowToApplication);
 }
 
 export async function getApplicationById(
   id: string
 ): Promise<Application | null> {
-  const store = await readStore();
-  return store.applications.find((a) => a.id === id) ?? null;
+  const { data, error } = await supabase
+    .from("applications")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
+  if (error) throw new Error(`getApplicationById failed: ${error.message}`);
+  return data ? rowToApplication(data as ApplicationRow) : null;
 }
 
 export async function countApplicationsByJobCode(
   jobCode: string
 ): Promise<number> {
-  const store = await readStore();
-  return store.applications.filter((a) => a.jobCode === jobCode).length;
-}
-
-async function writeStore(store: Store): Promise<void> {
-  await fs.mkdir(DATA_DIR, { recursive: true });
-  await fs.writeFile(FILE, JSON.stringify(store, null, 2), "utf-8");
+  // `head: true` skips returning rows — Postgres only computes the count.
+  const { count, error } = await supabase
+    .from("applications")
+    .select("*", { count: "exact", head: true })
+    .eq("job_code", jobCode);
+  if (error)
+    throw new Error(`countApplicationsByJobCode failed: ${error.message}`);
+  return count ?? 0;
 }
 
 export type CreateApplicationInput = Omit<Application, "id" | "receivedAt">;
@@ -202,15 +162,30 @@ export type CreateApplicationInput = Omit<Application, "id" | "receivedAt">;
 export async function createApplication(
   input: CreateApplicationInput
 ): Promise<Application> {
-  const store = await readStore();
-  const application: Application = {
+  const newRow = {
     id: crypto.randomUUID(),
-    receivedAt: new Date().toISOString(),
-    ...input,
+    job_id: input.jobId,
+    job_code: input.jobCode,
+    candidate_id: input.candidateId,
+    candidate_name: input.candidateName,
+    candidate_email: input.candidateEmail,
+    candidate_location: input.candidateLocation,
+    candidate_years_of_experience: input.candidateYearsOfExperience,
+    match_score: input.matchScore,
+    match_summary: input.matchSummary,
+    match_breakdown: input.matchBreakdown,
+    cover_letter: input.coverLetter,
+    status: input.status,
+    // received_at defaults to now() in Postgres
   };
-  store.applications.push(application);
-  await writeStore(store);
-  return application;
+
+  const { data, error } = await supabase
+    .from("applications")
+    .insert(newRow)
+    .select()
+    .single();
+  if (error) throw new Error(`createApplication failed: ${error.message}`);
+  return rowToApplication(data as ApplicationRow);
 }
 
 /**
@@ -222,10 +197,13 @@ export async function updateApplicationStatus(
   id: string,
   status: ApplicationStatus
 ): Promise<Application | null> {
-  const store = await readStore();
-  const application = store.applications.find((a) => a.id === id);
-  if (!application) return null;
-  application.status = status;
-  await writeStore(store);
-  return application;
+  const { data, error } = await supabase
+    .from("applications")
+    .update({ status })
+    .eq("id", id)
+    .select()
+    .maybeSingle();
+  if (error)
+    throw new Error(`updateApplicationStatus failed: ${error.message}`);
+  return data ? rowToApplication(data as ApplicationRow) : null;
 }
