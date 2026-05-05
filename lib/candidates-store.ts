@@ -50,20 +50,35 @@ export type Candidate = {
 type Store = { candidates: Candidate[] };
 
 async function readStore(): Promise<Store> {
-  // Try the live file first, fall back to the committed example.
+  let live: Candidate[] = [];
   try {
     const raw = await fs.readFile(FILE, "utf-8");
-    const parsed = JSON.parse(raw) as Store;
-    if (parsed.candidates && parsed.candidates.length > 0) return parsed;
-  } catch {
-    // fall through to example
+    live = (JSON.parse(raw) as Store).candidates ?? [];
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException).code !== "ENOENT") throw err;
   }
+
+  let example: Candidate[] = [];
   try {
     const raw = await fs.readFile(EXAMPLE, "utf-8");
-    return JSON.parse(raw) as Store;
+    example = (JSON.parse(raw) as Store).candidates ?? [];
   } catch {
-    return { candidates: [] };
+    // no example file
   }
+
+  const liveIds = new Set(live.map((c) => c.id));
+  return { candidates: [...live, ...example.filter((c) => !liveIds.has(c.id))] };
+}
+
+async function writeStore(store: Store): Promise<void> {
+  await fs.mkdir(DATA_DIR, { recursive: true });
+  await fs.writeFile(FILE, JSON.stringify(store, null, 2), "utf-8");
+}
+
+export async function saveCandidate(candidate: Candidate): Promise<void> {
+  const store = await readStore();
+  store.candidates.push(candidate);
+  await writeStore(store);
 }
 
 export async function listCandidates(): Promise<Candidate[]> {

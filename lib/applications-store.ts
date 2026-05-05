@@ -45,19 +45,35 @@ export type Application = {
 type Store = { applications: Application[] };
 
 async function readStore(): Promise<Store> {
+  let live: Application[] = [];
   try {
     const raw = await fs.readFile(FILE, "utf-8");
-    const parsed = JSON.parse(raw) as Store;
-    if (parsed.applications && parsed.applications.length > 0) return parsed;
-  } catch {
-    // fall through
+    live = (JSON.parse(raw) as Store).applications ?? [];
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException).code !== "ENOENT") throw err;
   }
+
+  let example: Application[] = [];
   try {
     const raw = await fs.readFile(EXAMPLE, "utf-8");
-    return JSON.parse(raw) as Store;
+    example = (JSON.parse(raw) as Store).applications ?? [];
   } catch {
-    return { applications: [] };
+    // no example file
   }
+
+  const liveIds = new Set(live.map((a) => a.id));
+  return { applications: [...live, ...example.filter((a) => !liveIds.has(a.id))] };
+}
+
+async function writeStore(store: Store): Promise<void> {
+  await fs.mkdir(DATA_DIR, { recursive: true });
+  await fs.writeFile(FILE, JSON.stringify(store, null, 2), "utf-8");
+}
+
+export async function saveApplication(application: Application): Promise<void> {
+  const store = await readStore();
+  store.applications.push(application);
+  await writeStore(store);
 }
 
 export async function listApplications(): Promise<Application[]> {

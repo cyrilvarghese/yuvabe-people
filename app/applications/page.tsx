@@ -102,11 +102,19 @@ export default async function ApplicationsListPage() {
             <span className="text-muted-foreground">/</span>
             <Eyebrow>ATS</Eyebrow>
           </div>
-          <Eyebrow>
-            <span className="tabular">{String(total).padStart(2, "0")}</span>
-            &nbsp;{total === 1 ? "application" : "applications"} across {jobs.length}{" "}
-            {jobs.length === 1 ? "role" : "roles"}
-          </Eyebrow>
+          <div className="flex items-center gap-6">
+            <Eyebrow>
+              <span className="tabular">{String(total).padStart(2, "0")}</span>
+              &nbsp;{total === 1 ? "application" : "applications"} across {jobs.length}{" "}
+              {jobs.length === 1 ? "role" : "roles"}
+            </Eyebrow>
+            <Link
+              href="/applications/new"
+              className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground hover:text-primary transition-colors"
+            >
+              Match resume →
+            </Link>
+          </div>
         </div>
         <nav className="px-10 flex items-center gap-8">
           <NavTabClient href="/jobs" label="Jobs" prefix="/jobs" />
