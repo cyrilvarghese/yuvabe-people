@@ -94,10 +94,18 @@ export default async function JobsPage({
             <span className="text-muted-foreground">/</span>
             <Eyebrow>ATS</Eyebrow>
           </div>
-          <Eyebrow>
-            <span className="tabular">{String(count).padStart(2, "0")}</span>
-            &nbsp;{count === 1 ? "job" : "jobs"}
-          </Eyebrow>
+          <div className="flex items-center gap-6">
+            <Link
+              href="/candidate"
+              className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground hover:text-primary transition-colors"
+            >
+              For candidates →
+            </Link>
+            <Eyebrow>
+              <span className="tabular">{String(count).padStart(2, "0")}</span>
+              &nbsp;{count === 1 ? "job" : "jobs"}
+            </Eyebrow>
+          </div>
         </div>
         <nav className="px-10 flex items-center gap-8">
           <NavTabClient href="/jobs" label="Jobs" prefix="/jobs" />

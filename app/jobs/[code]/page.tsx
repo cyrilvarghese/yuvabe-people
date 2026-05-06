@@ -123,6 +123,12 @@ export default async function JobDetailPage({
             <ArrowLeft className="h-3 w-3" />
             All jobs
           </Link>
+          <Link
+            href="/candidate"
+            className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground hover:text-primary transition-colors"
+          >
+            For candidates →
+          </Link>
         </div>
         <nav className="px-10 flex items-center gap-8">
           <NavTabClient href="/jobs" label="Jobs" prefix="/jobs" />
