@@ -49,3 +49,5 @@ next-env.d.ts
 # `.claude/settings.local.json` is per-machine (permission grants etc.)
 .claude/settings.local.json
 .claude/worktrees/
+
+playground/
